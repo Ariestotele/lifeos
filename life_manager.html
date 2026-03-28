@@ -3946,25 +3946,42 @@ function jbRestoreStatus(){
    Shows a non-blocking toast so user knows data was loaded.
    ───────────────────────────────────────────────────────── */
 async function jbAutoLoad(){
-  const binId=localStorage.getItem(JB_BIN);
-  if(!binId) return; // never synced — nothing to load
   jbStatus('busy','Checking cloud…');
   try{
+    // Step 1: resolve Bin ID — use cached one, or search by bin name
+    let binId=localStorage.getItem(JB_BIN);
+    if(!binId){
+      // Search all bins for one named 'LifeOS'
+      const searchRes=await fetch('https://api.jsonbin.io/v3/b',{
+        headers:{'X-Master-Key':JB_KEY}
+      });
+      if(!searchRes.ok){jbStatus('','Ready');return;}
+      const bins=await searchRes.json();
+      const match=(bins||[]).find(function(b){return b.snippetMeta&&b.snippetMeta.name==='LifeOS';});
+      if(!match){jbStatus('','Ready');return;} // no bin yet — first time user
+      binId=match.snippetMeta.id;
+      localStorage.setItem(JB_BIN,binId);
+      // Show bin ID in sidebar
+      document.getElementById('jb-bin-display').textContent='Bin ID: '+binId;
+      document.getElementById('jb-bin-row').style.display='flex';
+    }
+
+    // Step 2: fetch latest data
     const res=await fetch(JB_URL+'/'+binId+'/latest?t='+Date.now(),{
       headers:{'X-Master-Key':JB_KEY,'Cache-Control':'no-cache'}
     });
-    if(!res.ok){jbStatus('','Ready');return;}
+    if(!res.ok){jbStatus('err','Load failed: '+res.status);return;}
     const wrapper=await res.json();
     const data=wrapper.record||wrapper;
     if(!data||!data.savedAt){jbStatus('','Ready');return;}
 
+    // Step 3: compare timestamps — only apply if cloud is newer
     const cloudTime=new Date(data.savedAt).getTime();
     const localTime=new Date(localStorage.getItem(JB_SYNC)||0).getTime();
     const hasLocalData=items.length||tasks.length||goals.length;
 
     if(cloudTime>localTime||!hasLocalData){
-      // Silently apply cloud data — write directly to localStorage
-      // (bypassing saveData/saveTasks etc. to avoid triggering auto-sync loop)
+      // Apply cloud data directly — bypass save functions to avoid triggering auto-sync
       items=data.items||[];
       payments=data.payments||[];
       tabbyItems=data.tabbyItems||[];
@@ -3977,8 +3994,7 @@ async function jbAutoLoad(){
       try{localStorage.setItem(KEY_TASKS,JSON.stringify(tasks));}catch(e){}
       try{localStorage.setItem(KEY_LISTS,JSON.stringify(lists));}catch(e){}
       try{localStorage.setItem(KEY_GOALS,JSON.stringify(goals));}catch(e){}
-      // Store cloud timestamp so next open doesn't re-load unnecessarily
-      localStorage.setItem(JB_SYNC,data.savedAt);
+      localStorage.setItem(JB_SYNC,data.savedAt); // preserve cloud timestamp
       render();
       if(currentPage==='tasks')renderTasks();
       if(currentPage==='goals')renderGoals();
@@ -3987,7 +4003,7 @@ async function jbAutoLoad(){
       const d=new Date(data.savedAt);
       const timeStr=d.toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
       jbStatus('ok','☑ Synced '+d.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'}));
-      toast('☁ Data loaded from cloud (saved '+timeStr+')');
+      toast('☁ Cloud data loaded (saved '+timeStr+')');
     } else {
       jbStatus('ok','Up to date');
     }

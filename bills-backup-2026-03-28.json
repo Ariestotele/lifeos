@@ -1,0 +1,450 @@
+{
+  "items": [
+    {
+      "id": "1774618809293",
+      "name": "Savings",
+      "amount": 5000,
+      "cycle": "monthly",
+      "cat": "Finance",
+      "dueDay": 30,
+      "notes": "",
+      "status": "active",
+      "color": "#888880",
+      "isTrial": false,
+      "trialEnd": null
+    },
+    {
+      "id": "1774618778687",
+      "name": "Expenses Extra Spare",
+      "amount": 300,
+      "cycle": "monthly",
+      "cat": "Finance",
+      "dueDay": 30,
+      "notes": "",
+      "status": "active",
+      "color": "#888880",
+      "isTrial": false,
+      "trialEnd": null
+    },
+    {
+      "id": "1774384015804",
+      "name": "Claude",
+      "amount": 80,
+      "cycle": "monthly",
+      "cat": "Streaming",
+      "dueDay": 17,
+      "notes": "",
+      "status": "active",
+      "color": "#C98A1A",
+      "isTrial": false,
+      "trialEnd": null
+    },
+    {
+      "id": "1774381539605",
+      "name": "Rent",
+      "amount": 4000,
+      "cycle": "monthly",
+      "cat": "Housing",
+      "dueDay": 10,
+      "notes": "",
+      "status": "active",
+      "color": "#C95050",
+      "isTrial": false,
+      "trialEnd": null
+    },
+    {
+      "id": "1773690443363",
+      "name": "Tasleem",
+      "amount": 100,
+      "cycle": "monthly",
+      "cat": "Housing",
+      "dueDay": 5,
+      "status": "active",
+      "color": "#E24B4A"
+    },
+    {
+      "id": "1773690352019",
+      "name": "Etisalat Elife Neo 1GB",
+      "amount": 445,
+      "cycle": "monthly",
+      "cat": "Housing",
+      "dueDay": 1,
+      "status": "active",
+      "color": "#E24B4A"
+    },
+    {
+      "id": "1773690295450",
+      "name": "TAQA",
+      "amount": 350,
+      "cycle": "monthly",
+      "cat": "Housing",
+      "dueDay": 2,
+      "status": "active",
+      "color": "#E24B4A"
+    },
+    {
+      "id": "1773690193715",
+      "name": "Google One",
+      "amount": 8,
+      "cycle": "monthly",
+      "cat": "Utilities",
+      "dueDay": 10,
+      "status": "active",
+      "color": "#7F77DD"
+    },
+    {
+      "id": "1773690158305",
+      "name": "Plex Remote Access",
+      "amount": 10,
+      "cycle": "monthly",
+      "cat": "Streaming",
+      "dueDay": 11,
+      "status": "active",
+      "color": "#D4537E"
+    },
+    {
+      "id": "1773690066419",
+      "name": "Talabat Pro",
+      "amount": 29,
+      "cycle": "monthly",
+      "cat": "Food",
+      "dueDay": 14,
+      "status": "active",
+      "color": "#D85A30"
+    },
+    {
+      "id": "1773690026376",
+      "name": "ChatGPT",
+      "amount": 31,
+      "cycle": "monthly",
+      "cat": "Software",
+      "dueDay": 14,
+      "status": "active",
+      "color": "#378ADD"
+    },
+    {
+      "id": "1773690001803",
+      "name": "Spotify",
+      "amount": 25,
+      "cycle": "monthly",
+      "cat": "Streaming",
+      "dueDay": 26,
+      "notes": "",
+      "status": "active",
+      "color": "#639922",
+      "isTrial": false,
+      "trialEnd": null
+    },
+    {
+      "id": "1773689954991",
+      "name": "Noon One",
+      "amount": 5,
+      "cycle": "monthly",
+      "cat": "Food",
+      "dueDay": 16,
+      "status": "active",
+      "color": "#BA7517"
+    }
+  ],
+  "payments": [
+    {
+      "id": "1774618784046",
+      "itemId": "1774618778687",
+      "name": "Expenses Spare",
+      "cat": "Finance",
+      "amount": 300,
+      "date": "2026-03-27",
+      "note": ""
+    },
+    {
+      "id": "1774589142945",
+      "itemId": "1774384015804",
+      "name": "Claude",
+      "cat": "Streaming",
+      "amount": 80,
+      "date": "2026-03-27",
+      "note": ""
+    },
+    {
+      "id": "1774543454257",
+      "itemId": "1773690001803",
+      "name": "Spotify",
+      "cat": "Streaming",
+      "amount": 25,
+      "date": "2026-03-26",
+      "note": ""
+    },
+    {
+      "id": "1774381543525",
+      "itemId": "1774381539605",
+      "name": "Rent",
+      "cat": "Housing",
+      "amount": 4000,
+      "date": "2026-03-24",
+      "note": ""
+    },
+    {
+      "id": "1773725260406",
+      "itemId": "1773725246812",
+      "name": "Claude",
+      "cat": "Software",
+      "amount": 80,
+      "date": "2026-03-17",
+      "note": ""
+    },
+    {
+      "id": "1773691063123",
+      "itemId": "1773690443363",
+      "name": "Tasleem",
+      "cat": "Housing",
+      "amount": 100,
+      "date": "2026-03-16",
+      "note": ""
+    },
+    {
+      "id": "1773690354874",
+      "itemId": "1773690352019",
+      "name": "Etisalat Elife Neo 1GB",
+      "cat": "Housing",
+      "amount": 445,
+      "date": "2026-03-16",
+      "note": ""
+    },
+    {
+      "id": "1773690299812",
+      "itemId": "1773690295450",
+      "name": "TAQA",
+      "cat": "Housing",
+      "amount": 350,
+      "date": "2026-03-16",
+      "note": ""
+    },
+    {
+      "id": "1773690200451",
+      "itemId": "1773690158305",
+      "name": "Plex Remote Access",
+      "cat": "Streaming",
+      "amount": 10,
+      "date": "2026-03-16",
+      "note": ""
+    },
+    {
+      "id": "1773690197751",
+      "itemId": "1773690193715",
+      "name": "Google One",
+      "cat": "Utilities",
+      "amount": 8,
+      "date": "2026-03-16",
+      "note": ""
+    },
+    {
+      "id": "1773690075831",
+      "itemId": "1773690001803",
+      "name": "Sporify",
+      "cat": "Streaming",
+      "amount": 25,
+      "date": "2026-03-16",
+      "note": ""
+    },
+    {
+      "id": "1773690070521",
+      "itemId": "1773690066419",
+      "name": "Talabat Pro",
+      "cat": "Food",
+      "amount": 29,
+      "date": "2026-03-16",
+      "note": ""
+    },
+    {
+      "id": "1773690033172",
+      "itemId": "1773690026376",
+      "name": "ChatGPT",
+      "cat": "Software",
+      "amount": 31,
+      "date": "2026-03-16",
+      "note": ""
+    },
+    {
+      "id": "1773689963395",
+      "itemId": "1773689954991",
+      "name": "Noon One",
+      "cat": "Food",
+      "amount": 5,
+      "date": "2026-03-16",
+      "note": ""
+    }
+  ],
+  "tabbyItems": [
+    {
+      "id": "1774620511026",
+      "name": "iPhone Y",
+      "total": 2200,
+      "startDate": "2025-12-24",
+      "cat": "Health",
+      "notes": "",
+      "color": "#1D9E75",
+      "instalments": [
+        {
+          "date": "2025-12-24",
+          "paid": true
+        },
+        {
+          "date": "2026-01-24",
+          "paid": true
+        },
+        {
+          "date": "2026-02-24",
+          "paid": false
+        },
+        {
+          "date": "2026-03-24",
+          "paid": false
+        }
+      ]
+    },
+    {
+      "id": "1774543487671",
+      "name": "LG Washer",
+      "total": 1089,
+      "startDate": "2026-03-26",
+      "cat": "Electronics",
+      "notes": "",
+      "color": "#6A9E30",
+      "instalments": [
+        {
+          "date": "2026-03-26",
+          "paid": true
+        },
+        {
+          "date": "2026-04-26",
+          "paid": false
+        },
+        {
+          "date": "2026-05-26",
+          "paid": false
+        },
+        {
+          "date": "2026-06-26",
+          "paid": false
+        }
+      ]
+    },
+    {
+      "id": "1773720858296",
+      "name": "Amazon",
+      "total": 320.49,
+      "startDate": "2026-02-12",
+      "cat": "Electronics",
+      "notes": "",
+      "color": "#7A74D4",
+      "instalments": [
+        {
+          "date": "2026-02-12",
+          "paid": true
+        },
+        {
+          "date": "2026-03-12",
+          "paid": true
+        },
+        {
+          "date": "2026-04-12",
+          "paid": false
+        },
+        {
+          "date": "2026-05-12",
+          "paid": false
+        }
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "1774672783348",
+      "title": "Fix water leakage",
+      "notes": "",
+      "priority": "low",
+      "dueDate": "2026-03-29",
+      "listId": null,
+      "workspace": "personal",
+      "tags": [
+        "housefix"
+      ],
+      "subtasks": [],
+      "done": false,
+      "starred": false,
+      "color": "#C95050",
+      "createdAt": 1774672783348
+    },
+    {
+      "id": "1774671886156",
+      "title": "ALCON Natural tears",
+      "notes": "",
+      "priority": "medium",
+      "dueDate": "2026-03-29",
+      "listId": null,
+      "workspace": "personal",
+      "tags": [
+        "mom"
+      ],
+      "subtasks": [],
+      "done": false,
+      "starred": false,
+      "color": "#C46A8A",
+      "createdAt": 1774671886156
+    },
+    {
+      "id": "1774644304231",
+      "title": "Req. BOM",
+      "notes": "",
+      "priority": "medium",
+      "dueDate": "2026-03-23",
+      "listId": null,
+      "workspace": "work",
+      "tags": [
+        "SE"
+      ],
+      "subtasks": [],
+      "done": false,
+      "starred": false,
+      "color": "#4A8ECC",
+      "createdAt": 1774644304231
+    },
+    {
+      "id": "1774643881701",
+      "title": "Go update bundle",
+      "notes": "",
+      "priority": "medium",
+      "dueDate": "2026-03-31",
+      "listId": null,
+      "workspace": "work",
+      "tags": [
+        "SI"
+      ],
+      "subtasks": [],
+      "done": false,
+      "starred": false,
+      "color": "#C95050",
+      "createdAt": 1774643881701
+    },
+    {
+      "id": "1774642825700",
+      "title": "Get rid of Samsung Washer",
+      "notes": "",
+      "priority": "high",
+      "dueDate": "2026-03-30",
+      "listId": null,
+      "workspace": "personal",
+      "tags": [
+        "worker"
+      ],
+      "subtasks": [],
+      "done": false,
+      "starred": false,
+      "color": "#4A8ECC",
+      "createdAt": 1774642825700
+    }
+  ],
+  "lists": [],
+  "goals": [],
+  "exportedAt": "2026-03-28T16:58:33.918Z"
+}

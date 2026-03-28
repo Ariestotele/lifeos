@@ -41,8 +41,9 @@ body{
   background:linear-gradient(180deg,var(--surface) 0%,#111111 100%);
   border-right:0.5px solid var(--border);
   padding:1.5rem 1rem;display:flex;flex-direction:column;gap:4px;
-  position:sticky;top:0;height:100vh;overflow:hidden;
+  position:sticky;top:0;height:100vh;overflow-y:auto;overflow-x:hidden;
   transition:all .22s ease;min-width:0;
+  scrollbar-width:thin;scrollbar-color:var(--surface4) transparent;
 }
 .app.collapsed .sidebar{padding:1rem 8px}
 .app.collapsed .sidebar-section{display:none}
@@ -3962,20 +3963,27 @@ async function jbAutoLoad(){
     const hasLocalData=items.length||tasks.length||goals.length;
 
     if(cloudTime>localTime||!hasLocalData){
-      // Silently apply cloud data — Replace mode
+      // Silently apply cloud data — write directly to localStorage
+      // (bypassing saveData/saveTasks etc. to avoid triggering auto-sync loop)
       items=data.items||[];
       payments=data.payments||[];
       tabbyItems=data.tabbyItems||[];
       tasks=data.tasks||[];
       lists=data.lists||[];
       goals=data.goals||[];
-      saveData();saveTasks();saveLists();saveGoals();
+      try{localStorage.setItem(KEY_ITEMS,JSON.stringify(items));}catch(e){}
+      try{localStorage.setItem(KEY_PAY,JSON.stringify(payments));}catch(e){}
+      try{localStorage.setItem(KEY_TABBY,JSON.stringify(tabbyItems));}catch(e){}
+      try{localStorage.setItem(KEY_TASKS,JSON.stringify(tasks));}catch(e){}
+      try{localStorage.setItem(KEY_LISTS,JSON.stringify(lists));}catch(e){}
+      try{localStorage.setItem(KEY_GOALS,JSON.stringify(goals));}catch(e){}
+      // Store cloud timestamp so next open doesn't re-load unnecessarily
+      localStorage.setItem(JB_SYNC,data.savedAt);
       render();
       if(currentPage==='tasks')renderTasks();
       if(currentPage==='goals')renderGoals();
       if(currentPage==='calendar')renderCalendar();
       if(currentPage==='dashboard')renderDashboard();
-      localStorage.setItem(JB_SYNC,data.savedAt);
       const d=new Date(data.savedAt);
       const timeStr=d.toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
       jbStatus('ok','☑ Synced '+d.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'}));

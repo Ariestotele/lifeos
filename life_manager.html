@@ -3883,7 +3883,7 @@ async function jbLoad(){
   }
   jbStatus('busy','Loading…'); jbBtns(true);
   try{
-    const res=await fetch(JB_URL+'/'+binId+'/latest',{
+    const res=await fetch(JB_URL+'/'+binId+'/latest?t='+Date.now(),{
       headers:{'X-Master-Key':JB_KEY}
     });
     const wrapper=await res.json();
@@ -3937,6 +3937,58 @@ function jbRestoreStatus(){
   }
 }
 
+/* ── Auto-load on page open ──────────────────────────────
+   Runs silently on startup if:
+   - A Bin ID exists in localStorage (user has synced before)
+   - Applies cloud data automatically if local data is empty,
+     OR if cloud data is newer than last local sync.
+   Shows a non-blocking toast so user knows data was loaded.
+   ───────────────────────────────────────────────────────── */
+async function jbAutoLoad(){
+  const binId=localStorage.getItem(JB_BIN);
+  if(!binId) return; // never synced — nothing to load
+  jbStatus('busy','Checking cloud…');
+  try{
+    const res=await fetch(JB_URL+'/'+binId+'/latest?t='+Date.now(),{
+      headers:{'X-Master-Key':JB_KEY,'Cache-Control':'no-cache'}
+    });
+    if(!res.ok){jbStatus('','Ready');return;}
+    const wrapper=await res.json();
+    const data=wrapper.record||wrapper;
+    if(!data||!data.savedAt){jbStatus('','Ready');return;}
+
+    const cloudTime=new Date(data.savedAt).getTime();
+    const localTime=new Date(localStorage.getItem(JB_SYNC)||0).getTime();
+    const hasLocalData=items.length||tasks.length||goals.length;
+
+    if(cloudTime>localTime||!hasLocalData){
+      // Silently apply cloud data — Replace mode
+      items=data.items||[];
+      payments=data.payments||[];
+      tabbyItems=data.tabbyItems||[];
+      tasks=data.tasks||[];
+      lists=data.lists||[];
+      goals=data.goals||[];
+      saveData();saveTasks();saveLists();saveGoals();
+      render();
+      if(currentPage==='tasks')renderTasks();
+      if(currentPage==='goals')renderGoals();
+      if(currentPage==='calendar')renderCalendar();
+      if(currentPage==='dashboard')renderDashboard();
+      localStorage.setItem(JB_SYNC,data.savedAt);
+      const d=new Date(data.savedAt);
+      const timeStr=d.toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      jbStatus('ok','☑ Synced '+d.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'}));
+      toast('☁ Data loaded from cloud (saved '+timeStr+')');
+    } else {
+      jbStatus('ok','Up to date');
+    }
+  } catch(e){
+    console.warn('Auto-load failed:',e.message);
+    jbStatus('','Ready');
+  }
+}
+
 /* ── Auto-sync ────────────────────────────────────────────
    Called after every data mutation. Debounced 2s so rapid
    edits (typing a name, toggling paid) batch into one save.
@@ -3969,6 +4021,7 @@ function jbAutoSync(){
 
 loadData();
 jbRestoreStatus();
+jbAutoLoad();
 </script>
 <!-- Mobile bottom nav -->
 <!-- Restore modal -->

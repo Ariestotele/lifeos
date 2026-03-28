@@ -70,23 +70,20 @@ body{
 .nav-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0;transition:color .18s}
 .sidebar-section{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;padding:0 10px;margin:1rem 0 4px}
 .sidebar-bottom{margin-top:auto;padding-top:1rem;border-top:0.5px solid var(--border)}
-/* ── JSONBin Cloud Sync ── */
-.jb-wrap{padding:10px;margin-bottom:4px;border-radius:8px;border:0.5px solid var(--border);background:var(--surface2)}
-.jb-status{font-size:10px;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:5px;min-height:14px}
-.jb-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:var(--text3);transition:background .3s}
-.jb-dot.ok{background:var(--accent)}
-.jb-dot.busy{background:var(--amber);animation:jbPulse 1s ease-in-out infinite}
-.jb-dot.err{background:var(--red)}
-@keyframes jbPulse{0%,100%{opacity:1}50%{opacity:.25}}
-.jb-btns{display:grid;grid-template-columns:1fr 1fr;gap:5px}
-.jb-btn{height:28px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;
-  cursor:pointer;font-size:11px;font-weight:500;font-family:var(--font);color:var(--text2);
-  transition:all .15s;display:flex;align-items:center;justify-content:center;gap:4px}
-.jb-btn:hover{background:var(--surface3);color:var(--text);border-color:var(--border3)}
-.jb-btn.save:hover{border-color:var(--accent-border);color:var(--accent);background:var(--accent-dim)}
-.jb-btn.load:hover{border-color:var(--purple-border);color:var(--purple);background:var(--purple-dim)}
-.jb-btn:disabled{opacity:.35;cursor:not-allowed}
-.app.collapsed .jb-wrap{display:none}
+/* ── Auto-save (File System Access API) ── */
+.as-wrap{padding:10px;margin-bottom:4px;border-radius:8px;border:0.5px solid var(--border);background:var(--surface2)}
+.as-status{font-size:10px;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:5px;min-height:14px}
+.as-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:var(--text3);transition:background .3s}
+.as-dot.ok{background:var(--accent)}
+.as-dot.busy{background:var(--amber);animation:asPulse 1s ease-in-out infinite}
+.as-dot.err{background:var(--red)}
+@keyframes asPulse{0%,100%{opacity:1}50%{opacity:.25}}
+.as-setup-btn{width:100%;height:28px;border-radius:6px;border:0.5px solid var(--border2);
+  background:transparent;cursor:pointer;font-size:11px;font-weight:500;
+  font-family:var(--font);color:var(--text2);transition:all .15s;
+  display:flex;align-items:center;justify-content:center;gap:5px}
+.as-setup-btn:hover{background:var(--accent-dim);color:var(--accent);border-color:var(--accent-border)}
+.app.collapsed .as-wrap{display:none}
 /* Tabby */
 .tabby-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:10px;transition:border-color .18s,transform .18s,box-shadow .18s}
 .tabby-card:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:var(--shadow-md)}
@@ -917,19 +914,16 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
     <button class="nav-item" id="nav-tasks" onclick="switchPage('tasks')"><span class="nav-icon">&#9635;</span><span class="nav-label"> Tasks</span></button>
     <button class="nav-item" id="nav-goals" onclick="switchPage('goals')"><span class="nav-icon">&#9651;</span><span class="nav-label"> Goals</span></button>
     <button class="nav-item" id="nav-calendar" onclick="switchPage('calendar')"><span class="nav-icon">&#9744;</span><span class="nav-label"> Calendar</span></button>
-    <div class="sidebar-section">Cloud sync</div>
-    <div class="jb-wrap">
-      <div class="jb-status">
-        <div class="jb-dot" id="jb-dot"></div>
-        <span id="jb-status-text">Ready</span>
+    <div class="sidebar-section">Auto-save</div>
+    <div class="as-wrap">
+      <div class="as-status">
+        <div class="as-dot" id="as-dot"></div>
+        <span id="as-status-text">Not set up</span>
       </div>
-      <div class="jb-btns">
-        <button class="jb-btn save" onclick="jbSave()" id="jb-save-btn">&#8679; Save</button>
-        <button class="jb-btn load" onclick="jbLoad()" id="jb-load-btn">&#8681; Load</button>
-      </div>
-      <div id="jb-bin-row" style="display:none;align-items:center;justify-content:space-between;margin-top:7px;gap:6px">
-        <span id="jb-bin-display" style="font-size:9px;color:var(--text3);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1"></span>
-        <button onclick="jbCopyBinId()" style="font-size:9px;padding:2px 7px;border-radius:4px;border:0.5px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;white-space:nowrap;font-family:var(--font)" title="Copy Bin ID">Copy ID</button>
+      <button class="as-setup-btn" id="as-setup-btn" onclick="asSetup()">&#128194; Choose save file</button>
+      <div id="as-file-row" style="display:none;margin-top:6px">
+        <div id="as-file-name" style="font-size:9px;color:var(--text3);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px"></div>
+        <button class="as-setup-btn" style="opacity:.7" onclick="asSetup()">&#128194; Change file</button>
       </div>
     </div>
     <div class="sidebar-section">Actions</div>
@@ -1426,9 +1420,9 @@ function saveData(){
   try{localStorage.setItem(KEY_ITEMS,JSON.stringify(items));}catch(e){}
   try{localStorage.setItem(KEY_PAY,JSON.stringify(payments));}catch(e){}
   try{localStorage.setItem(KEY_TABBY,JSON.stringify(tabbyItems));}catch(e){}
-  jbAutoSync();
+  asAutoSave();
 }
-function saveGoals(){try{localStorage.setItem(KEY_GOALS,JSON.stringify(goals));}catch(e){}jbAutoSync();}
+function saveGoals(){try{localStorage.setItem(KEY_GOALS,JSON.stringify(goals));}catch(e){}asAutoSave();}
 
 function loadData(){
   try{const d=localStorage.getItem(KEY_ITEMS);if(d)items=JSON.parse(d);}catch(e){items=[];}
@@ -2668,8 +2662,8 @@ document.addEventListener('keydown',e=>{
 document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal();});
 
 /* ━━ Task Manager ━━ */
-function saveTasks(){try{localStorage.setItem(KEY_TASKS,JSON.stringify(tasks));}catch(e){}jbAutoSync();}
-function saveLists(){try{localStorage.setItem(KEY_LISTS,JSON.stringify(lists));}catch(e){}jbAutoSync();}
+function saveTasks(){try{localStorage.setItem(KEY_TASKS,JSON.stringify(tasks));}catch(e){}asAutoSave();}
+function saveLists(){try{localStorage.setItem(KEY_LISTS,JSON.stringify(lists));}catch(e){}asAutoSave();}
 
 function taskDueLabel(dateStr){
   if(!dateStr)return null;
@@ -3809,243 +3803,116 @@ function dbWidgetWeek(el){
 
 
 /* ═══════════════════════════════════════════════════════
-   JSONBin.io Cloud Sync
-   Works from any https:// origin (GitHub Pages etc.)
-   First save  → creates a private bin, stores Bin ID
-   Later saves → updates same bin (no duplicates)
-   Load        → fetches latest, opens Replace/Merge modal
-   New device  → prompts for Bin ID once, then remembers
+   Auto-save — File System Access API
+   Works in Chrome/Edge from any origin (local file,
+   GitHub Pages, localhost).
+   - asSetup()      : open Save dialog, pick file location
+   - asAutoSave()   : debounced write on every data change
+   - asRestoreStatus: show last-save info on page load
    ═══════════════════════════════════════════════════════ */
-const JB_KEY   = '$2a$10$51QWn/srNPj8cc.q6.9WLut/6E3cJAcDcSptIKnX01mPIjlTD.LFO';
-const JB_URL   = 'https://api.jsonbin.io/v3/b';
-const JB_BIN   = 'lifeos_jb_bin_id';
-const JB_SYNC  = 'lifeos_jb_last_sync';
+const AS_FILE_KEY  = 'lifeos_as_filename';
+const AS_SYNC_KEY  = 'lifeos_as_last_save';
+let _asFileHandle  = null;  // FileSystemFileHandle
+let _asAutoTimer   = null;
+let _asBusy        = false;
 
-function jbDot(state){ const d=document.getElementById('jb-dot'); if(d) d.className='jb-dot'+(state?' '+state:''); }
-function jbTxt(t)    { const e=document.getElementById('jb-status-text'); if(e) e.textContent=t; }
-function jbBtns(off) { ['jb-save-btn','jb-load-btn'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=off;}); }
-function jbStatus(state,text){ jbDot(state); jbTxt(text); }
+/* ── UI helpers ── */
+function asDot(state){ const d=document.getElementById('as-dot'); if(d) d.className='as-dot'+(state?' '+state:''); }
+function asTxt(t)    { const e=document.getElementById('as-status-text'); if(e) e.textContent=t; }
+function asStatus(state,txt){ asDot(state); asTxt(txt); }
 
-function jbData(){
-  return JSON.stringify({items,payments,tabbyItems,tasks,lists,goals,savedAt:new Date().toISOString()});
-}
+/* ── Check browser support ── */
+function asSupported(){ return typeof window.showSaveFilePicker==='function'; }
 
-/* ── Save ─────────────────────────────────────────────── */
-async function jbSave(){
-  jbStatus('busy','Saving…'); jbBtns(true);
-  try{
-    const body=jbData();
-    const binId=localStorage.getItem(JB_BIN);
-    let res;
-    if(binId){
-      res=await fetch(JB_URL+'/'+binId,{
-        method:'PUT',
-        headers:{'Content-Type':'application/json','X-Master-Key':JB_KEY,'X-Bin-Versioning':'false'},
-        body
-      });
-    } else {
-      res=await fetch(JB_URL,{
-        method:'POST',
-        headers:{'Content-Type':'application/json','X-Master-Key':JB_KEY,'X-Bin-Name':'LifeOS','X-Bin-Private':'true'},
-        body
-      });
-    }
-    const data=await res.json();
-    if(!res.ok) throw new Error(data.message||'HTTP '+res.status);
-    const id=data.metadata?.id||binId;
-    if(id&&!binId){
-      localStorage.setItem(JB_BIN,id);
-      // Show Bin ID prominently so user can note it for other devices
-      document.getElementById('jb-bin-display').textContent='Bin ID: '+id;
-      document.getElementById('jb-bin-row').style.display='flex';
-      toast('☁ Cloud bin created! Copy the Bin ID shown in the sidebar.');
-    } else {
-      toast('☁ Saved to cloud');
-    }
-    const now=new Date();
-    localStorage.setItem(JB_SYNC,now.toISOString());
-    jbStatus('ok','Saved '+now.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'}));
-  } catch(e){
-    console.error('JBin save:',e);
-    jbStatus('err',e.message||'Save failed');
-    toast('Cloud save failed — '+e.message);
+/* ── Setup: let user pick save location ── */
+async function asSetup(){
+  if(!asSupported()){
+    toast('Auto-save requires Chrome or Edge — not supported in this browser');
+    return;
   }
-  jbBtns(false);
-}
-
-/* ── Load ─────────────────────────────────────────────── */
-async function jbLoad(){
-  let binId=localStorage.getItem(JB_BIN);
-  if(!binId){
-    binId=prompt('Enter your Bin ID\n(shown in the sidebar when you first saved on another device):');
-    if(!binId||!binId.trim()){jbStatus('','Ready');return;}
-    binId=binId.trim();
-    localStorage.setItem(JB_BIN,binId);
-  }
-  jbStatus('busy','Loading…'); jbBtns(true);
   try{
-    const res=await fetch(JB_URL+'/'+binId+'/latest?t='+Date.now(),{
-      headers:{'X-Master-Key':JB_KEY}
+    _asFileHandle = await window.showSaveFilePicker({
+      suggestedName: 'lifeos-backup.json',
+      types:[{description:'JSON backup',accept:{'application/json':['.json']}}],
     });
-    const wrapper=await res.json();
-    if(!res.ok) throw new Error(wrapper.message||'HTTP '+res.status);
-    const data=wrapper.record||wrapper;
-    _pendingRestore=data;
-    const d=new Date(data.savedAt||data.exportedAt||0);
-    const dateStr=(data.savedAt||data.exportedAt)
-      ?d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})
-      :'Unknown date';
-    const counts=[
-      (data.items||[]).length+' bills',
-      (data.payments||[]).length+' payments',
-      (data.tabbyItems||[]).length+' Tabby',
-      (data.tasks||[]).length+' tasks',
-      (data.goals||[]).length+' goals',
-    ].join(' · ');
-    document.getElementById('restore-modal-meta').textContent='☁ From cloud · '+dateStr;
-    document.getElementById('restore-modal-counts').textContent=counts;
-    document.getElementById('restore-modal').style.display='flex';
-    jbStatus('ok','Ready to restore');
-    // Show the bin ID so it's visible on this device too
-    document.getElementById('jb-bin-display').textContent='Bin ID: '+binId;
-    document.getElementById('jb-bin-row').style.display='flex';
+    const name = _asFileHandle.name;
+    localStorage.setItem(AS_FILE_KEY, name);
+    document.getElementById('as-file-name').textContent = name;
+    document.getElementById('as-file-row').style.display = 'block';
+    asStatus('ok','Ready — '+name);
+    // Immediately write current data to the chosen file
+    await asWriteFile();
+    toast('✔ Auto-save set up — '+name);
   } catch(e){
-    console.error('JBin load:',e);
-    jbStatus('err',e.message||'Load failed');
-    toast('Cloud load failed — '+e.message);
+    if(e.name==='AbortError') return; // user cancelled — fine
+    asStatus('err','Setup failed');
+    console.error('AS setup:',e);
   }
-  jbBtns(false);
 }
 
-/* ── Copy Bin ID helper ───────────────────────────────── */
-function jbCopyBinId(){
-  const id=localStorage.getItem(JB_BIN);
-  if(!id) return;
-  navigator.clipboard.writeText(id).then(()=>toast('Bin ID copied to clipboard'));
+/* ── Write data to the file handle ── */
+async function asWriteFile(){
+  if(!_asFileHandle) return;
+  if(_asBusy) return;
+  _asBusy = true;
+  asDot('busy');
+  try{
+    const payload = JSON.stringify(
+      {items,payments,tabbyItems,tasks,lists,goals,savedAt:new Date().toISOString()},
+      null, 2
+    );
+    const writable = await _asFileHandle.createWritable();
+    await writable.write(payload);
+    await writable.close();
+    const now = new Date();
+    localStorage.setItem(AS_SYNC_KEY, now.toISOString());
+    const timeStr = now.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'});
+    asStatus('ok','✔ Saved '+timeStr);
+  } catch(e){
+    // Permission may have expired — prompt user to re-grant
+    if(e.name==='NotAllowedError'){
+      try{
+        const perm = await _asFileHandle.requestPermission({mode:'readwrite'});
+        if(perm==='granted'){ await asWriteFile(); return; }
+      } catch(e2){}
+    }
+    asStatus('err','Save failed — click Choose file');
+    console.error('AS write:',e);
+  }
+  _asBusy = false;
 }
 
-/* ── Restore status on page load ─────────────────────── */
-function jbRestoreStatus(){
-  const last=localStorage.getItem(JB_SYNC);
-  const binId=localStorage.getItem(JB_BIN);
-  if(binId){
-    document.getElementById('jb-bin-display').textContent='Bin ID: '+binId;
-    document.getElementById('jb-bin-row').style.display='flex';
+/* ── Debounced auto-save triggered by data changes ── */
+function asAutoSave(){
+  if(!_asFileHandle) return; // not set up yet
+  clearTimeout(_asAutoTimer);
+  _asAutoTimer = setTimeout(asWriteFile, 2000);
+}
+
+/* ── Restore status text on page load ── */
+function asRestoreStatus(){
+  const last = localStorage.getItem(AS_SYNC_KEY);
+  const name = localStorage.getItem(AS_FILE_KEY);
+  if(name){
+    document.getElementById('as-file-name').textContent = name;
+    document.getElementById('as-file-row').style.display = 'block';
   }
   if(last){
-    const d=new Date(last);
-    jbStatus('ok','Last saved '+d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'}));
+    const d = new Date(last);
+    const str = d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})
+              + ' ' + d.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'});
+    asStatus('ok','✔ Last saved '+str);
+    asTxt('Last: '+str+(name?' — '+name:''));
+  } else if(name){
+    asStatus('','Click “Choose save file” to reconnect');
   }
-}
-
-/* ── Auto-load on page open ──────────────────────────────
-   Runs silently on startup if:
-   - A Bin ID exists in localStorage (user has synced before)
-   - Applies cloud data automatically if local data is empty,
-     OR if cloud data is newer than last local sync.
-   Shows a non-blocking toast so user knows data was loaded.
-   ───────────────────────────────────────────────────────── */
-async function jbAutoLoad(){
-  jbStatus('busy','Checking cloud…');
-  try{
-    // Step 1: resolve Bin ID — use cached one, or search by bin name
-    let binId=localStorage.getItem(JB_BIN);
-    if(!binId){
-      // Search all bins for one named 'LifeOS'
-      const searchRes=await fetch('https://api.jsonbin.io/v3/b',{
-        headers:{'X-Master-Key':JB_KEY}
-      });
-      if(!searchRes.ok){jbStatus('','Ready');return;}
-      const bins=await searchRes.json();
-      const match=(bins||[]).find(function(b){return b.snippetMeta&&b.snippetMeta.name==='LifeOS';});
-      if(!match){jbStatus('','Ready');return;} // no bin yet — first time user
-      binId=match.snippetMeta.id;
-      localStorage.setItem(JB_BIN,binId);
-      // Show bin ID in sidebar
-      document.getElementById('jb-bin-display').textContent='Bin ID: '+binId;
-      document.getElementById('jb-bin-row').style.display='flex';
-    }
-
-    // Step 2: fetch latest data
-    const res=await fetch(JB_URL+'/'+binId+'/latest?t='+Date.now(),{
-      headers:{'X-Master-Key':JB_KEY,'Cache-Control':'no-cache'}
-    });
-    if(!res.ok){jbStatus('err','Load failed: '+res.status);return;}
-    const wrapper=await res.json();
-    const data=wrapper.record||wrapper;
-    if(!data||!data.savedAt){jbStatus('','Ready');return;}
-
-    // Step 3: compare timestamps — only apply if cloud is newer
-    const cloudTime=new Date(data.savedAt).getTime();
-    const localTime=new Date(localStorage.getItem(JB_SYNC)||0).getTime();
-    const hasLocalData=items.length||tasks.length||goals.length;
-
-    if(cloudTime>localTime||!hasLocalData){
-      // Apply cloud data directly — bypass save functions to avoid triggering auto-sync
-      items=data.items||[];
-      payments=data.payments||[];
-      tabbyItems=data.tabbyItems||[];
-      tasks=data.tasks||[];
-      lists=data.lists||[];
-      goals=data.goals||[];
-      try{localStorage.setItem(KEY_ITEMS,JSON.stringify(items));}catch(e){}
-      try{localStorage.setItem(KEY_PAY,JSON.stringify(payments));}catch(e){}
-      try{localStorage.setItem(KEY_TABBY,JSON.stringify(tabbyItems));}catch(e){}
-      try{localStorage.setItem(KEY_TASKS,JSON.stringify(tasks));}catch(e){}
-      try{localStorage.setItem(KEY_LISTS,JSON.stringify(lists));}catch(e){}
-      try{localStorage.setItem(KEY_GOALS,JSON.stringify(goals));}catch(e){}
-      localStorage.setItem(JB_SYNC,data.savedAt); // preserve cloud timestamp
-      render();
-      if(currentPage==='tasks')renderTasks();
-      if(currentPage==='goals')renderGoals();
-      if(currentPage==='calendar')renderCalendar();
-      if(currentPage==='dashboard')renderDashboard();
-      const d=new Date(data.savedAt);
-      const timeStr=d.toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-      jbStatus('ok','☑ Synced '+d.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'}));
-      toast('☁ Cloud data loaded (saved '+timeStr+')');
-    } else {
-      jbStatus('ok','Up to date');
-    }
-  } catch(e){
-    console.warn('Auto-load failed:',e.message);
-    jbStatus('','Ready');
-  }
-}
-
-/* ── Auto-sync ────────────────────────────────────────────
-   Called after every data mutation. Debounced 2s so rapid
-   edits (typing a name, toggling paid) batch into one save.
-   Only runs if a Bin ID exists (i.e. user has saved once).
-   ───────────────────────────────────────────────────────── */
-let _jbAutoTimer=null;
-function jbAutoSync(){
-  if(!localStorage.getItem(JB_BIN)) return; // no bin yet — skip
-  clearTimeout(_jbAutoTimer);
-  _jbAutoTimer=setTimeout(async function(){
-    jbDot('busy');
-    try{
-      const binId=localStorage.getItem(JB_BIN);
-      const res=await fetch(JB_URL+'/'+binId,{
-        method:'PUT',
-        headers:{'Content-Type':'application/json','X-Master-Key':JB_KEY,'X-Bin-Versioning':'false'},
-        body:jbData()
-      });
-      const data=await res.json();
-      if(!res.ok) throw new Error(data.message||'HTTP '+res.status);
-      const now=new Date();
-      localStorage.setItem(JB_SYNC,now.toISOString());
-      jbStatus('ok','☑ Synced '+now.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'}));
-    } catch(e){
-      console.warn('Auto-sync failed:',e.message);
-      jbStatus('err','Sync failed — click ↑ Save');
-    }
-  },2000); // 2 second debounce
+  // Note: file handle does NOT persist across page loads in the browser.
+  // User needs to click "Choose save file" once per session to reconnect.
+  // This is a browser security requirement — we can't store the handle.
 }
 
 loadData();
-jbRestoreStatus();
-jbAutoLoad();
+asRestoreStatus();
 </script>
 <!-- Mobile bottom nav -->
 <!-- Restore modal -->

@@ -70,6 +70,39 @@ body{
 .nav-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0;transition:color .18s}
 .sidebar-section{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;padding:0 10px;margin:1rem 0 4px}
 .sidebar-bottom{margin-top:auto;padding-top:1rem;border-top:0.5px solid var(--border)}
+/* ── Sidebar nav edit mode ── */
+.nav-edit-btn{width:100%;height:26px;border-radius:6px;border:0.5px solid var(--border2);
+  background:transparent;cursor:pointer;font-size:10px;font-weight:500;
+  font-family:var(--font);color:var(--text3);margin-top:6px;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  transition:all .15s}
+.nav-edit-btn:hover{background:var(--surface3);color:var(--text);border-color:var(--border3)}
+.nav-edit-btn.active{background:var(--amber-dim);color:var(--amber);border-color:var(--amber-border)}
+.app.collapsed .nav-edit-btn{display:none}
+/* Nav sections wrapper — rendered dynamically in edit mode */
+#nav-sections-wrap{display:flex;flex-direction:column;gap:0}
+/* Edit-mode section label */
+.nav-section-wrap{display:flex;flex-direction:column}
+.nav-section-edit-label{font-size:10px;color:var(--text3);text-transform:uppercase;
+  letter-spacing:.08em;padding:0 10px;margin:1rem 0 4px;
+  display:flex;align-items:center;justify-content:space-between;gap:6px}
+.nav-section-edit-label.editing{color:var(--amber);cursor:default}
+/* Draggable nav item in edit mode */
+.nav-item.nav-draggable{cursor:grab;transition:opacity .15s,transform .15s,background .15s!important}
+.nav-item.nav-draggable:active{cursor:grabbing}
+.nav-item.nav-draggable.nav-dragging{opacity:.3;transform:scale(.96)}
+.nav-item.nav-draggable.nav-drag-over{background:var(--accent-dim)!important;
+  color:var(--accent)!important;border-radius:8px}
+.nav-item.nav-hidden-item{opacity:.35}
+.nav-item-drag-handle{font-size:11px;color:var(--amber);opacity:.7;
+  margin-right:4px;letter-spacing:1px;pointer-events:none}
+.nav-item-vis-btn{width:18px;height:18px;border-radius:4px;border:none;
+  background:transparent;cursor:pointer;font-size:11px;margin-left:auto;
+  color:var(--text3);display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:color .15s}
+.nav-item-vis-btn:hover{color:var(--accent)}
+.app.collapsed .nav-item-drag-handle,.app.collapsed .nav-item-vis-btn{display:none}
+
 /* ── Auto-save (File System Access API) ── */
 .as-wrap{padding:10px;margin-bottom:4px;border-radius:8px;border:0.5px solid var(--border);background:var(--surface2)}
 .as-status{font-size:10px;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:5px;min-height:14px}
@@ -708,6 +741,105 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 .tk-list-manage-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--border)}
 .tk-list-manage-row:last-child{border-bottom:none}
 .tk-list-color-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+/* ── AI Insight widget ── */
+.ai-insight-body{padding:6px 0 2px}
+.ai-insight-text{font-size:13px;color:var(--text);line-height:1.65;font-style:italic}
+.ai-insight-text.loading{color:var(--text3);font-style:normal;display:flex;align-items:center;gap:7px}
+.ai-insight-loading-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:aiPulse 1.2s ease-in-out infinite}
+.ai-insight-loading-dot:nth-child(2){animation-delay:.2s}
+.ai-insight-loading-dot:nth-child(3){animation-delay:.4s}
+@keyframes aiPulse{0%,80%,100%{opacity:.2;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+.ai-insight-meta{font-size:10px;color:var(--text3);margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ai-insight-refresh-btn{font-size:10px;color:var(--text3);background:none;border:none;cursor:pointer;padding:0;font-family:var(--font);transition:color .15s}
+.ai-insight-refresh-btn:hover{color:var(--accent)}
+.ai-insight-key-row{margin-top:8px;display:flex;gap:6px;align-items:center}
+.ai-insight-key-input{flex:1;height:26px;border-radius:5px;border:0.5px solid var(--border2);background:var(--surface3);color:var(--text);padding:0 8px;font-size:11px;font-family:var(--mono);outline:none;transition:border-color .18s}
+.ai-insight-key-input:focus{border-color:var(--accent-border)}
+.ai-insight-save-btn{height:26px;padding:0 10px;border-radius:5px;border:0.5px solid var(--accent-border);background:var(--accent-dim);color:var(--accent);font-size:11px;font-weight:500;cursor:pointer;font-family:var(--font);white-space:nowrap;transition:all .15s}
+.ai-insight-save-btn:hover{background:var(--accent);color:#000}
+
+/* ── Net Worth ── */
+.nw-hero{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:2rem;text-align:center;margin-bottom:1.25rem;position:relative;overflow:hidden}
+.nw-hero-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.09em;margin-bottom:.5rem}
+.nw-hero-value{font-size:40px;font-weight:600;font-family:var(--mono);letter-spacing:-.03em;margin-bottom:.4rem}
+.nw-hero-value.pos{color:var(--accent)}
+.nw-hero-value.neg{color:var(--red)}
+.nw-hero-delta{font-size:13px;font-weight:500;margin-bottom:.25rem}
+.nw-hero-delta.pos{color:var(--accent)}
+.nw-hero-delta.neg{color:var(--red)}
+.nw-hero-sub{font-size:11px;color:var(--text3)}
+.nw-section-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.25rem}
+.nw-section{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:16px}
+.nw-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.nw-section-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
+.nw-section-total{font-size:15px;font-weight:600;font-family:var(--mono)}
+.nw-section-total.green{color:var(--accent)}
+.nw-section-total.red{color:var(--red)}
+.nw-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid var(--border);gap:10px}
+.nw-row:last-child{border-bottom:none}
+.nw-row-left{display:flex;align-items:center;gap:8px;min-width:0}
+.nw-row-icon{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.nw-row-name{font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nw-row-sub{font-size:10px;color:var(--text3)}
+.nw-row-amt{font-size:13px;font-weight:500;font-family:var(--mono);flex-shrink:0}
+.nw-row-amt.green{color:var(--accent)}
+.nw-row-amt.red{color:var(--red)}
+.nw-row-pct{font-size:10px;color:var(--text3);flex-shrink:0;min-width:32px;text-align:right}
+.nw-chart-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:1.25rem}
+.nw-chart-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:1rem}
+.nw-chart-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
+.nw-snapshot-bar{display:flex;align-items:center;gap:8px;margin-bottom:.75rem;padding:10px 12px;background:var(--surface2);border-radius:var(--radius);border:0.5px solid var(--border)}
+.nw-snapshot-bar input{flex:1;height:28px;border-radius:6px;border:0.5px solid var(--border2);background:var(--surface3);color:var(--text);padding:0 8px;font-size:12px;font-family:var(--font);outline:none}
+.nw-snapshot-bar input:focus{border-color:var(--accent-border)}
+.nw-snap-btn{height:28px;padding:0 12px;border-radius:6px;border:0.5px solid var(--accent-border);background:var(--accent-dim);color:var(--accent);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);transition:all .15s;white-space:nowrap}
+.nw-snap-btn:hover{background:var(--accent);color:#000}
+.nw-empty{text-align:center;padding:3.5rem 1rem;color:var(--text3);border:0.5px dashed var(--border);border-radius:var(--radius-lg)}
+@media(max-width:640px){.nw-section-grid{grid-template-columns:1fr}}
+
+/* ── Version history ── */
+.ver-btn{width:100%;height:26px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;
+  cursor:pointer;font-size:11px;font-weight:500;font-family:var(--font);color:var(--text3);
+  margin-top:6px;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px}
+.ver-btn:hover{background:var(--surface3);color:var(--text);border-color:var(--border3)}
+.ver-panel{background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius-lg);
+  padding:14px;margin:0 0 8px}
+.ver-panel-title{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;
+  letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.ver-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--border)}
+.ver-row:last-child{border-bottom:none}
+.ver-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:var(--text3)}
+.ver-dot.latest{background:var(--accent)}
+.ver-info{flex:1;min-width:0}
+.ver-time{font-size:12px;color:var(--text);font-weight:500}
+.ver-counts{font-size:10px;color:var(--text3);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ver-restore-btn{height:24px;padding:0 9px;border-radius:5px;border:0.5px solid var(--border2);
+  background:transparent;cursor:pointer;font-size:10px;font-weight:500;
+  font-family:var(--font);color:var(--text2);transition:all .15s;flex-shrink:0}
+.ver-restore-btn:hover{border-color:var(--accent-border);color:var(--accent);background:var(--accent-dim)}
+.app.collapsed .ver-btn{display:none}
+
+/* ── Bill reminders banner ── */
+.reminder-banner{
+  position:sticky;top:0;z-index:150;
+  background:linear-gradient(90deg,rgba(201,138,26,.18) 0%,rgba(201,138,26,.08) 100%);
+  border-bottom:0.5px solid var(--amber-border);
+  padding:10px 1.5rem;
+  display:flex;align-items:center;gap:12px;
+  animation:reminderSlide .3s cubic-bezier(.4,0,.2,1);
+}
+@keyframes reminderSlide{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.reminder-banner-icon{font-size:16px;flex-shrink:0}
+.reminder-banner-text{flex:1;font-size:13px;color:var(--amber);line-height:1.4}
+.reminder-banner-text strong{font-weight:600;color:var(--text)}
+.reminder-banner-actions{display:flex;gap:7px;align-items:center;flex-shrink:0}
+.reminder-banner-btn{height:26px;padding:0 11px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;font-family:var(--font);transition:all .15s;border:0.5px solid}
+.reminder-banner-btn.primary{background:var(--amber-dim);color:var(--amber);border-color:var(--amber-border)}
+.reminder-banner-btn.primary:hover{background:var(--amber);color:#000}
+.reminder-banner-btn.ghost{background:transparent;color:var(--text3);border-color:var(--border2)}
+.reminder-banner-btn.ghost:hover{background:var(--surface3);color:var(--text)}
+.reminder-notif-btn{height:26px;padding:0 11px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;font-family:var(--font);background:var(--surface3);color:var(--text2);border:0.5px solid var(--border2);transition:all .15s}
+.reminder-notif-btn:hover{background:var(--surface4);color:var(--text)}
+
 /* ── Accounts ── */
 .ac-filter-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
 .ac-search-wrap{position:relative;flex:1;min-width:160px}
@@ -844,6 +976,49 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 .db-greeting{margin-bottom:1.5rem}
 .db-greeting-time{font-size:22px;font-weight:600;letter-spacing:-.03em;margin-bottom:3px}
 .db-greeting-date{font-size:13px;color:var(--text2)}
+
+/* ── Dashboard edit mode ── */
+.db-edit-bar{display:none;align-items:center;justify-content:space-between;
+  padding:8px 12px;margin-bottom:10px;border-radius:var(--radius-lg);
+  background:var(--amber-dim);border:0.5px solid var(--amber-border)}
+.db-edit-bar.visible{display:flex}
+.db-edit-bar-label{font-size:12px;color:var(--amber);font-weight:500}
+.db-edit-done-btn{height:28px;padding:0 14px;border-radius:6px;
+  border:0.5px solid var(--amber-border);background:var(--amber);
+  color:#000;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);
+  transition:all .15s}
+.db-edit-done-btn:hover{background:#e09000}
+.db-header-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;gap:12px}
+.db-edit-toggle-btn{height:28px;padding:0 12px;border-radius:6px;flex-shrink:0;
+  border:0.5px solid var(--border2);background:transparent;
+  color:var(--text2);font-size:11px;font-weight:500;cursor:pointer;
+  font-family:var(--font);transition:all .15s;white-space:nowrap;margin-top:4px}
+.db-edit-toggle-btn:hover{background:var(--surface3);color:var(--text);border-color:var(--border3)}
+.db-edit-toggle-btn.active{background:var(--amber-dim);color:var(--amber);border-color:var(--amber-border)}
+/* Edit-mode widget styles */
+.db-editing .db-widget{
+  cursor:grab;border:1.5px dashed var(--amber-border)!important;
+  transition:border-color .15s,opacity .15s,transform .15s!important;
+  position:relative;
+}
+.db-editing .db-widget:active{cursor:grabbing}
+.db-editing .db-widget.drag-over{border-color:var(--accent-border)!important;
+  background:var(--accent-dim);transform:scale(1.01)}
+.db-editing .db-widget.dragging{opacity:.35;transform:scale(.97)}
+.db-editing .db-widget.hidden-widget{opacity:.38;border-style:dotted!important}
+.db-widget-edit-overlay{display:none;position:absolute;inset:0;z-index:10;
+  border-radius:var(--radius-lg);pointer-events:none}
+.db-editing .db-widget-edit-overlay{display:flex;flex-direction:column;
+  align-items:flex-end;padding:8px;pointer-events:auto}
+.db-drag-handle{font-size:14px;color:var(--amber);opacity:.8;
+  position:absolute;top:50%;left:10px;transform:translateY(-50%);
+  pointer-events:none;letter-spacing:1px}
+.db-vis-btn{width:24px;height:24px;border-radius:5px;border:0.5px solid var(--border2);
+  background:var(--surface);cursor:pointer;font-size:13px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;pointer-events:auto}
+.db-vis-btn:hover{background:var(--surface3)}
+
 .db-grid{
   display:grid;
   grid-template-columns:repeat(3,1fr);
@@ -962,11 +1137,97 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 .db-empty{text-align:center;padding:1.5rem 1rem;color:var(--text3);font-size:12px}
 /* Responsive */
 @media(max-width:900px){
-  .db-grid{grid-template-columns:repeat(2,1fr)}
+  
+/* ── Dashboard edit mode ── */
+.db-edit-bar{display:none;align-items:center;justify-content:space-between;
+  padding:8px 12px;margin-bottom:10px;border-radius:var(--radius-lg);
+  background:var(--amber-dim);border:0.5px solid var(--amber-border)}
+.db-edit-bar.visible{display:flex}
+.db-edit-bar-label{font-size:12px;color:var(--amber);font-weight:500}
+.db-edit-done-btn{height:28px;padding:0 14px;border-radius:6px;
+  border:0.5px solid var(--amber-border);background:var(--amber);
+  color:#000;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);
+  transition:all .15s}
+.db-edit-done-btn:hover{background:#e09000}
+.db-header-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;gap:12px}
+.db-edit-toggle-btn{height:28px;padding:0 12px;border-radius:6px;flex-shrink:0;
+  border:0.5px solid var(--border2);background:transparent;
+  color:var(--text2);font-size:11px;font-weight:500;cursor:pointer;
+  font-family:var(--font);transition:all .15s;white-space:nowrap;margin-top:4px}
+.db-edit-toggle-btn:hover{background:var(--surface3);color:var(--text);border-color:var(--border3)}
+.db-edit-toggle-btn.active{background:var(--amber-dim);color:var(--amber);border-color:var(--amber-border)}
+/* Edit-mode widget styles */
+.db-editing .db-widget{
+  cursor:grab;border:1.5px dashed var(--amber-border)!important;
+  transition:border-color .15s,opacity .15s,transform .15s!important;
+  position:relative;
+}
+.db-editing .db-widget:active{cursor:grabbing}
+.db-editing .db-widget.drag-over{border-color:var(--accent-border)!important;
+  background:var(--accent-dim);transform:scale(1.01)}
+.db-editing .db-widget.dragging{opacity:.35;transform:scale(.97)}
+.db-editing .db-widget.hidden-widget{opacity:.38;border-style:dotted!important}
+.db-widget-edit-overlay{display:none;position:absolute;inset:0;z-index:10;
+  border-radius:var(--radius-lg);pointer-events:none}
+.db-editing .db-widget-edit-overlay{display:flex;flex-direction:column;
+  align-items:flex-end;padding:8px;pointer-events:auto}
+.db-drag-handle{font-size:14px;color:var(--amber);opacity:.8;
+  position:absolute;top:50%;left:10px;transform:translateY(-50%);
+  pointer-events:none;letter-spacing:1px}
+.db-vis-btn{width:24px;height:24px;border-radius:5px;border:0.5px solid var(--border2);
+  background:var(--surface);cursor:pointer;font-size:13px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;pointer-events:auto}
+.db-vis-btn:hover{background:var(--surface3)}
+
+.db-grid{grid-template-columns:repeat(2,1fr)}
   .db-w3{grid-column:span 2}
 }
 @media(max-width:620px){
-  .db-grid{grid-template-columns:1fr}
+  
+/* ── Dashboard edit mode ── */
+.db-edit-bar{display:none;align-items:center;justify-content:space-between;
+  padding:8px 12px;margin-bottom:10px;border-radius:var(--radius-lg);
+  background:var(--amber-dim);border:0.5px solid var(--amber-border)}
+.db-edit-bar.visible{display:flex}
+.db-edit-bar-label{font-size:12px;color:var(--amber);font-weight:500}
+.db-edit-done-btn{height:28px;padding:0 14px;border-radius:6px;
+  border:0.5px solid var(--amber-border);background:var(--amber);
+  color:#000;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);
+  transition:all .15s}
+.db-edit-done-btn:hover{background:#e09000}
+.db-header-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;gap:12px}
+.db-edit-toggle-btn{height:28px;padding:0 12px;border-radius:6px;flex-shrink:0;
+  border:0.5px solid var(--border2);background:transparent;
+  color:var(--text2);font-size:11px;font-weight:500;cursor:pointer;
+  font-family:var(--font);transition:all .15s;white-space:nowrap;margin-top:4px}
+.db-edit-toggle-btn:hover{background:var(--surface3);color:var(--text);border-color:var(--border3)}
+.db-edit-toggle-btn.active{background:var(--amber-dim);color:var(--amber);border-color:var(--amber-border)}
+/* Edit-mode widget styles */
+.db-editing .db-widget{
+  cursor:grab;border:1.5px dashed var(--amber-border)!important;
+  transition:border-color .15s,opacity .15s,transform .15s!important;
+  position:relative;
+}
+.db-editing .db-widget:active{cursor:grabbing}
+.db-editing .db-widget.drag-over{border-color:var(--accent-border)!important;
+  background:var(--accent-dim);transform:scale(1.01)}
+.db-editing .db-widget.dragging{opacity:.35;transform:scale(.97)}
+.db-editing .db-widget.hidden-widget{opacity:.38;border-style:dotted!important}
+.db-widget-edit-overlay{display:none;position:absolute;inset:0;z-index:10;
+  border-radius:var(--radius-lg);pointer-events:none}
+.db-editing .db-widget-edit-overlay{display:flex;flex-direction:column;
+  align-items:flex-end;padding:8px;pointer-events:auto}
+.db-drag-handle{font-size:14px;color:var(--amber);opacity:.8;
+  position:absolute;top:50%;left:10px;transform:translateY(-50%);
+  pointer-events:none;letter-spacing:1px}
+.db-vis-btn{width:24px;height:24px;border-radius:5px;border:0.5px solid var(--border2);
+  background:var(--surface);cursor:pointer;font-size:13px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;pointer-events:auto}
+.db-vis-btn:hover{background:var(--surface3)}
+
+.db-grid{grid-template-columns:1fr}
   .db-w1,.db-w2,.db-w3{grid-column:span 1}
   .db-week{grid-template-columns:repeat(7,1fr);gap:3px;row-gap:5px}
   .db-day{padding:5px 3px;min-height:54px}
@@ -1031,21 +1292,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
       <button class="sidebar-toggle" onclick="toggleSidebar()" id="sidebar-btn" title="Toggle sidebar">&#8592;</button>
     </div>
     <button class="nav-item" id="nav-dashboard" onclick="switchPage('dashboard')" style="margin-bottom:4px"><span class="nav-icon">&#9632;</span><span class="nav-label"> Dashboard</span></button>
-    <div class="sidebar-section">Productivity</div>
-    <button class="nav-item" id="nav-tasks" onclick="switchPage('tasks')"><span class="nav-icon">&#9635;</span><span class="nav-label"> Tasks</span></button>
-    <button class="nav-item" id="nav-goals" onclick="switchPage('goals')"><span class="nav-icon">&#9651;</span><span class="nav-label"> Goals</span></button>
-    <div class="sidebar-section">Finances</div>
-    <button class="nav-item" id="nav-active" onclick="switchPage('active')"><span class="nav-icon">&#9672;</span><span class="nav-label"> Monthly Expenses</span></button>
-    <button class="nav-item" id="nav-tabby" onclick="switchPage('tabby')"><span class="nav-icon">&#9681;</span><span class="nav-label"> Tabby</span></button>
-    <button class="nav-item" id="nav-trials" onclick="switchPage('trials')"><span class="nav-icon">&#9203;</span><span class="nav-label"> Free trials</span></button>
-    <button class="nav-item" id="nav-accounts" onclick="switchPage('accounts')"><span class="nav-icon">&#127981;</span><span class="nav-label"> Accounts</span></button>
-    <button class="nav-item" id="nav-loans" onclick="switchPage('loans')"><span class="nav-icon">&#127968;</span><span class="nav-label"> Loans</span></button>
-    <div class="sidebar-section">Tools</div>
-    <button class="nav-item" id="nav-history" onclick="switchPage('history')"><span class="nav-icon">&#9719;</span><span class="nav-label"> History</span></button>
-    <button class="nav-item" id="nav-insights" onclick="switchPage('insights')"><span class="nav-icon">&#9673;</span><span class="nav-label"> Insights</span></button>
-    <button class="nav-item" id="nav-calendar" onclick="switchPage('calendar')"><span class="nav-icon">&#9744;</span><span class="nav-label"> Calendar</span></button>
-    <button class="nav-item" id="nav-notes" onclick="switchPage('notes')"><span class="nav-icon">&#9998;</span><span class="nav-label"> Notes</span></button>
-    <button class="nav-item" id="nav-calc" onclick="switchPage('calc')"><span class="nav-icon">&#8862;</span><span class="nav-label"> Calculator</span></button>
+    <div id="nav-sections-wrap"></div>
     <div class="sidebar-section">Auto-save</div>
     <div class="as-wrap">
       <div class="as-status">
@@ -1057,7 +1304,11 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
         <div id="as-file-name" style="font-size:9px;color:var(--text3);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px"></div>
         <button class="as-setup-btn" style="opacity:.7" onclick="asSetup()">&#128194; Change file</button>
       </div>
+      <button class="ver-btn" onclick="toggleVerPanel()" id="ver-toggle-btn">&#9719; Version history</button>
+      <button class="nav-edit-btn" id="nav-edit-btn" onclick="navToggleEditMode()">&#9998; Reorder tabs</button>
     </div>
+    <!-- Version history panel — shown below auto-save widget -->
+    <div id="ver-panel" style="display:none"></div>
     <div class="sidebar-section">Actions</div>
     <button class="nav-item" onclick="openModal()"><span class="nav-icon">&#65291;</span><span class="nav-label"> Add entry</span></button>
     <button class="nav-item" onclick="exportJSON()"><span class="nav-icon">&#8595;</span><span class="nav-label"> Backup data</span></button>
@@ -1068,9 +1319,18 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
   <input type="file" id="import-input" accept=".json" style="display:none" onchange="importJSON(event)">
 
   <main class="main">
+    <!-- Bill reminders banner — injected by checkReminders() on load -->
+    <div id="reminder-banner-wrap"></div>
     <!-- Dashboard page -->
     <div id="page-dashboard" style="display:none">
-      <div class="db-greeting" id="db-greeting"></div>
+      <div class="db-header-row">
+        <div class="db-greeting" id="db-greeting" style="margin-bottom:0;flex:1"></div>
+        <button class="db-edit-toggle-btn" id="db-edit-btn" onclick="dbToggleEditMode()">&#9998; Customise</button>
+      </div>
+      <div class="db-edit-bar" id="db-edit-bar">
+        <span class="db-edit-bar-label">&#9998; Drag to reorder &nbsp;&middot;&nbsp; click eye to show/hide</span>
+        <button class="db-edit-done-btn" onclick="dbToggleEditMode()">&#10003; Done</button>
+      </div>
       <div class="db-grid" id="db-grid"></div>
     </div>
 
@@ -1480,6 +1740,33 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
       </div>
       <div id="ac-groups"></div>
     </div>
+
+    <!-- Net Worth page -->
+    <div id="page-networth" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Net Worth</div>
+          <div class="page-sub" id="nw-sub">Assets minus liabilities</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn primary" onclick="nwTakeSnapshot()">&#9998; Save snapshot</button>
+        </div>
+      </div>
+      <div id="nw-hero"></div>
+      <div class="nw-snapshot-bar">
+        <span style="font-size:11px;color:var(--text3);white-space:nowrap">&#9662; Snapshot note</span>
+        <input id="nw-snap-note" type="text" placeholder="e.g. End of March, after bonus&#8230;" maxlength="60">
+        <button class="nw-snap-btn" onclick="nwTakeSnapshot()">Save now</button>
+      </div>
+      <div class="nw-section-grid" id="nw-sections"></div>
+      <div class="nw-chart-card" id="nw-chart-card">
+        <div class="nw-chart-head">
+          <div class="nw-chart-title">Net worth over time</div>
+          <div style="font-size:11px;color:var(--text3)" id="nw-chart-sub"></div>
+        </div>
+        <div style="position:relative;height:200px"><canvas id="nwTrendChart"></canvas></div>
+      </div>
+    </div>
   </main>
 </div>
 
@@ -1601,7 +1888,7 @@ const COLORS=['#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
-const KEY_TASKS='subtracker_tasks', KEY_LISTS='subtracker_lists', KEY_GOALS='subtracker_goals', KEY_NOTES='subtracker_notes', KEY_LOANS='subtracker_loans', KEY_ACCOUNTS='subtracker_accounts';
+const KEY_TASKS='subtracker_tasks', KEY_LISTS='subtracker_lists', KEY_GOALS='subtracker_goals', KEY_NOTES='subtracker_notes', KEY_LOANS='subtracker_loans', KEY_ACCOUNTS='subtracker_accounts', KEY_NW='subtracker_networth';
 
 let items=[], payments=[], tabbyItems=[], editId=null, tabbyEditId=null, tabbyColor=COLORS[4];
 let filterCat='All', selectedColor=COLORS[0];
@@ -1613,6 +1900,7 @@ let goals=[], glEditId=null, glLogId=null, glFilterCat='all', glSelectedEmoji='�
 let notes=[], qnEditId=null, qnFilterTag='all', qnSelectedColor='none', qnModalTags=[];
 let loans=[], lnEditId=null;
 let accounts=[], acEditId=null, acSelectedColor='#4A8ECC';
+let nwHistory=[];
 const AC_TYPES={savings:{label:'Savings',icon:'💰',group:'liquid'},current:{label:'Current',icon:'🏦',group:'liquid'},cash:{label:'Cash',icon:'💵',group:'liquid'},investment:{label:'Investment',icon:'📈',group:'investments'},crypto:{label:'Crypto',icon:'💎',group:'investments'},gold:{label:'Gold',icon:'🥇',group:'investments'},fixeddeposit:{label:'Fixed Deposit',icon:'🔒',group:'fixed'},other:{label:'Other',icon:'📋',group:'liquid'}};
 const AC_GROUPS={liquid:'Liquid / Cash',investments:'Investments',fixed:'Fixed / Term deposits'};
 const AC_COLORS=['#4A8ECC','#1D9E75','#C98A1A','#C46A8A','#7A74D4','#C95050','#C97840','#5DCAA5','#888880'];
@@ -1634,6 +1922,7 @@ function saveGoals(){try{localStorage.setItem(KEY_GOALS,JSON.stringify(goals));}
 function saveNotes(){try{localStorage.setItem(KEY_NOTES,JSON.stringify(notes));}catch(e){}asAutoSave();}
 function saveLoans(){try{localStorage.setItem(KEY_LOANS,JSON.stringify(loans));}catch(e){}asAutoSave();}
 function saveAccounts(){try{localStorage.setItem(KEY_ACCOUNTS,JSON.stringify(accounts));}catch(e){}asAutoSave();}
+function saveNetWorth(){try{localStorage.setItem(KEY_NW,JSON.stringify(nwHistory));}catch(e){}}
 
 function loadData(){
   try{const d=localStorage.getItem(KEY_ITEMS);if(d)items=JSON.parse(d);}catch(e){items=[];}
@@ -1645,8 +1934,10 @@ function loadData(){
   try{const d=localStorage.getItem(KEY_NOTES);if(d)notes=JSON.parse(d);}catch(e){notes=[];}
   try{const d=localStorage.getItem(KEY_LOANS);if(d)loans=JSON.parse(d);}catch(e){loans=[];}
   try{const d=localStorage.getItem(KEY_ACCOUNTS);if(d)accounts=JSON.parse(d);}catch(e){accounts=[];}
+  try{const d=localStorage.getItem(KEY_NW);if(d)nwHistory=JSON.parse(d);}catch(e){nwHistory=[];}
   render();
   switchPage('dashboard');
+  setTimeout(verSnapshot, 500); // snapshot initial state on load
 }
 
 /* &#9472;&#9472; Helpers &#9472;&#9472; */
@@ -1747,7 +2038,7 @@ function undoDelete(){
 /* &#9472;&#9472; Navigation &#9472;&#9472; */
 function switchPage(p){
   currentPage=p;
-  ['dashboard','active','tabby','trials','history','insights','calc','tasks','goals','calendar','notes','loans','accounts'].forEach(x=>{
+  ['dashboard','active','tabby','trials','history','insights','calc','tasks','goals','calendar','notes','loans','accounts','networth'].forEach(x=>{
     document.getElementById('page-'+x).style.display=x===p?'':'none';
     const n=document.getElementById('nav-'+x);
     if(n)n.className='nav-item'+(x===p?' active':'');
@@ -1769,7 +2060,9 @@ function switchPage(p){
   if(p==='notes')renderNotes();
   if(p==='loans')renderLoans();
   if(p==='accounts')renderAccounts();
+  if(p==='networth')renderNetWorth();
   closeMobileSidebar();
+  if(!_navEditing) renderNav();
 }
 function toggleSidebar(){
   const app=document.getElementById('app');
@@ -1906,6 +2199,7 @@ function render(){
     return;
   }
   document.getElementById('items').innerHTML=vis.map(item=>item._tabby?renderTabbyActiveItem(item):renderItem(item,ym)).join('');
+  checkReminders();
 }
 
 function renderItem(item,ym){
@@ -2078,7 +2372,7 @@ function renderHistory(){
 
 /* &#9472;&#9472; Insights &#9472;&#9472; */
 function renderInsights(){
-  ['insBarChart','insDonutChart'].forEach(function(id){var c=Chart.getChart(id);if(c)c.destroy();});
+  ['insBarChart','insDonutChart','insForecastChart'].forEach(function(id){var c=Chart.getChart(id);if(c)c.destroy();});
   var active=items.filter(function(i){return i.status==='active'&&!i.isTrial;});
   var cont=document.getElementById('insights-content');
   if(!active.length){cont.innerHTML='<div class="empty" style="text-align:center;padding:3rem 1rem;color:var(--text3);border:0.5px dashed var(--border);border-radius:var(--radius-lg)">No active entries to analyze.</div>';return;}
@@ -2165,6 +2459,15 @@ function renderInsights(){
         '</div>';
       }).join('')+
     '</div>'+
+    '</div>'+
+    // ── Forecast card (appended after grid) ──
+    '<div class="ins-card full" style="margin-top:14px">'+
+      '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:1rem">'+
+        '<div class="ins-card-title" style="margin-bottom:0">Spending forecast — next 12 months</div>'+
+        '<div style="font-size:11px;color:var(--text3)">based on current subscriptions</div>'+
+      '</div>'+
+      '<div style="position:relative;height:220px"><canvas id="insForecastChart"></canvas></div>'+
+      '<div id="ins-forecast-note" style="font-size:11px;color:var(--text3);margin-top:10px;line-height:1.6"></div>'+
     '</div>';
 
   Chart.defaults.color='rgba(255,255,255,.38)';
@@ -2280,6 +2583,155 @@ function renderInsights(){
       }
     },
     plugins:[donutCenterPlugin]
+  });
+
+  // ── Build 12-month forecast data ──
+  var fcastNow=new Date();
+  var fcastMonths=[];
+  for(var fi=0;fi<12;fi++){
+    var fd=new Date(fcastNow.getFullYear(),fcastNow.getMonth()+fi,1);
+    fcastMonths.push({
+      label:MONTHS[fd.getMonth()]+' '+String(fd.getFullYear()).slice(2),
+      year:fd.getFullYear(),
+      month:fd.getMonth(), // 0-indexed
+      total:0,
+      items:[]
+    });
+  }
+  // For each active item, calculate which forecast months it hits
+  active.forEach(function(item){
+    var amt=item.amount;
+    var cycle=item.cycle;
+    var color=item.color||CATCOLORS[item.cat]||'#888';
+    if(cycle==='monthly'||cycle==='weekly'){
+      // Every month
+      fcastMonths.forEach(function(m){
+        m.total+=toMonthly(amt,cycle);
+        m.items.push({name:item.name,amount:toMonthly(amt,cycle),color:color});
+      });
+    } else if(cycle==='quarterly'){
+      // Every 3 months — find first hit from current month
+      var startMonth=fcastNow.getMonth();
+      fcastMonths.forEach(function(m,idx){
+        if(idx%3===0){
+          m.total+=amt;
+          m.items.push({name:item.name,amount:amt,color:color,badge:'quarterly'});
+        }
+      });
+    } else if(cycle==='yearly'){
+      // Only the renewal month — use dueDay month if set, otherwise current month
+      var renewalMonth=item.dueDay?
+        (function(){
+          // Estimate renewal month from dueDay — use the month when dueDay is in the future
+          var d=new Date(fcastNow.getFullYear(),fcastNow.getMonth(),item.dueDay);
+          if(d<fcastNow) d=new Date(fcastNow.getFullYear(),fcastNow.getMonth()+1,item.dueDay);
+          return d.getMonth();
+        })():fcastNow.getMonth();
+      fcastMonths.forEach(function(m){
+        if(m.month===renewalMonth){
+          m.total+=amt;
+          m.items.push({name:item.name,amount:amt,color:color,badge:'annual'});
+        }
+      });
+    }
+  });
+  // Also include active Tabby instalments
+  tabbyItems.forEach(function(t){
+    t.instalments.forEach(function(ins){
+      if(ins.paid) return;
+      var insDate=new Date(ins.date);
+      fcastMonths.forEach(function(m){
+        if(insDate.getFullYear()===m.year&&insDate.getMonth()===m.month){
+          m.total+=t.total/4;
+          m.items.push({name:t.name+' (Tabby)',amount:t.total/4,color:'#C98A1A',badge:'tabby'});
+        }
+      });
+    });
+  });
+
+  var fcastMax=Math.max.apply(null,fcastMonths.map(function(m){return m.total;}))*1.18||1;
+  var fcastAvg=fcastMonths.reduce(function(s,m){return s+m.total;},0)/12;
+  var fcastTotal=fcastMonths.reduce(function(s,m){return s+m.total;},0);
+  // Heavy months = above 120% of average
+  var heavyMonths=fcastMonths.filter(function(m){return m.total>fcastAvg*1.2;});
+
+  // Update note
+  var noteEl=document.getElementById('ins-forecast-note');
+  if(noteEl){
+    var noteHTML='Total projected spend: <strong style="color:var(--text);font-family:var(--mono)">AED '+fmt(fcastTotal)+'</strong> over 12 months · avg <strong style="color:var(--text);font-family:var(--mono)">AED '+fmt(fcastAvg)+'</strong>/month';
+    if(heavyMonths.length){
+      noteHTML+=' · <span style="color:var(--amber)">Heavier months: '+heavyMonths.map(function(m){return m.label;}).join(', ')+'</span>';
+    }
+    noteEl.innerHTML=noteHTML;
+  }
+
+  var fcastCtx=document.getElementById('insForecastChart').getContext('2d');
+  var fcastGrad=fcastCtx.createLinearGradient(0,0,0,220);
+  fcastGrad.addColorStop(0,'rgba(155,127,232,.55)');
+  fcastGrad.addColorStop(1,'rgba(155,127,232,.08)');
+  var fcastBorderColors=fcastMonths.map(function(m){
+    return m.total>fcastAvg*1.2?'rgba(201,138,26,.9)':'rgba(155,127,232,.85)';
+  });
+  var fcastBgColors=fcastMonths.map(function(m){
+    return m.total>fcastAvg*1.2?'rgba(201,138,26,.28)':fcastGrad;
+  });
+  new Chart(fcastCtx,{
+    type:'bar',
+    data:{
+      labels:fcastMonths.map(function(m){return m.label;}),
+      datasets:[{
+        label:'Forecast',
+        data:fcastMonths.map(function(m){return parseFloat(m.total.toFixed(2));}),
+        backgroundColor:fcastBgColors,
+        borderColor:fcastBorderColors,
+        borderWidth:1.5,
+        borderRadius:5,
+        borderSkipped:false,
+        maxBarThickness:52,
+      },{
+        type:'line',
+        label:'Monthly avg',
+        data:fcastMonths.map(function(){return parseFloat(fcastAvg.toFixed(2));}),
+        borderColor:'rgba(31,170,126,.55)',
+        borderWidth:1.5,
+        borderDash:[5,4],
+        pointRadius:0,
+        tension:0,
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'rgba(18,18,18,.95)',
+          titleColor:'rgba(255,255,255,.85)',
+          bodyColor:'rgba(255,255,255,.55)',
+          borderColor:'rgba(255,255,255,.09)',
+          borderWidth:1,padding:10,
+          callbacks:{
+            title:function(items){return items[0].label;},
+            label:function(item){
+              if(item.datasetIndex===1) return 'avg AED '+fmt(item.parsed.y);
+              var m=fcastMonths[item.dataIndex];
+              var lines=['AED '+fmt(m.total)];
+              m.items.slice(0,5).forEach(function(it){
+                lines.push('  '+it.name+(it.badge?' ['+it.badge+']':'')
+                  +': AED '+fmt(it.amount));
+              });
+              if(m.items.length>5) lines.push('  ...+'+(m.items.length-5)+' more');
+              return lines;
+            }
+          }
+        }
+      },
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,.04)'},border:{display:false},ticks:{color:'rgba(255,255,255,.38)'}},
+        y:{grid:{color:'rgba(255,255,255,.05)'},border:{display:false},
+          ticks:{color:'rgba(255,255,255,.38)',callback:function(v){return 'AED '+Math.round(v);}},
+          suggestedMax:fcastMax,suggestedMin:0}
+      }
+    }
   });
 }
 function setFilter(c){filterCat=c;render();}
@@ -2514,9 +2966,10 @@ document.getElementById('tabby-modal').addEventListener('click',e=>{if(e.target=
 
 function exportJSON(){
   if(!items.length&&!payments.length&&!tabbyItems.length&&!tasks.length){toast('Nothing to back up yet');return;}
-  const data=JSON.stringify({items,payments,tabbyItems,tasks,lists,goals,notes,loans,accounts,exportedAt:new Date().toISOString()},null,2);
+  const data=JSON.stringify({items,payments,tabbyItems,tasks,lists,goals,notes,loans,accounts,nwHistory,exportedAt:new Date().toISOString()},null,2);
   const d=new Date();
   const filename='bills-backup-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'.json';
+  verSnapshot();
   triggerDownload(new Blob([data],{type:'application/json'}),filename);
   toast('&#8595; Backup downloaded');
 }
@@ -2571,7 +3024,8 @@ function applyRestore(mode){
     notes=data.notes||[];
     loans=data.loans||[];
     accounts=data.accounts||[];
-    saveData();saveTasks();saveLists();saveGoals();saveNotes();saveLoans();saveAccounts();
+    nwHistory=data.nwHistory||[];
+    saveData();saveTasks();saveLists();saveGoals();saveNotes();saveLoans();saveAccounts();saveNetWorth();
     render();
     if(currentPage==='tasks')renderTasks();
     if(currentPage==='goals')renderGoals();
@@ -2586,6 +3040,10 @@ function applyRestore(mode){
     loans=[...(data.loans||[]),...loans.filter(l=>!loanIds.has(l.id))];
     const acIds=new Set((data.accounts||[]).map(a=>a.id));
     accounts=[...(data.accounts||[]),...accounts.filter(a=>!acIds.has(a.id))];
+    // Merge net worth snapshots by timestamp
+    const nwTs=new Set(nwHistory.map(n=>n.ts));
+    nwHistory=[...(data.nwHistory||[]),...nwHistory.filter(n=>!nwTs.has(n.ts))].sort((a,b)=>a.ts-b.ts);
+    saveNetWorth();
     const bkIds={
       items:new Set((data.items||[]).map(i=>i.id)),
       pay:new Set((data.payments||[]).map(p=>p.id)),
@@ -2600,13 +3058,14 @@ function applyRestore(mode){
     tasks=[...(data.tasks||[]),...tasks.filter(t=>!bkIds.tasks.has(t.id))];
     lists=[...(data.lists||[]),...lists.filter(l=>!bkIds.lists.has(l.id))];
     goals=[...(data.goals||[]),...goals.filter(g=>!bkIds.goals.has(g.id))];
-    saveData();saveTasks();saveLists();saveGoals();saveNotes();saveLoans();
+    saveData();saveTasks();saveLists();saveGoals();saveNotes();saveLoans();saveAccounts();
     render();
     if(currentPage==='tasks')renderTasks();
     if(currentPage==='goals')renderGoals();
     if(currentPage==='notes')renderNotes();
     if(currentPage==='loans')renderLoans();
     if(currentPage==='accounts')renderAccounts();
+    if(currentPage==='networth')renderNetWorth();
     toast('✓ Backup merged — no duplicates created');
   }
   closeRestoreModal();
@@ -3745,9 +4204,10 @@ const DB_WIDGETS = [
   { id:'bills7',      cols:1, render: dbWidgetBills7      },
   { id:'goals',       cols:1, render: dbWidgetGoals       },
   { id:'week',        cols:3, render: dbWidgetWeek        },
+  { id:'networth',  cols:1, render: dbWidgetNetWorth    },
+  { id:'aiinsight', cols:3, render: dbWidgetAIInsight   },
   /* ── Future widgets plug in here ──────────────────────
      { id:'budget',   cols:1, render: dbWidgetBudget      },
-     { id:'networth', cols:1, render: dbWidgetNetWorth    },
      { id:'habits',   cols:1, render: dbWidgetHabits      },
      ─────────────────────────────────────────────────── */
 ];
@@ -3841,6 +4301,49 @@ function dbWidgetFinances(el){
         <div class="db-kpi-label">Tabby next cycle</div>
         <div class="db-kpi-val">AED ${Math.round(tabbyOwed).toLocaleString()}</div>
         <div class="db-kpi-sub">${tabbyItems.filter(t=>!t.instalments.every(i=>i.paid)).length} active plans</div>
+      </div>
+    </div>`;
+}
+
+/* ── Widget: Net Worth ───────────────────────────────── */
+function dbWidgetNetWorth(el){
+  const assets = accounts.reduce((s,a)=>s+(parseFloat(a.balance)||0),0);
+  const liabs  = loans.filter(l=>!l.paidOff).reduce((s,l)=>s+lnRemainingBalance(l),0);
+  const net    = assets - liabs;
+  // Delta vs last net worth snapshot
+  const lastSnap = nwHistory.length ? nwHistory[nwHistory.length-1] : null;
+  const delta    = lastSnap != null ? net - lastSnap.net : null;
+  const deltaLabel = delta != null
+    ? (delta>=0?'+':'')+' AED '+Math.round(Math.abs(delta)).toLocaleString()+(delta>=0?' ▲':' ▼')
+    : null;
+  const deltaColor = delta == null ? '' : delta>=0 ? 'var(--accent)' : 'var(--red)';
+  const deltaDate  = lastSnap
+    ? 'vs ' + new Date(lastSnap.ts).toLocaleDateString('en-GB',{day:'numeric',month:'short'})
+    : 'no snapshot yet';
+  dbCard(el,{
+    icon:'✶',
+    title:'Net worth',
+    footerLink:'View details',
+    footerPage:'networth',
+  });
+  document.getElementById('dbwb-networth').innerHTML=`
+    <div style="text-align:center;padding:10px 0 8px">
+      <div style="font-size:26px;font-weight:600;font-family:var(--mono);letter-spacing:-.02em;color:${net>=0?'var(--accent)':'var(--red)'}">
+        ${net<0?'-':''}AED ${Math.round(Math.abs(net)).toLocaleString()}
+      </div>
+      ${deltaLabel!=null?`<div style="font-size:12px;font-weight:500;color:${deltaColor};margin-top:3px">${deltaLabel}</div>`:''}
+      <div style="font-size:10px;color:var(--text3);margin-top:2px">${deltaDate}</div>
+    </div>
+    <div class="db-kpi-grid" style="margin-top:4px">
+      <div class="db-kpi green">
+        <div class="db-kpi-label">Assets</div>
+        <div class="db-kpi-val">AED ${Math.round(assets).toLocaleString()}</div>
+        <div class="db-kpi-sub">${accounts.length} account${accounts.length!==1?'s':''}</div>
+      </div>
+      <div class="db-kpi red">
+        <div class="db-kpi-label">Liabilities</div>
+        <div class="db-kpi-val">AED ${Math.round(liabs).toLocaleString()}</div>
+        <div class="db-kpi-sub">${loans.filter(l=>!l.paidOff).length} active loan${loans.filter(l=>!l.paidOff).length!==1?'s':''}</div>
       </div>
     </div>`;
 }
@@ -4104,7 +4607,7 @@ async function asWriteFile(){
   asDot('busy');
   try{
     const payload = JSON.stringify(
-      {items,payments,tabbyItems,tasks,lists,goals,savedAt:new Date().toISOString()},
+      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,accounts,savedAt:new Date().toISOString()},
       null, 2
     );
     const writable = await _asFileHandle.createWritable();
@@ -4112,6 +4615,7 @@ async function asWriteFile(){
     await writable.close();
     const now = new Date();
     localStorage.setItem(AS_SYNC_KEY, now.toISOString());
+    verSnapshot(); // save a versioned snapshot on every successful write
     const timeStr = now.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'});
     asStatus('ok','✔ Saved '+timeStr);
   } catch(e){
@@ -4842,8 +5346,1008 @@ function deleteAccount(id){
   toast('Account deleted');
 }
 
+/* ═══════════════════════════════════════════════════════
+   Bill Reminders
+   Two-layer system:
+   1. In-app sticky banner — always works, no permissions
+   2. Browser push notifications — opt-in, persisted
+   Checks on every page load. Dismissed-today state stored
+   in sessionStorage so it doesn't re-appear mid-session.
+   ═══════════════════════════════════════════════════════ */
+const REM_DAYS    = 3;   // warn this many days before due
+const REM_DISMISS = 'lifeos_rem_dismissed'; // sessionStorage key
+const REM_NOTIF   = 'lifeos_notif_enabled'; // localStorage key
+
+/* ── Build the list of upcoming unpaid bills ── */
+function getUpcomingReminders(){
+  const now = new Date();
+  const today = now.getDate();
+  const ym = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+  const active = items.filter(i=>i.status==='active'&&!i.isTrial&&i.dueDay);
+  const results = [];
+  active.forEach(i=>{
+    if(isPaidThisCycle(i)) return;
+    let diff = i.dueDay - today;
+    // Wrap to next month if due day already passed
+    if(diff < 0) diff = daysInMonth - today + i.dueDay;
+    if(diff <= REM_DAYS && diff >= 0){
+      results.push({item:i, diff, overdue: diff === 0 && i.dueDay < today});
+    }
+  });
+  // Also include Tabby instalments due within 3 days
+  tabbyItems.forEach(t=>{
+    t.instalments.forEach(ins=>{
+      if(ins.paid) return;
+      const insDate = new Date(ins.date);
+      const diffMs = insDate - now;
+      const diffDays = Math.ceil(diffMs/(1000*60*60*24));
+      if(diffDays >= 0 && diffDays <= REM_DAYS){
+        results.push({
+          item:{name:t.name+' (Tabby)',amount:t.total/4,color:'#C98A1A'},
+          diff:diffDays, tabby:true
+        });
+      }
+    });
+  });
+  return results.sort((a,b)=>a.diff-b.diff);
+}
+
+/* ── Render the in-app banner ── */
+function checkReminders(){
+  const wrap = document.getElementById('reminder-banner-wrap');
+  if(!wrap) return;
+  // Check if dismissed this session
+  const dismissed = sessionStorage.getItem(REM_DISMISS);
+  const todayKey = new Date().toISOString().slice(0,10);
+  if(dismissed === todayKey){ wrap.innerHTML=''; return; }
+
+  const due = getUpcomingReminders();
+  if(!due.length){ wrap.innerHTML=''; return; }
+
+  const overdueItems = due.filter(d=>d.diff===0||d.overdue);
+  const soonItems    = due.filter(d=>d.diff>0&&!d.overdue);
+  const notifEnabled = localStorage.getItem(REM_NOTIF)==='true';
+  const notifGranted = 'Notification' in window && Notification.permission==='granted';
+
+  // Build text
+  let parts = [];
+  if(overdueItems.length){
+    parts.push('<strong>'+overdueItems.length+' bill'+(overdueItems.length!==1?'s':'')+' due today</strong>');
+  }
+  if(soonItems.length){
+    const names = soonItems.slice(0,3).map(d=>'<strong>'+esc(d.item.name)+'</strong> in '+d.diff+'d').join(', ');
+    parts.push(names+(soonItems.length>3?' +more':''));
+  }
+
+  // Notification button
+  let notifBtnHtml = '';
+  if('Notification' in window && !notifGranted && !notifEnabled){
+    notifBtnHtml = '<button class="reminder-notif-btn" onclick="requestNotifPermission()" title="Enable browser notifications">🔔 Enable alerts</button>';
+  }
+
+  wrap.innerHTML =
+    '<div class="reminder-banner">'+
+      '<span class="reminder-banner-icon">&#9888;</span>'+
+      '<span class="reminder-banner-text">'+parts.join(' &nbsp;·&nbsp; ')+'</span>'+
+      '<div class="reminder-banner-actions">'+
+        notifBtnHtml+
+        '<button class="reminder-banner-btn primary" onclick="switchPage(\'active\')">View bills</button>'+
+        '<button class="reminder-banner-btn ghost" onclick="dismissReminder()" title="Dismiss until tomorrow">&#10005;</button>'+
+      '</div>'+
+    '</div>';
+
+  // Fire browser notifications if enabled
+  if(notifGranted && notifEnabled) fireNotifications(due);
+}
+
+function dismissReminder(){
+  const todayKey = new Date().toISOString().slice(0,10);
+  sessionStorage.setItem(REM_DISMISS, todayKey);
+  document.getElementById('reminder-banner-wrap').innerHTML='';
+  toast('Reminder dismissed for today');
+}
+
+/* ── Browser push notifications ── */
+function requestNotifPermission(){
+  if(!('Notification' in window)) return;
+  Notification.requestPermission().then(perm=>{
+    if(perm==='granted'){
+      localStorage.setItem(REM_NOTIF,'true');
+      const due = getUpcomingReminders();
+      fireNotifications(due);
+      checkReminders(); // refresh banner to remove the enable button
+      toast('&#10003; Browser notifications enabled');
+    } else {
+      toast('Notifications blocked — use the in-app banner instead');
+    }
+  });
+}
+
+function fireNotifications(due){
+  if(!('Notification' in window)||Notification.permission!=='granted') return;
+  const firedKey = 'lifeos_notif_fired_'+new Date().toISOString().slice(0,10);
+  if(sessionStorage.getItem(firedKey)) return; // only fire once per day
+  sessionStorage.setItem(firedKey,'1');
+  due.forEach((d,idx)=>{
+    setTimeout(()=>{
+      const label = d.diff===0?'Due today':'Due in '+d.diff+' day'+(d.diff!==1?'s':'');
+      const n = new Notification('Bill reminder — '+esc(d.item.name),{
+        body: label+' · AED '+fmt(d.item.amount),
+        icon: '',
+        tag: 'lifeos-bill-'+d.item.name,
+        requireInteraction: false,
+      });
+      n.onclick = ()=>{ window.focus(); switchPage('active'); n.close(); };
+    }, idx * 800); // stagger notifications
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   Data Versioning
+   Keeps last 5 snapshots in localStorage.
+   A snapshot is taken on every asAutoSave() call
+   (i.e. every time any data changes, after a 2s debounce).
+   Snapshots are stored as compressed JSON strings under
+   KEY_VER. Each entry: {ts, label, data (full payload str)}
+   ═══════════════════════════════════════════════════════ */
+const KEY_VER      = 'lifeos_versions';
+const VER_MAX      = 5;
+let _verPanelOpen  = false;
+
+function verSnapshot(){
+  try{
+    const payload = JSON.stringify(
+      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,accounts,savedAt:new Date().toISOString()}
+    );
+    const snap = {
+      ts: Date.now(),
+      label: new Date().toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}),
+      counts: {
+        bills: items.length,
+        tasks: tasks.length,
+        goals: goals.length,
+        notes: notes.length,
+        loans: loans.length,
+        accounts: accounts.length,
+      },
+      data: payload,
+    };
+    let versions = [];
+    try{ const s=localStorage.getItem(KEY_VER); if(s) versions=JSON.parse(s); }catch(e){}
+    // Prepend new snapshot, keep max VER_MAX
+    versions.unshift(snap);
+    if(versions.length > VER_MAX) versions = versions.slice(0, VER_MAX);
+    localStorage.setItem(KEY_VER, JSON.stringify(versions));
+    if(_verPanelOpen) renderVerPanel();
+  } catch(e){
+    console.warn('Version snapshot failed:', e);
+  }
+}
+
+function getVersions(){
+  try{
+    const s = localStorage.getItem(KEY_VER);
+    return s ? JSON.parse(s) : [];
+  } catch(e){ return []; }
+}
+
+function toggleVerPanel(){
+  _verPanelOpen = !_verPanelOpen;
+  const panel = document.getElementById('ver-panel');
+  const btn   = document.getElementById('ver-toggle-btn');
+  if(_verPanelOpen){
+    panel.style.display = 'block';
+    if(btn) btn.innerHTML = '&#9719; Hide history';
+    renderVerPanel();
+  } else {
+    panel.style.display = 'none';
+    if(btn) btn.innerHTML = '&#9719; Version history';
+  }
+}
+
+function renderVerPanel(){
+  const panel = document.getElementById('ver-panel');
+  if(!panel) return;
+  const versions = getVersions();
+  if(!versions.length){
+    panel.innerHTML = '<div class="ver-panel"><div class="ver-panel-title">Version history</div><div style="font-size:12px;color:var(--text3);text-align:center;padding:8px 0">No snapshots yet.<br>Saves are taken automatically<br>when you make changes.</div></div>';
+    return;
+  }
+  panel.innerHTML = '<div class="ver-panel">'+
+    '<div class="ver-panel-title"><span>&#9719; '+versions.length+' snapshot'+(versions.length!==1?'s':'')+' (last '+VER_MAX+')</span></div>'+
+    versions.map((v,i)=>{
+      const c = v.counts||{};
+      const countStr = [
+        c.bills?c.bills+' bills':'',
+        c.tasks?c.tasks+' tasks':'',
+        c.goals?c.goals+' goals':'',
+        c.notes?c.notes+' notes':'',
+        c.accounts?c.accounts+' accounts':'',
+        c.loans?c.loans+' loans':'',
+      ].filter(Boolean).join(' · ');
+      return '<div class="ver-row">'+
+        '<div class="ver-dot'+(i===0?' latest':'')+'"></div>'+
+        '<div class="ver-info">'+
+          '<div class="ver-time">'+(i===0?'<span style="color:var(--accent)">Latest — </span>':'')+v.label+'</div>'+
+          '<div class="ver-counts">'+(countStr||'no data')+'</div>'+
+        '</div>'+
+        (i===0?'<span style="font-size:10px;color:var(--text3);flex-shrink:0">current</span>':
+          '<button class="ver-restore-btn" onclick="verRestore('+i+')">Restore</button>')+
+      '</div>';
+    }).join('')+
+  '</div>';
+}
+
+function verRestore(idx){
+  const versions = getVersions();
+  const snap = versions[idx];
+  if(!snap) return;
+  const d = new Date(snap.ts);
+  const label = d.toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  if(!confirm('Restore to snapshot from '+label+'?\n\nThis will replace all current data. Your current state is saved as the most recent snapshot.')){
+    return;
+  }
+  try{
+    // Take a snapshot of current state before overwriting (safety net)
+    verSnapshot();
+    const data = JSON.parse(snap.data);
+    items      = data.items      || [];
+    payments   = data.payments   || [];
+    tabbyItems = data.tabbyItems || [];
+    tasks      = data.tasks      || [];
+    lists      = data.lists      || [];
+    goals      = data.goals      || [];
+    notes      = data.notes      || [];
+    loans      = data.loans      || [];
+    accounts   = data.accounts   || [];
+    // Write to localStorage directly (skip asAutoSave to avoid creating a snapshot mid-restore)
+    try{localStorage.setItem(KEY_ITEMS,JSON.stringify(items));}catch(e){}
+    try{localStorage.setItem(KEY_PAY,JSON.stringify(payments));}catch(e){}
+    try{localStorage.setItem(KEY_TABBY,JSON.stringify(tabbyItems));}catch(e){}
+    try{localStorage.setItem(KEY_TASKS,JSON.stringify(tasks));}catch(e){}
+    try{localStorage.setItem(KEY_LISTS,JSON.stringify(lists));}catch(e){}
+    try{localStorage.setItem(KEY_GOALS,JSON.stringify(goals));}catch(e){}
+    try{localStorage.setItem(KEY_NOTES,JSON.stringify(notes));}catch(e){}
+    try{localStorage.setItem(KEY_LOANS,JSON.stringify(loans));}catch(e){}
+    try{localStorage.setItem(KEY_ACCOUNTS,JSON.stringify(accounts));}catch(e){}
+    // Re-render everything
+    render();
+    if(currentPage==='tasks')    renderTasks();
+    if(currentPage==='goals')    renderGoals();
+    if(currentPage==='notes')    renderNotes();
+    if(currentPage==='loans')    renderLoans();
+    if(currentPage==='accounts') renderAccounts();
+    if(currentPage==='dashboard')renderDashboard();
+    renderVerPanel();
+    toast('\u21a9 Restored to '+label);
+  } catch(e){
+    console.error('Restore failed:', e);
+    toast('Restore failed \u2014 snapshot may be corrupted');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   Net Worth
+   Assets  = sum of all account balances
+   Liabs   = sum of remaining loan balances
+   Net     = Assets - Liabs
+   History = manually saved snapshots stored in nwHistory[]
+   Each snapshot: {ts, note, assets, liabs, net, breakdown}
+   ═══════════════════════════════════════════════════════ */
+
+function nwCalc(){
+  const assets = accounts.reduce((s,a)=>s+(parseFloat(a.balance)||0),0);
+  const liabs  = loans.filter(l=>!l.paidOff).reduce((s,l)=>s+lnRemainingBalance(l),0);
+  return {assets, liabs, net: assets-liabs};
+}
+
+/* ── Take a snapshot of current net worth ── */
+function nwTakeSnapshot(){
+  const {assets, liabs, net} = nwCalc();
+  const note = (document.getElementById('nw-snap-note')||{}).value||'';
+  const snap = {
+    ts:     Date.now(),
+    date:   new Date().toISOString().slice(0,10),
+    note:   note.trim(),
+    assets, liabs, net,
+    breakdown: {
+      accounts: accounts.map(a=>({name:a.name,type:a.type,balance:parseFloat(a.balance)||0})),
+      loans:    loans.filter(l=>!l.paidOff).map(l=>({name:l.name,type:l.type,remaining:lnRemainingBalance(l)})),
+    },
+  };
+  nwHistory.push(snap);
+  if(nwHistory.length > 24) nwHistory = nwHistory.slice(-24); // keep last 24
+  saveNetWorth();
+  if(document.getElementById('nw-snap-note')) document.getElementById('nw-snap-note').value='';
+  renderNetWorth();
+  toast('\u2713 Net worth snapshot saved — AED '+fmt(net));
+}
+
+/* ── Main render ── */
+function renderNetWorth(){
+  const {assets, liabs, net} = nwCalc();
+
+  // Compare to last snapshot
+  const lastSnap = nwHistory.length ? nwHistory[nwHistory.length-1] : null;
+  const delta    = lastSnap ? net - lastSnap.net : null;
+  const deltaStr = delta !== null
+    ? (delta >= 0 ? '+' : '') + 'AED ' + fmt(Math.abs(delta)) + (delta >= 0 ? ' \u25b2' : ' \u25bc')
+    : null;
+  const deltaDate = lastSnap
+    ? 'vs snapshot ' + new Date(lastSnap.ts).toLocaleDateString('en-GB',{day:'numeric',month:'short'})
+    : '';
+
+  document.getElementById('nw-sub').textContent =
+    accounts.length + ' account' + (accounts.length!==1?'s':'') +
+    ' \u00b7 ' + loans.filter(l=>!l.paidOff).length + ' active loan' +
+    (loans.filter(l=>!l.paidOff).length!==1?'s':'');
+
+  // Hero card
+  document.getElementById('nw-hero').innerHTML =
+    '<div class="nw-hero">' +
+      '<div class="nw-hero-label">Total net worth</div>' +
+      '<div class="nw-hero-value ' + (net>=0?'pos':'neg') + '">AED ' + fmt(Math.abs(net)) + (net<0?' (deficit)':'') + '</div>' +
+      (deltaStr ? '<div class="nw-hero-delta ' + (delta>=0?'pos':'neg') + '">' + deltaStr + '</div>' : '') +
+      (deltaDate ? '<div class="nw-hero-sub">' + deltaDate + '</div>' : '<div class="nw-hero-sub">Save your first snapshot to track changes over time</div>') +
+    '</div>';
+
+  // Assets + Liabilities side-by-side
+  const AC_TYPES_LOCAL = typeof AC_TYPES !== 'undefined' ? AC_TYPES : {};
+
+  const assetRows = accounts.length ? accounts
+    .slice().sort((a,b)=>(parseFloat(b.balance)||0)-(parseFloat(a.balance)||0))
+    .map(a=>{
+      const pct = assets > 0 ? Math.round((parseFloat(a.balance)||0)/assets*100) : 0;
+      const meta = AC_TYPES_LOCAL[a.type]||{icon:'📋'};
+      return '<div class="nw-row">' +
+        '<div class="nw-row-left">' +
+          '<div class="nw-row-icon" style="background:'+(a.color||'#4A8ECC')+'22">' + (meta.icon||'📋') + '</div>' +
+          '<div><div class="nw-row-name">' + esc(a.name) + '</div>' +
+          '<div class="nw-row-sub">' + esc(a.bank||a.type||'') + '</div></div>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:8px">' +
+          '<div class="nw-row-pct">' + pct + '%</div>' +
+          '<div class="nw-row-amt green">AED ' + fmt(parseFloat(a.balance)||0) + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('') :
+    '<div style="text-align:center;padding:1rem;font-size:12px;color:var(--text3)">No accounts yet<br><button class="btn" style="margin-top:6px;font-size:11px" onclick="switchPage(\'accounts\')">Add accounts \u2192</button></div>';
+
+  const activeLiabs = loans.filter(l=>!l.paidOff);
+  const liabRows = activeLiabs.length ? activeLiabs
+    .slice().sort((a,b)=>lnRemainingBalance(b)-lnRemainingBalance(a))
+    .map(l=>{
+      const rem = lnRemainingBalance(l);
+      const pct = liabs > 0 ? Math.round(rem/liabs*100) : 0;
+      const colors = typeof LN_COLORS!=='undefined' ? LN_COLORS : {};
+      const color = colors[l.type]||'#888';
+      return '<div class="nw-row">' +
+        '<div class="nw-row-left">' +
+          '<div class="nw-row-icon" style="background:'+color+'22">🏠</div>' +
+          '<div><div class="nw-row-name">' + esc(l.name) + '</div>' +
+          '<div class="nw-row-sub">' + esc(l.lender||l.type||'') + '</div></div>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:8px">' +
+          '<div class="nw-row-pct">' + pct + '%</div>' +
+          '<div class="nw-row-amt red">AED ' + fmt(rem) + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('') :
+    '<div style="text-align:center;padding:1rem;font-size:12px;color:var(--text3)">No active loans<br><span style="color:var(--accent);font-size:11px">\u2713 Debt-free!</span></div>';
+
+  document.getElementById('nw-sections').innerHTML =
+    '<div class="nw-section">' +
+      '<div class="nw-section-head">' +
+        '<div class="nw-section-title">\u25b2 Assets</div>' +
+        '<div class="nw-section-total green">AED ' + fmt(assets) + '</div>' +
+      '</div>' + assetRows +
+    '</div>' +
+    '<div class="nw-section">' +
+      '<div class="nw-section-head">' +
+        '<div class="nw-section-title">\u25bc Liabilities</div>' +
+        '<div class="nw-section-total red">AED ' + fmt(liabs) + '</div>' +
+      '</div>' + liabRows +
+    '</div>';
+
+  // Trend chart
+  nwRenderChart(net);
+}
+
+/* ── Trend chart ── */
+function nwRenderChart(currentNet){
+  const c = Chart.getChart('nwTrendChart');
+  if(c) c.destroy();
+
+  // Build chart data: history snapshots + current live value
+  const snaps = nwHistory.slice();
+  const chartData = [
+    ...snaps.map(s=>({x:s.date, y:s.net, note:s.note})),
+    {x:new Date().toISOString().slice(0,10), y:currentNet, note:'Now (live)'},
+  ];
+
+  document.getElementById('nw-chart-sub').textContent =
+    snaps.length === 0 ? 'Save snapshots to see your trend'
+    : snaps.length + ' snapshot' + (snaps.length!==1?'s':'') + ' saved';
+
+  if(chartData.length < 2){
+    // Not enough data — show placeholder message
+    const canvas = document.getElementById('nwTrendChart');
+    const ctx = canvas.getContext('2d');
+    canvas.height = 200;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = 'rgba(255,255,255,.2)';
+    ctx.font = "13px system-ui";
+    ctx.textAlign = 'center';
+    ctx.fillText('Save snapshots over time to see your net worth trend', canvas.width/2, 100);
+    return;
+  }
+
+  const vals = chartData.map(d=>d.y);
+  const minVal = Math.min(...vals);
+  const maxVal = Math.max(...vals);
+  const padding = (maxVal - minVal) * 0.2 || 1000;
+
+  const ctx = document.getElementById('nwTrendChart').getContext('2d');
+  const grad = ctx.createLinearGradient(0,0,0,200);
+  grad.addColorStop(0, 'rgba(31,170,126,.35)');
+  grad.addColorStop(1, 'rgba(31,170,126,.02)');
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: chartData.map(d=>d.x),
+      datasets: [{
+        label: 'Net Worth',
+        data: chartData.map(d=>d.y),
+        borderColor: 'rgba(31,170,126,.9)',
+        backgroundColor: grad,
+        borderWidth: 2,
+        fill: true,
+        tension: 0.35,
+        pointRadius: chartData.map((_,i)=>i===chartData.length-1?5:4),
+        pointBackgroundColor: chartData.map((_,i)=>i===chartData.length-1?'rgba(31,170,126,1)':'rgba(31,170,126,.7)'),
+        pointBorderColor: '#141414',
+        pointBorderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {display:false},
+        tooltip: {
+          backgroundColor:'rgba(18,18,18,.95)',
+          titleColor:'rgba(255,255,255,.85)',
+          bodyColor:'rgba(255,255,255,.55)',
+          borderColor:'rgba(255,255,255,.09)',
+          borderWidth:1, padding:10,
+          callbacks: {
+            title: items => chartData[items[0].dataIndex].x,
+            label: item => {
+              const note = chartData[item.dataIndex].note;
+              const lines = ['AED ' + fmt(item.parsed.y)];
+              if(note) lines.push('\u201c' + note + '\u201d');
+              return lines;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {grid:{color:'rgba(255,255,255,.04)'}, border:{display:false}, ticks:{color:'rgba(255,255,255,.38)', maxTicksLimit:8}},
+        y: {
+          grid:{color:'rgba(255,255,255,.05)'}, border:{display:false},
+          ticks:{color:'rgba(255,255,255,.38)', callback:v=>'AED '+Math.round(v/1000)+'k'},
+          suggestedMin: minVal - padding,
+          suggestedMax: maxVal + padding,
+        }
+      }
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   AI Insight Widget
+   - Calls Claude (claude-haiku-4-5-20251001) with a compact
+     financial snapshot to generate one contextual observation
+   - Result cached in localStorage keyed by today's date
+   - Re-fetch on manual refresh or when date changes
+   - API key stored in localStorage — never leaves the device
+   ═══════════════════════════════════════════════════════ */
+const AI_KEY_STORE  = 'lifeos_anthropic_key';
+const AI_INS_STORE  = 'lifeos_ai_insight';  // {date, text}
+
+function aiGetKey(){ return localStorage.getItem(AI_KEY_STORE)||''; }
+function aiSetKey(k){ localStorage.setItem(AI_KEY_STORE, k.trim()); }
+
+function aiFinancialContext(){
+  // Build a compact, token-efficient snapshot of the user's finances
+  const now   = new Date();
+  const ym    = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const active = items.filter(i=>i.status==='active'&&!i.isTrial);
+  const monthly = active.reduce((s,i)=>s+toMonthly(i.amount,i.cycle),0);
+  const paidAmt = payments.filter(p=>p.date.startsWith(ym)).reduce((s,p)=>s+p.amount,0);
+  const overdue = active.filter(i=>i.dueDay&&(i.dueDay-now.getDate())<0&&!isPaidThisCycle(i));
+  const assets  = accounts.reduce((s,a)=>s+(parseFloat(a.balance)||0),0);
+  const liabs   = loans.filter(l=>!l.paidOff).reduce((s,l)=>s+lnRemainingBalance(l),0);
+  const net     = assets - liabs;
+  const tabbyActive = tabbyItems.filter(t=>!t.instalments.every(i=>i.paid));
+  const goalsProg = goals.filter(g=>g.status!=='done').map(g=>({
+    name:g.name, target:g.target, current:g.current||0
+  }));
+  const topBills = active.slice().sort((a,b)=>toMonthly(b.amount,b.cycle)-toMonthly(a.amount,a.cycle)).slice(0,5)
+    .map(i=>i.name+' AED '+Math.round(toMonthly(i.amount,i.cycle))+'/mo');
+
+  return [
+    'Monthly subscriptions/bills: AED '+Math.round(monthly)+' ('+active.length+' active)',
+    'Paid this month so far: AED '+Math.round(paidAmt),
+    overdue.length ? 'Overdue bills: '+overdue.map(i=>i.name).join(', ') : 'No overdue bills',
+    'Top bills: '+topBills.join(' | '),
+    tabbyActive.length ? 'Tabby instalments active: '+tabbyActive.length+' plans' : '',
+    'Total assets: AED '+Math.round(assets)+' across '+accounts.length+' accounts',
+    'Total liabilities: AED '+Math.round(liabs)+' across '+loans.filter(l=>!l.paidOff).length+' loans',
+    'Net worth: AED '+Math.round(net),
+    goalsProg.length ? 'Goals: '+goalsProg.map(g=>g.name+' '+Math.round(g.target>0?g.current/g.target*100:0)+'%').join(', ') : '',
+    'Today: '+now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}),
+  ].filter(Boolean).join('\n');
+}
+
+async function aiFetchInsight(force){
+  const today = new Date().toISOString().slice(0,10);
+  if(!force){
+    try{
+      const cached = JSON.parse(localStorage.getItem(AI_INS_STORE)||'{}');
+      if(cached.date===today && cached.text) return cached.text;
+    }catch(e){}
+  }
+  const key = aiGetKey();
+  if(!key) return null; // no key yet
+  const context = aiFinancialContext();
+  const prompt = `You are a friendly personal finance assistant. Based on this user's real financial data, write ONE short, specific, helpful observation or tip (max 25 words). Be concrete — mention actual numbers or specific bills/goals from the data. Do not start with "I" or "You". No pleasantries.\n\nUser data:\n${context}`;
+
+  const resp = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-haiku-4-5-20251001',
+      max_tokens:80,
+      messages:[{role:'user',content:prompt}],
+    }),
+  });
+  if(!resp.ok) throw new Error('API error '+resp.status);
+  const data = await resp.json();
+  const text = (data.content||[]).map(b=>b.text||'').join('').trim();
+  localStorage.setItem(AI_INS_STORE, JSON.stringify({date:today, text}));
+  return text;
+}
+
+/* ── Widget render ── */
+function dbWidgetAIInsight(el){
+  dbCard(el,{icon:'&#10024;',title:'AI insight',badgeCls:'db-badge-purple'});
+  const body = document.getElementById('dbwb-aiinsight');
+  if(!body) return;
+  const key = aiGetKey();
+
+  if(!key){
+    // No API key — show setup UI
+    body.innerHTML =
+      '<div class="ai-insight-body">'+
+        '<div style="font-size:12px;color:var(--text2);margin-bottom:8px">'+
+          'Enter your <a href="https://console.anthropic.com/settings/keys" style="color:var(--accent)">Anthropic API key</a> to get daily AI observations about your finances.'+
+        '</div>'+
+        '<div class="ai-insight-key-row">'+
+          '<input class="ai-insight-key-input" id="ai-key-input" type="password" placeholder="sk-ant-...">'+
+          '<button class="ai-insight-save-btn" onclick="aiSaveKeyAndRun()">Save &amp; run</button>'+
+        '</div>'+
+        '<div style="font-size:10px;color:var(--text3);margin-top:6px">Key is stored only in your browser — never sent anywhere except Anthropic.</div>'+
+      '</div>';
+    return;
+  }
+
+  // Has key — show loading state then fetch
+  body.innerHTML =
+    '<div class="ai-insight-body">'+
+      '<div class="ai-insight-text loading" id="ai-ins-text">'+
+        '<div class="ai-insight-loading-dot"></div>'+
+        '<div class="ai-insight-loading-dot"></div>'+
+        '<div class="ai-insight-loading-dot"></div>'+
+        '<span style="margin-left:2px">Thinking\u2026</span>'+
+      '</div>'+
+    '</div>';
+
+  // Check cache first (non-blocking)
+  const today = new Date().toISOString().slice(0,10);
+  let cached = null;
+  try{ const s=localStorage.getItem(AI_INS_STORE); if(s){ const p=JSON.parse(s); if(p.date===today) cached=p.text; } }catch(e){}
+
+  if(cached){
+    aiShowInsight(body, cached, false);
+  } else {
+    aiFetchInsight(false).then(text=>{
+      if(text) aiShowInsight(body, text, false);
+      else body.innerHTML='<div class="ai-insight-body"><div style="font-size:12px;color:var(--text3)">Could not fetch insight. Check your API key.</div></div>';
+    }).catch(e=>{
+      body.innerHTML='<div class="ai-insight-body"><div style="font-size:12px;color:var(--red)">Error: '+esc(e.message)+'</div></div>';
+    });
+  }
+}
+
+function aiShowInsight(body, text, fresh){
+  const today = new Date().toISOString().slice(0,10);
+  body.innerHTML =
+    '<div class="ai-insight-body">'+
+      '<div class="ai-insight-text">\u201c'+esc(text)+'\u201d</div>'+
+      '<div class="ai-insight-meta">'+
+        '<span>'+(fresh?'Just generated':'Cached for today \u00b7 '+today)+'</span>'+
+        '<button class="ai-insight-refresh-btn" onclick="aiRefreshInsight()" title="Generate a fresh insight">&#8635; Refresh</button>'+
+      '</div>'+
+    '</div>';
+}
+
+function aiRefreshInsight(){
+  const body = document.getElementById('dbwb-aiinsight');
+  if(!body) return;
+  body.innerHTML =
+    '<div class="ai-insight-body">'+
+      '<div class="ai-insight-text loading">'+
+        '<div class="ai-insight-loading-dot"></div>'+
+        '<div class="ai-insight-loading-dot"></div>'+
+        '<div class="ai-insight-loading-dot"></div>'+
+        '<span style="margin-left:2px">Refreshing\u2026</span>'+
+      '</div>'+
+    '</div>';
+  aiFetchInsight(true).then(text=>{
+    if(text) aiShowInsight(body, text, true);
+    else body.innerHTML='<div class="ai-insight-body"><div style="font-size:12px;color:var(--text3)">Could not fetch insight.</div></div>';
+  }).catch(e=>{
+    body.innerHTML='<div class="ai-insight-body"><div style="font-size:12px;color:var(--red)">Error: '+esc(e.message)+'</div></div>';
+  });
+}
+
+function aiSaveKeyAndRun(){
+  const inp = document.getElementById('ai-key-input');
+  if(!inp||!inp.value.trim()){inp&&inp.focus();return;}
+  aiSetKey(inp.value);
+  // Re-render the widget
+  const widgetEl = document.getElementById('dbw-aiinsight');
+  if(widgetEl) try{ dbWidgetAIInsight(widgetEl); }catch(e){}
+}
+
+/* ═══════════════════════════════════════════════════════
+   Dashboard edit mode — drag to reorder + show/hide
+   Widget order & visibility stored in localStorage.
+   ═══════════════════════════════════════════════════════ */
+const DB_LAYOUT_KEY = 'lifeos_db_layout';
+let _dbEditing = false;
+let _dbDragSrc = null;  // widget id being dragged
+
+/* ── Load saved layout → returns [{id, visible}] ── */
+function dbLoadLayout(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]');
+    if(saved.length) return saved;
+  }catch(e){}
+  // Default: all visible in original order
+  return DB_WIDGETS.map(w=>({id:w.id, visible:true}));
+}
+
+function dbSaveLayout(layout){
+  localStorage.setItem(DB_LAYOUT_KEY, JSON.stringify(layout));
+}
+
+/* ── Get ordered list of widgets with visibility ── */
+function dbGetOrderedWidgets(){
+  const layout = dbLoadLayout();
+  // Merge saved layout with current DB_WIDGETS (handles new widgets added after layout saved)
+  const layoutMap = Object.fromEntries(layout.map(l=>[l.id,l]));
+  const ordered = layout
+    .filter(l=>DB_WIDGETS.find(w=>w.id===l.id))           // remove stale entries
+    .map(l=>({...DB_WIDGETS.find(w=>w.id===l.id), visible:l.visible}));
+  // Append any new widgets not in saved layout
+  DB_WIDGETS.forEach(w=>{ if(!layoutMap[w.id]) ordered.push({...w, visible:true}); });
+  return ordered;
+}
+
+/* ── Override renderDashboard to respect order + visibility ── */
+const _origRenderDashboard = renderDashboard;
+renderDashboard = function(){
+  dbGreeting();
+  const grid = document.getElementById('db-grid');
+  grid.innerHTML = '';
+  const ordered = dbGetOrderedWidgets();
+  ordered.forEach(w=>{
+    const div = document.createElement('div');
+    div.className = `db-widget db-w${w.cols}`;
+    div.id = 'dbw-'+w.id;
+    div.dataset.wid = w.id;
+    if(!w.visible) div.classList.add('hidden-widget');
+    // Edit overlay (drag handle + show/hide)
+    const overlay = document.createElement('div');
+    overlay.className = 'db-widget-edit-overlay';
+    overlay.innerHTML =
+      '<div class="db-drag-handle">&#8942;&#8942;</div>'+
+      '<button class="db-vis-btn" onclick="dbToggleVisible(\''+w.id+'\')" title="'+(w.visible?'Hide':'Show')+' widget">'+
+        (w.visible?'&#128065;':'&#128683;')+
+      '</button>';
+    div.appendChild(overlay);
+    grid.appendChild(div);
+    if(w.visible){
+      try{ w.render(div); }catch(e){ div.innerHTML='<div class="db-empty">Widget error</div>'; }
+    } else {
+      // Placeholder for hidden widget
+      const ph = document.createElement('div');
+      ph.style.cssText='padding:16px;font-size:12px;color:var(--text3);text-align:center;opacity:.6';
+      ph.textContent = w.id.charAt(0).toUpperCase()+w.id.slice(1)+' (hidden)';
+      div.appendChild(ph);
+    }
+    // Drag events
+    div.draggable = false; // only enabled in edit mode
+    div.addEventListener('dragstart', dbOnDragStart);
+    div.addEventListener('dragover',  dbOnDragOver);
+    div.addEventListener('dragleave', dbOnDragLeave);
+    div.addEventListener('drop',      dbOnDrop);
+    div.addEventListener('dragend',   dbOnDragEnd);
+  });
+  // Apply edit mode state if active
+  if(_dbEditing) grid.classList.add('db-editing');
+};
+
+/* ── Toggle edit mode ── */
+function dbToggleEditMode(){
+  _dbEditing = !_dbEditing;
+  const grid = document.getElementById('db-grid');
+  const bar  = document.getElementById('db-edit-bar');
+  const btn  = document.getElementById('db-edit-btn');
+  if(_dbEditing){
+    grid.classList.add('db-editing');
+    bar.classList.add('visible');
+    btn.classList.add('active');
+    btn.innerHTML = '&#10005; Exit edit';
+    // Enable dragging on all widgets
+    grid.querySelectorAll('.db-widget').forEach(el=>{ el.draggable=true; });
+  } else {
+    grid.classList.remove('db-editing');
+    bar.classList.remove('visible');
+    btn.classList.remove('active');
+    btn.innerHTML = '&#9998; Customise';
+    grid.querySelectorAll('.db-widget').forEach(el=>{ el.draggable=false; });
+    toast('\u2713 Dashboard layout saved');
+  }
+}
+
+/* ── Toggle widget visibility ── */
+function dbToggleVisible(wid){
+  const layout = dbGetOrderedWidgets().map(w=>({id:w.id, visible:w.id===wid ? !w.visible : w.visible}));
+  dbSaveLayout(layout);
+  renderDashboard();
+  // Re-enable edit mode after re-render
+  if(_dbEditing){
+    const grid = document.getElementById('db-grid');
+    grid.classList.add('db-editing');
+    grid.querySelectorAll('.db-widget').forEach(el=>{ el.draggable=true; });
+    document.getElementById('db-edit-bar').classList.add('visible');
+  }
+}
+
+/* ── Drag and drop ── */
+function dbOnDragStart(e){
+  _dbDragSrc = this;
+  this.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', this.dataset.wid);
+}
+function dbOnDragOver(e){
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  if(this !== _dbDragSrc) this.classList.add('drag-over');
+}
+function dbOnDragLeave(){
+  this.classList.remove('drag-over');
+}
+function dbOnDrop(e){
+  e.preventDefault();
+  this.classList.remove('drag-over');
+  if(!_dbDragSrc || _dbDragSrc===this) return;
+  // Reorder in layout
+  const srcId  = _dbDragSrc.dataset.wid;
+  const dstId  = this.dataset.wid;
+  const layout = dbGetOrderedWidgets().map(w=>({id:w.id, visible:w.visible}));
+  const srcIdx = layout.findIndex(l=>l.id===srcId);
+  const dstIdx = layout.findIndex(l=>l.id===dstId);
+  if(srcIdx<0||dstIdx<0) return;
+  const [moved] = layout.splice(srcIdx,1);
+  layout.splice(dstIdx,0,moved);
+  dbSaveLayout(layout);
+  // Re-render keeping edit mode alive
+  _dbEditing = false; // temporarily off so renderDashboard won't re-add class prematurely
+  renderDashboard();
+  _dbEditing = true;
+  const grid=document.getElementById('db-grid');
+  grid.classList.add('db-editing');
+  grid.querySelectorAll('.db-widget').forEach(el=>{ el.draggable=true; });
+  document.getElementById('db-edit-bar').classList.add('visible');
+  document.getElementById('db-edit-btn').classList.add('active');
+  document.getElementById('db-edit-btn').innerHTML='&#10005; Exit edit';
+}
+function dbOnDragEnd(){
+  this.classList.remove('dragging');
+  document.querySelectorAll('.db-widget').forEach(el=>el.classList.remove('drag-over'));
+  _dbDragSrc = null;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Sidebar nav — dynamic render + drag-to-reorder + hide
+   ═══════════════════════════════════════════════════════ */
+const NAV_LAYOUT_KEY = 'lifeos_nav_layout';
+let _navEditing = false;
+let _navDragSrc = null;
+
+// Master nav definition — ground truth for all pages
+const NAV_ITEMS = [
+  {id:'tasks',    icon:'&#9635;',  label:'Tasks',            section:'Productivity'},
+  {id:'goals',    icon:'&#9651;',  label:'Goals',            section:'Productivity'},
+  {id:'active',   icon:'&#9672;',  label:'Monthly Expenses', section:'Finances'},
+  {id:'tabby',    icon:'&#9681;',  label:'Tabby',            section:'Finances'},
+  {id:'trials',   icon:'&#9203;',  label:'Free trials',      section:'Finances'},
+  {id:'accounts', icon:'&#127981;',label:'Accounts',         section:'Finances'},
+  {id:'loans',    icon:'&#127968;',label:'Loans',            section:'Finances'},
+  {id:'networth', icon:'&#10022;', label:'Net Worth',        section:'Finances'},
+  {id:'history',  icon:'&#9719;',  label:'History',          section:'Tools'},
+  {id:'insights', icon:'&#9673;',  label:'Insights',         section:'Tools'},
+  {id:'calendar', icon:'&#9744;',  label:'Calendar',         section:'Tools'},
+  {id:'notes',    icon:'&#9998;',  label:'Notes',            section:'Tools'},
+  {id:'calc',     icon:'&#8862;',  label:'Calculator',       section:'Tools'},
+];
+
+function navLoadLayout(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]');
+    if(saved.length){
+      // Merge: keep saved order/visibility, append any new items not in saved
+      const savedMap = Object.fromEntries(saved.map(s=>[s.id,s]));
+      const merged = saved
+        .filter(s=>NAV_ITEMS.find(n=>n.id===s.id))          // remove stale
+        .map(s=>({...NAV_ITEMS.find(n=>n.id===s.id), visible:s.visible}));
+      NAV_ITEMS.forEach(n=>{ if(!savedMap[n.id]) merged.push({...n,visible:true}); });
+      return merged;
+    }
+  }catch(e){}
+  return NAV_ITEMS.map(n=>({...n,visible:true}));
+}
+
+function navSaveLayout(){
+  const items = navLoadLayout().map(n=>({id:n.id,visible:n.visible}));
+  localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(items));
+}
+
+/* ── Render the nav (called on load + after any change) ── */
+function renderNav(){
+  const wrap = document.getElementById('nav-sections-wrap');
+  if(!wrap) return;
+  const items = navLoadLayout();
+
+  // Group by section preserving order
+  const sections = [];
+  const sectionMap = {};
+  items.forEach(item=>{
+    if(!sectionMap[item.section]){
+      sectionMap[item.section] = [];
+      sections.push({name:item.section, items:sectionMap[item.section]});
+    }
+    sectionMap[item.section].push(item);
+  });
+
+  wrap.innerHTML = '';
+  sections.forEach(sec=>{
+    const secDiv = document.createElement('div');
+    secDiv.className = 'nav-section-wrap';
+    secDiv.dataset.section = sec.name;
+
+    // Section label
+    const label = document.createElement('div');
+    label.className = 'nav-section-edit-label' + (_navEditing?' editing':'');
+    label.textContent = sec.name;
+    secDiv.appendChild(label);
+
+    // Nav items
+    sec.items.forEach(item=>{
+      const btn = document.createElement('button');
+      btn.id = 'nav-'+item.id;
+      let cls = 'nav-item';
+      if(_navEditing) cls += ' nav-draggable';
+      if(!item.visible) cls += ' nav-hidden-item';
+      if(currentPage===item.id) cls += ' active';
+      btn.className = cls;
+      btn.dataset.navid = item.id;
+
+      if(_navEditing){
+        btn.innerHTML =
+          '<span class="nav-item-drag-handle">&#8942;&#8942;</span>'+
+          '<span class="nav-icon">'+item.icon+'</span>'+
+          '<span class="nav-label"> '+item.label+'</span>'+
+          '<button class="nav-item-vis-btn" onclick="navToggleVisible(\''+item.id+'\');event.stopPropagation()" title="'+(item.visible?'Hide':'Show')+'">'+
+            (item.visible?'&#128065;':'&#128683;')+
+          '</button>';
+        btn.draggable = true;
+        btn.addEventListener('dragstart', navDragStart);
+        btn.addEventListener('dragover',  navDragOver);
+        btn.addEventListener('dragleave', navDragLeave);
+        btn.addEventListener('drop',      navDrop);
+        btn.addEventListener('dragend',   navDragEnd);
+      } else {
+        btn.innerHTML =
+          '<span class="nav-icon">'+item.icon+'</span>'+
+          '<span class="nav-label"> '+item.label+'</span>';
+        if(item.visible){
+          btn.onclick = ()=>switchPage(item.id);
+        } else {
+          btn.onclick = null;
+          btn.style.pointerEvents = 'none';
+        }
+      }
+      secDiv.appendChild(btn);
+    });
+    wrap.appendChild(secDiv);
+  });
+}
+
+/* ── Toggle edit mode ── */
+function navToggleEditMode(){
+  _navEditing = !_navEditing;
+  const btn = document.getElementById('nav-edit-btn');
+  if(btn){
+    btn.classList.toggle('active', _navEditing);
+    btn.innerHTML = _navEditing ? '&#10003; Done reordering' : '&#9998; Reorder tabs';
+  }
+  renderNav();
+  if(!_navEditing) toast('\u2713 Sidebar layout saved');
+}
+
+/* ── Toggle item visibility ── */
+function navToggleVisible(id){
+  const layout = navLoadLayout().map(n=>({id:n.id, visible:n.id===id?!n.visible:n.visible}));
+  localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(layout.map(n=>({id:n.id,visible:n.visible}))));
+  renderNav();
+}
+
+/* ── Drag handlers ── */
+function navDragStart(e){
+  _navDragSrc = this;
+  this.classList.add('nav-dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', this.dataset.navid);
+}
+function navDragOver(e){
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  if(this !== _navDragSrc && this.dataset.navid) this.classList.add('nav-drag-over');
+}
+function navDragLeave(){ this.classList.remove('nav-drag-over'); }
+function navDrop(e){
+  e.preventDefault();
+  this.classList.remove('nav-drag-over');
+  if(!_navDragSrc || _navDragSrc===this) return;
+  const srcId = _navDragSrc.dataset.navid;
+  const dstId = this.dataset.navid;
+  if(!srcId||!dstId) return;
+  const layout = navLoadLayout().map(n=>({id:n.id,visible:n.visible}));
+  const si = layout.findIndex(n=>n.id===srcId);
+  const di = layout.findIndex(n=>n.id===dstId);
+  if(si<0||di<0) return;
+  const [moved] = layout.splice(si,1);
+  layout.splice(di,0,moved);
+  localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(layout));
+  renderNav();
+}
+function navDragEnd(){
+  this.classList.remove('nav-dragging');
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('nav-drag-over'));
+  _navDragSrc = null;
+}
+
 loadData();
 asRestoreStatus();
+checkReminders();
+renderNav();
 </script>
 <!-- Mobile bottom nav -->
 <!-- Restore modal -->

@@ -52,7 +52,7 @@ body{
 .storage-status{font-size:10px;color:var(--text3);padding:0 10px 4px;min-height:14px}
 .sidebar-toggle{width:28px;height:28px;border-radius:8px;background:transparent;border:0.5px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:13px;transition:all .18s;flex-shrink:0}
 .sidebar-toggle:hover{background:var(--surface3);color:var(--text);border-color:var(--border2)}
-.main{padding:2rem 2rem 4rem;overflow-y:auto;max-width:900px}
+.main{padding:2rem 2rem 4rem;overflow-y:auto}
 .nav-item{
   display:flex;align-items:center;gap:9px;padding:8px 10px;
   border-radius:8px;cursor:pointer;color:var(--text2);font-size:13px;
@@ -317,6 +317,8 @@ body{
 .color-dot{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .18s;opacity:.65}
 .color-dot:hover{opacity:1;transform:scale(1.1)}
 .color-dot.selected{border-color:#fff;opacity:1;transform:scale(1.18);box-shadow:0 0 8px rgba(255,255,255,.2)}
+.color-dot.none-dot{background:var(--surface3)!important;border:1.5px dashed var(--border3)!important;opacity:.8}
+.color-dot.none-dot.selected{border-color:#fff!important;border-style:solid!important}
 /* Calc result hover */
 .calc-result{background:var(--surface2);border-radius:var(--radius);padding:12px 14px;text-align:center;border:0.5px solid transparent;transition:border-color .18s,transform .18s}
 .calc-result:hover{border-color:var(--border2);transform:translateY(-1px)}
@@ -1918,7 +1920,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 </div>
 
 <script>
-const COLORS=['#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
+const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
@@ -2242,7 +2244,7 @@ function renderItem(item,ym){
   const thisMonthPayment=payments.filter(p=>p.itemId===item.id).sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
   const paidNow=isPaidThisCycle(item);
   const showDue=due&&!(paidNow&&due.cls==='due-overdue');
-  const color=item.color||CATCOLORS[item.cat]||'#888';
+  const color=(item.color&&item.color!=='none')?item.color:(CATCOLORS[item.cat]||'#888');
   // Last paid date (most recent payment of any month)
   const allPayments=payments.filter(p=>p.itemId===item.id).sort((a,b)=>new Date(b.date)-new Date(a.date));
   const lastPaid=allPayments[0];
@@ -2850,7 +2852,7 @@ function renderTabby(){
   document.getElementById('tabby-list').innerHTML=sorted.map(t=>{
     const paidCount=t.instalments.filter(i=>i.paid).length;
     const complete=paidCount===4;
-    const color=t.color||'#C98A1A';
+    const color=(t.color&&t.color!=='none')?t.color:COLORS[1];
     const pct=Math.round(paidCount/4*100);
     const nextIdx=t.instalments.findIndex(i=>!i.paid);
     const owed=fmt((t.total/4)*(4-paidCount));
@@ -2942,7 +2944,7 @@ function previewInstalments(){
 }
 
 function renderTabbyColorPicker(){
-  document.getElementById('tabby-color-picker').innerHTML=COLORS.map(c=>`<div class="color-dot${tabbySelectedColor===c?' selected':''}" style="background:${c}" onclick="selectTabbyColor('${c}')"></div>`).join('');
+  document.getElementById('tabby-color-picker').innerHTML=COLORS.map(c=>c==='none'?`<div class="color-dot none-dot${tabbySelectedColor==='none'?' selected':''}" onclick="selectTabbyColor('none')" title="No colour">&#8854;</div>`:`<div class="color-dot${tabbySelectedColor===c?' selected':''}" style="background:${c}" onclick="selectTabbyColor('${c}')"></div>`).join('');
 }
 function selectTabbyColor(c){tabbySelectedColor=c;renderTabbyColorPicker();}
 
@@ -3141,7 +3143,7 @@ function openModal(id,forceTrial=false){
   setTimeout(()=>document.getElementById('f-name').focus(),50);
 }
 function renderColorPicker(){
-  document.getElementById('color-picker').innerHTML=COLORS.map(c=>`<div class="color-dot${selectedColor===c?' selected':''}" style="background:${c}" onclick="selectColor('${c}')"></div>`).join('');
+  document.getElementById('color-picker').innerHTML=COLORS.map(c=>c==='none'?`<div class="color-dot none-dot${selectedColor==='none'?' selected':''}" onclick="selectColor('none')" title="No colour">&#8854;</div>`:`<div class="color-dot${selectedColor===c?' selected':''}" style="background:${c}" onclick="selectColor('${c}')"></div>`).join('');
 }
 function selectColor(c){selectedColor=c;renderColorPicker();}
 function closeModal(){document.getElementById('modal').style.display='none';editId=null;}
@@ -3278,7 +3280,7 @@ function renderCompare(){
   document.getElementById('cmp-list').innerHTML=sorted.map(item=>{
     const m=toMonthly(item.amount,item.cycle);
     const pct=Math.round(m/max*100);
-    const color=item.color||CATCOLORS[item.cat]||'#888';
+    const color=(item.color&&item.color!=='none')?item.color:(CATCOLORS[item.cat]||'#888');
     return `<div class="calc-compare-row">
       <div class="calc-compare-dot" style="background:${color}"></div>
       <div class="calc-compare-name">${esc(item.name)}</div>
@@ -3549,7 +3551,7 @@ function deleteTask(id){
 
 /* Task modal */
 function renderTkColorPicker(){
-  document.getElementById('tk-color-picker').innerHTML=COLORS.map(c=>`<div class="color-dot${tkSelectedColor===c?' selected':''}" style="background:${c}" onclick="selectTkColor('${c}')"></div>`).join('');
+  document.getElementById('tk-color-picker').innerHTML=COLORS.map(c=>c==='none'?`<div class="color-dot none-dot${tkSelectedColor==='none'?' selected':''}" onclick="selectTkColor('none')" title="No colour">&#8854;</div>`:`<div class="color-dot${tkSelectedColor===c?' selected':''}" style="background:${c}" onclick="selectTkColor('${c}')"></div>`).join('');
 }
 function selectTkColor(c){tkSelectedColor=c;renderTkColorPicker();}
 

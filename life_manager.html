@@ -231,7 +231,7 @@ body{
 .trial-days{font-size:11px;color:var(--text2);margin-top:3px}
 .trial-amt{font-size:12px;font-family:var(--mono);color:var(--text3);margin-top:2px}
 /* Upcoming strip */
-.upcoming-strip{display:flex;gap:8px;margin-bottom:1.75rem;overflow-x:auto;padding-bottom:4px}
+.upcoming-strip{display:flex;gap:8px;margin-bottom:1.75rem;overflow-x:auto;padding-bottom:12px}
 .upcoming-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 14px;flex-shrink:0;min-width:140px;transition:border-color .18s,transform .18s}
 .upcoming-card:hover{border-color:var(--border2);transform:translateY(-1px)}
 .upcoming-card.urgent{border-color:var(--accent-border);background:var(--accent-dim)}
@@ -819,26 +819,42 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 .app.collapsed .ver-btn{display:none}
 
 /* ── Bill reminders banner ── */
-.reminder-banner{
-  position:sticky;top:0;z-index:150;
-  background:linear-gradient(90deg,rgba(201,138,26,.18) 0%,rgba(201,138,26,.08) 100%);
-  border-bottom:0.5px solid var(--amber-border);
-  padding:10px 1.5rem;
-  display:flex;align-items:center;gap:12px;
-  animation:reminderSlide .3s cubic-bezier(.4,0,.2,1);
+
+/* ── Bill highlight from reminder ── */
+@keyframes billHighlight{
+  0%{box-shadow:0 0 0 0 rgba(201,138,26,.7);border-color:var(--amber-border)}
+  40%{box-shadow:0 0 0 8px rgba(201,138,26,.0);border-color:var(--amber-border)}
+  100%{box-shadow:0 0 0 0 rgba(201,138,26,0)}
 }
-@keyframes reminderSlide{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
-.reminder-banner-icon{font-size:16px;flex-shrink:0}
-.reminder-banner-text{flex:1;font-size:13px;color:var(--amber);line-height:1.4}
+.bill-highlight{
+  animation:billHighlight .9s ease 2;
+  border-color:var(--amber-border)!important;
+}
+.reminder-banner{
+  position:sticky;top:-2rem;z-index:150;
+  background:rgba(201,138,26,.1);
+  border:0.5px solid rgba(201,138,26,.3);
+  border-radius:10px;
+  padding:7px 12px;
+  margin:-1rem 0 1rem;
+  display:flex;align-items:center;gap:10px;
+  animation:reminderSlide .25s ease;
+  backdrop-filter:blur(6px);
+}
+@keyframes reminderSlide{from{transform:translateY(-6px);opacity:0}to{transform:translateY(0);opacity:1}}
+.reminder-banner-icon{font-size:12px;color:var(--amber);opacity:.8;flex-shrink:0}
+.reminder-banner-text{flex:1;font-size:12px;color:var(--amber);line-height:1.4}
 .reminder-banner-text strong{font-weight:600;color:var(--text)}
-.reminder-banner-actions{display:flex;gap:7px;align-items:center;flex-shrink:0}
-.reminder-banner-btn{height:26px;padding:0 11px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;font-family:var(--font);transition:all .15s;border:0.5px solid}
-.reminder-banner-btn.primary{background:var(--amber-dim);color:var(--amber);border-color:var(--amber-border)}
-.reminder-banner-btn.primary:hover{background:var(--amber);color:#000}
-.reminder-banner-btn.ghost{background:transparent;color:var(--text3);border-color:var(--border2)}
-.reminder-banner-btn.ghost:hover{background:var(--surface3);color:var(--text)}
-.reminder-notif-btn{height:26px;padding:0 11px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;font-family:var(--font);background:var(--surface3);color:var(--text2);border:0.5px solid var(--border2);transition:all .15s}
-.reminder-notif-btn:hover{background:var(--surface4);color:var(--text)}
+.reminder-banner-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
+/* Primary action — small text link style */
+.reminder-banner-btn{height:24px;padding:0 10px;border-radius:5px;font-size:11px;font-weight:500;cursor:pointer;font-family:var(--font);transition:all .15s;border:0.5px solid}
+.reminder-banner-btn.primary{background:transparent;color:var(--amber);border-color:rgba(201,138,26,.4)}
+.reminder-banner-btn.primary:hover{background:var(--amber);color:#000;border-color:var(--amber)}
+.reminder-banner-btn.ghost{width:24px;height:24px;padding:0;display:flex;align-items:center;justify-content:center;background:transparent;color:var(--text3);border-color:transparent;font-size:13px}
+.reminder-banner-btn.ghost:hover{background:var(--surface3);color:var(--text);border-color:var(--border2)}
+/* Notification opt-in — icon only with tooltip */
+.reminder-notif-btn{width:24px;height:24px;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);background:transparent;color:var(--text3);border:0.5px solid transparent;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.reminder-notif-btn:hover{background:var(--surface3);color:var(--amber);border-color:rgba(201,138,26,.3)}
 
 /* ── Accounts ── */
 .ac-filter-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
@@ -1025,6 +1041,24 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
   gap:12px;
   align-items:start;
 }
+
+/* ── Paid this month breakdown ── */
+.metric.clickable{cursor:pointer;transition:border-color .15s,transform .15s}
+.metric.clickable:hover{border-color:var(--accent-border);transform:translateY(-1px)}
+.paid-breakdown-modal{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);backdrop-filter:blur(4px)}
+.paid-breakdown-box{background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius-lg);width:min(420px,92vw);max-height:80vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--shadow-lg)}
+.paid-breakdown-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:0.5px solid var(--border)}
+.paid-breakdown-title{font-size:14px;font-weight:600;color:var(--text)}
+.paid-breakdown-body{overflow-y:auto;padding:12px 16px;flex:1}
+.paid-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)}
+.paid-row:last-child{border-bottom:none}
+.paid-row-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.paid-row-name{font-size:13px;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.paid-row-cat{font-size:10px;color:var(--text3);flex-shrink:0}
+.paid-row-date{font-size:10px;color:var(--text3);flex-shrink:0;min-width:50px;text-align:right}
+.paid-row-amt{font-size:13px;font-weight:500;font-family:var(--mono);color:var(--accent);flex-shrink:0;min-width:80px;text-align:right}
+.paid-breakdown-foot{padding:12px 16px;border-top:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.paid-breakdown-total{font-size:13px;font-weight:600;color:var(--text)}
 /* Widget column spans */
 .db-w1{grid-column:span 1}
 .db-w2{grid-column:span 2}
@@ -2104,7 +2138,7 @@ function render(){
   document.getElementById('metrics').innerHTML=`
     <div class="metric"><div class="metric-label">Monthly</div><div class="metric-value">AED ${fmt(monthly)}</div><div class="metric-sub">${active.length} subs + ${tabbyItems.filter(t=>!t.instalments.every(i=>i.paid)).length} Tabby</div></div>
     <div class="metric"><div class="metric-label">Annual</div><div class="metric-value">AED ${fmt(annual)}</div><div class="metric-sub">projected</div></div>
-    <div class="metric green"><div class="metric-label">Paid this month</div><div class="metric-value">AED ${fmt(paidAmt)}</div><div class="metric-sub">${paidCt} payment${paidCt!==1?'s':''}</div></div>
+    <div class="metric green clickable" onclick="showPaidBreakdown()" title="Click to see breakdown"><div class="metric-label">Paid this month &#9432;</div><div class="metric-value">AED ${fmt(paidAmt)}</div><div class="metric-sub">${paidCt} payment${paidCt!==1?'s':''}</div></div>
     <div class="metric${overdueCount>0?' red':''}" ><div class="metric-label">Overdue</div><div class="metric-value">${overdueCount}</div><div class="metric-sub">${overdueCount?'needs attention':'all clear'}</div></div>
     ${expiringTrials>0?`<div class="metric purple"><div class="metric-label">Trials expiring</div><div class="metric-value">${expiringTrials}</div><div class="metric-sub">within 7 days</div></div>`:''}
   `;
@@ -2239,7 +2273,7 @@ function renderItem(item,ym){
   const resetChip=!isP&&!item.isTrial
     ? `<span class="sep">&#183;</span><span style="color:#4A8ECC;font-size:11px">${resetDateStr}</span>`
     : '';
-  return `<div class="item${isP?' paused':''}${item.isTrial?' trial-item':''}">
+  return `<div class="item${isP?' paused':''}${item.isTrial?' trial-item':''}" id="bill-${item.id}">
     <div class="item-dot" style="background:${color}"></div>
     <div>
       <div class="item-name">
@@ -3058,7 +3092,7 @@ function applyRestore(mode){
     tasks=[...(data.tasks||[]),...tasks.filter(t=>!bkIds.tasks.has(t.id))];
     lists=[...(data.lists||[]),...lists.filter(l=>!bkIds.lists.has(l.id))];
     goals=[...(data.goals||[]),...goals.filter(g=>!bkIds.goals.has(g.id))];
-    saveData();saveTasks();saveLists();saveGoals();saveNotes();saveLoans();saveAccounts();
+    saveData();saveTasks();saveLists();saveGoals();saveNotes();saveLoans();saveAccounts();saveNetWorth();
     render();
     if(currentPage==='tasks')renderTasks();
     if(currentPage==='goals')renderGoals();
@@ -4607,7 +4641,7 @@ async function asWriteFile(){
   asDot('busy');
   try{
     const payload = JSON.stringify(
-      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,accounts,savedAt:new Date().toISOString()},
+      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,accounts,nwHistory,savedAt:new Date().toISOString()},
       null, 2
     );
     const writable = await _asFileHandle.createWritable();
@@ -5410,20 +5444,30 @@ function checkReminders(){
   const notifEnabled = localStorage.getItem(REM_NOTIF)==='true';
   const notifGranted = 'Notification' in window && Notification.permission==='granted';
 
-  // Build text
+  // Build text — names are clickable links that jump to + highlight the bill
+  const hlBtn = (d) => {
+    const style = 'background:none;border:none;cursor:pointer;font-family:var(--font);font-size:inherit;font-weight:600;color:var(--text);padding:0;text-decoration:underline;text-underline-offset:2px';
+    return '<button onclick="highlightBill(\'' + d.item.id + '\')" style="' + style + '" title="Jump to ' + esc(d.item.name) + '">' + esc(d.item.name) + '</button>';
+  };
   let parts = [];
   if(overdueItems.length){
-    parts.push('<strong>'+overdueItems.length+' bill'+(overdueItems.length!==1?'s':'')+' due today</strong>');
+    const overdueLinks = overdueItems.slice(0,3).map(d=>
+      d.item.id ? hlBtn(d) : '<strong>'+esc(d.item.name)+'</strong>'
+    ).join(', ');
+    parts.push(overdueLinks+(overdueItems.length>3?' +more':'')+' <span style="font-weight:400;color:var(--amber)">due today</span>');
   }
   if(soonItems.length){
-    const names = soonItems.slice(0,3).map(d=>'<strong>'+esc(d.item.name)+'</strong> in '+d.diff+'d').join(', ');
+    const names = soonItems.slice(0,3).map(d=>
+      (d.item.id ? hlBtn(d) : '<strong>'+esc(d.item.name)+'</strong>') +
+      ' <span style="font-weight:400;color:var(--amber)">in '+d.diff+'d</span>'
+    ).join('&nbsp;&nbsp;·&nbsp;&nbsp;');
     parts.push(names+(soonItems.length>3?' +more':''));
   }
 
   // Notification button
   let notifBtnHtml = '';
   if('Notification' in window && !notifGranted && !notifEnabled){
-    notifBtnHtml = '<button class="reminder-notif-btn" onclick="requestNotifPermission()" title="Enable browser notifications">🔔 Enable alerts</button>';
+    notifBtnHtml = '<button class="reminder-notif-btn" onclick="requestNotifPermission()" title="Enable browser notifications for bill reminders">&#128276;</button>';
   }
 
   wrap.innerHTML =
@@ -5498,7 +5542,7 @@ let _verPanelOpen  = false;
 function verSnapshot(){
   try{
     const payload = JSON.stringify(
-      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,accounts,savedAt:new Date().toISOString()}
+      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,accounts,nwHistory,savedAt:new Date().toISOString()}
     );
     const snap = {
       ts: Date.now(),
@@ -6336,12 +6380,85 @@ function navDrop(e){
   const [moved] = layout.splice(si,1);
   layout.splice(di,0,moved);
   localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(layout));
-  renderNav();
+  // Defer DOM rebuild until after dragend fires — destroying elements mid-drag
+  // prevents subsequent drags from working in Chrome/Firefox
+  setTimeout(renderNav, 0);
 }
 function navDragEnd(){
   this.classList.remove('nav-dragging');
   document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('nav-drag-over'));
   _navDragSrc = null;
+  // Ensure nav is re-rendered after drag ends even if drop didn't fire
+  // (e.g. dropped outside a valid target)
+  setTimeout(renderNav, 0);
+}
+
+/* ── Paid this month — breakdown modal ── */
+function showPaidBreakdown(){
+  const now = new Date();
+  const ym  = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const monthPayments = payments
+    .filter(p=>p.date.startsWith(ym))
+    .slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const total = monthPayments.reduce((s,p)=>s+p.amount,0);
+  const monthLabel = now.toLocaleString('en',{month:'long',year:'numeric'});
+
+  // Build rows
+  const rows = monthPayments.map(p=>{
+    // Find original item to get colour
+    const item = items.find(i=>i.id===p.itemId)||{color:'#888',cat:p.cat||''};
+    const color = item.color || CATCOLORS[item.cat] || '#888';
+    const dateStr = p.date ? new Date(p.date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '';
+    return `<div class="paid-row">
+      <div class="paid-row-dot" style="background:${color}"></div>
+      <div class="paid-row-name">${esc(p.name||'Unknown')}</div>
+      <div class="paid-row-cat">${esc(p.cat||'')}</div>
+      <div class="paid-row-date">${dateStr}</div>
+      <div class="paid-row-amt">AED ${fmt(p.amount)}</div>
+    </div>`;
+  }).join('');
+
+  const html = `
+    <div class="paid-breakdown-modal" id="paid-breakdown-modal" onclick="if(event.target===this)closePaidBreakdown()">
+      <div class="paid-breakdown-box">
+        <div class="paid-breakdown-head">
+          <div class="paid-breakdown-title">Paid in ${monthLabel}</div>
+          <button class="icon-btn del" onclick="closePaidBreakdown()">&#10005;</button>
+        </div>
+        <div class="paid-breakdown-body">
+          ${rows||'<div style="text-align:center;padding:2rem;color:var(--text3);font-size:13px">No payments recorded this month yet.</div>'}
+        </div>
+        <div class="paid-breakdown-foot">
+          <span class="paid-breakdown-total">Total: AED ${fmt(total)}</span>
+          <span style="font-size:11px;color:var(--text3)">${monthPayments.length} payment${monthPayments.length!==1?'s':''}</span>
+        </div>
+      </div>
+    </div>`;
+
+  // Inject into body
+  const existing = document.getElementById('paid-breakdown-modal');
+  if(existing) existing.remove();
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function closePaidBreakdown(){
+  const el = document.getElementById('paid-breakdown-modal');
+  if(el) el.remove();
+}
+
+/* ── Highlight a specific bill from the reminder banner ── */
+function highlightBill(itemId){
+  switchPage('active');
+  // Wait for render then scroll + pulse
+  setTimeout(function(){
+    const el = document.getElementById('bill-'+itemId);
+    if(!el) return;
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+    el.classList.remove('bill-highlight'); // reset if already animating
+    void el.offsetWidth; // force reflow
+    el.classList.add('bill-highlight');
+    setTimeout(function(){ el.classList.remove('bill-highlight'); }, 2000);
+  }, 120);
 }
 
 loadData();

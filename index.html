@@ -836,6 +836,12 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
   background:transparent;cursor:pointer;font-size:10px;font-weight:500;
   font-family:var(--font);color:var(--text2);transition:all .15s;flex-shrink:0}
 .ver-restore-btn:hover{border-color:var(--accent-border);color:var(--accent);background:var(--accent-dim)}
+.ver-name-input{width:100%;border:none;background:transparent;color:var(--text);
+  font-size:12px;font-weight:500;font-family:var(--font);outline:none;padding:0;
+  border-bottom:0.5px dashed transparent;transition:border-color .15s;cursor:text}
+.ver-name-input:hover{border-bottom-color:var(--border2)}
+.ver-name-input:focus{border-bottom-color:var(--accent-border);color:var(--accent)}
+.ver-name-input::placeholder{color:var(--text3);font-weight:400;font-style:italic}
 .app.collapsed .ver-btn{display:none}
 
 /* ── Bill reminders banner ── */
@@ -3112,7 +3118,7 @@ function exportJSON(){
   const data=JSON.stringify({items,payments,tabbyItems,tasks,lists,goals,notes,loans,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),exportedAt:new Date().toISOString()},null,2);
   const d=new Date();
   const filename='bills-backup-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'.json';
-  verSnapshot();
+  verSnapshot(true);
   triggerDownload(new Blob([data],{type:'application/json'}),filename);
   toast('&#8595; Backup downloaded');
 }
@@ -5662,17 +5668,29 @@ function fireNotifications(due){
    KEY_VER. Each entry: {ts, label, data (full payload str)}
    ═══════════════════════════════════════════════════════ */
 const KEY_VER      = 'lifeos_versions';
-const VER_MAX      = 5;
+const VER_MAX      = 15;
+const VER_MIN_GAP  = 15 * 60 * 1000; // 15 minutes in ms
 let _verPanelOpen  = false;
 
-function verSnapshot(){
+function verSnapshot(force){
   try{
+    let versions = [];
+    try{ const s=localStorage.getItem(KEY_VER); if(s) versions=JSON.parse(s); }catch(e){}
+    // Throttle: skip if last snapshot is less than 15 mins ago (unless forced)
+    if(!force && versions.length){
+      const lastTs = versions[0].ts;
+      if(Date.now() - lastTs < VER_MIN_GAP) return;
+    }
     const payload = JSON.stringify(
       {items,payments,tabbyItems,tasks,lists,goals,notes,loans,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),savedAt:new Date().toISOString()}
     );
+    // Store the current auto-save filename as the snapshot title
+    const filename = localStorage.getItem(AS_FILE_KEY)||null;
     const snap = {
       ts: Date.now(),
       label: new Date().toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}),
+      filename: filename,
+      name: '',
       counts: {
         bills: items.length,
         tasks: tasks.length,
@@ -5683,8 +5701,6 @@ function verSnapshot(){
       },
       data: payload,
     };
-    let versions = [];
-    try{ const s=localStorage.getItem(KEY_VER); if(s) versions=JSON.parse(s); }catch(e){}
     // Prepend new snapshot, keep max VER_MAX
     versions.unshift(snap);
     if(versions.length > VER_MAX) versions = versions.slice(0, VER_MAX);
@@ -5736,10 +5752,23 @@ function renderVerPanel(){
         c.accounts?c.accounts+' accounts':'',
         c.loans?c.loans+' loans':'',
       ].filter(Boolean).join(' · ');
+      const filenameHtml = v.filename
+        ? '<div style="font-size:10px;color:var(--text3);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">&#128196; '+v.filename+'</div>'
+        : '';
+      // Editable name input — shown above the timestamp
+      const nameHtml = '<input class="ver-name-input" id="ver-name-'+i+'" type="text" '+
+        'value="'+((v.name||'').replace(/"/g,'&quot;'))+'" '+
+        'placeholder="Add a label&#8230;" '+
+        'onchange="verSaveName('+i+',this.value)" '+
+        'onblur="verSaveName('+i+',this.value)" '+
+        'onclick="event.stopPropagation()" '+
+        'title="Click to add a label to this snapshot">';
       return '<div class="ver-row">'+
         '<div class="ver-dot'+(i===0?' latest':'')+'"></div>'+
-        '<div class="ver-info">'+
-          '<div class="ver-time">'+(i===0?'<span style="color:var(--accent)">Latest — </span>':'')+v.label+'</div>'+
+        '<div class="ver-info" style="overflow:hidden">'+
+          nameHtml+
+          filenameHtml+
+          '<div class="ver-time" style="color:var(--text3);font-weight:400;font-size:11px">'+v.label+'</div>'+
           '<div class="ver-counts">'+(countStr||'no data')+'</div>'+
         '</div>'+
         (i===0?'<span style="font-size:10px;color:var(--text3);flex-shrink:0">current</span>':
@@ -5747,6 +5776,14 @@ function renderVerPanel(){
       '</div>';
     }).join('')+
   '</div>';
+}
+
+function verSaveName(idx, name){
+  let versions = getVersions();
+  if(!versions[idx]) return;
+  versions[idx].name = name.trim();
+  localStorage.setItem(KEY_VER, JSON.stringify(versions));
+  // Don't re-render the whole panel (would lose focus mid-type)
 }
 
 function verRestore(idx){
@@ -5759,8 +5796,8 @@ function verRestore(idx){
     return;
   }
   try{
-    // Take a snapshot of current state before overwriting (safety net)
-    verSnapshot();
+    // Take a snapshot of current state before overwriting (safety net — always force)
+    verSnapshot(true);
     const data = JSON.parse(snap.data);
     items      = data.items      || [];
     payments   = data.payments   || [];

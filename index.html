@@ -35,7 +35,23 @@ body{
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--surface4);border-radius:99px}
 ::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.16)}
-.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh;transition:grid-template-columns .22s ease}
+
+/* ── Sidebar resize ── */
+:root{--sidebar-w:220px}
+.sidebar-resize-handle{
+  position:absolute;top:0;right:-4px;width:8px;height:100%;
+  cursor:col-resize;z-index:200;
+  display:flex;align-items:center;justify-content:center;
+}
+.sidebar-resize-handle::after{
+  content:'';width:3px;height:40px;
+  border-radius:99px;background:var(--border2);
+  opacity:0;transition:opacity .18s;
+}
+.sidebar-resize-handle:hover::after,
+.sidebar-resize-handle.dragging::after{opacity:1;background:var(--accent)}
+.sidebar{position:relative}
+.app{display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:100vh;transition:grid-template-columns .15s ease}
 .app.collapsed{grid-template-columns:52px 1fr}
 .sidebar{
   background:linear-gradient(180deg,var(--surface) 0%,#111111 100%);
@@ -1351,6 +1367,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
     <button class="nav-item" onclick="document.getElementById('import-input').click()"><span class="nav-icon">&#8593;</span><span class="nav-label"> Restore backup</span></button>
     <button class="nav-item" onclick="exportCSV()"><span class="nav-icon">&#8599;</span><span class="nav-label"> Export CSV</span></button>
     <div class="sidebar-bottom"></div>
+  <div class="sidebar-resize-handle" id="sidebar-resize-handle"></div>
   </aside>
   <input type="file" id="import-input" accept=".json" style="display:none" onchange="importJSON(event)">
 
@@ -3002,7 +3019,7 @@ document.getElementById('tabby-modal').addEventListener('click',e=>{if(e.target=
 
 function exportJSON(){
   if(!items.length&&!payments.length&&!tabbyItems.length&&!tasks.length){toast('Nothing to back up yet');return;}
-  const data=JSON.stringify({items,payments,tabbyItems,tasks,lists,goals,notes,loans,accounts,nwHistory,exportedAt:new Date().toISOString()},null,2);
+  const data=JSON.stringify({items,payments,tabbyItems,tasks,lists,goals,notes,loans,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),exportedAt:new Date().toISOString()},null,2);
   const d=new Date();
   const filename='bills-backup-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'.json';
   verSnapshot();
@@ -3062,6 +3079,9 @@ function applyRestore(mode){
     accounts=data.accounts||[];
     nwHistory=data.nwHistory||[];
     saveData();saveTasks();saveLists();saveGoals();saveNotes();saveLoans();saveAccounts();saveNetWorth();
+    if(data.dbLayout)  localStorage.setItem(DB_LAYOUT_KEY,  JSON.stringify(data.dbLayout));
+    if(data.navLayout) localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(data.navLayout));
+    renderNav();
     render();
     if(currentPage==='tasks')renderTasks();
     if(currentPage==='goals')renderGoals();
@@ -3095,6 +3115,10 @@ function applyRestore(mode){
     lists=[...(data.lists||[]),...lists.filter(l=>!bkIds.lists.has(l.id))];
     goals=[...(data.goals||[]),...goals.filter(g=>!bkIds.goals.has(g.id))];
     saveData();saveTasks();saveLists();saveGoals();saveNotes();saveLoans();saveAccounts();saveNetWorth();
+    // Merge layouts: only apply from backup if local layout is empty
+    if(data.dbLayout  && !localStorage.getItem(DB_LAYOUT_KEY))  localStorage.setItem(DB_LAYOUT_KEY,  JSON.stringify(data.dbLayout));
+    if(data.navLayout && !localStorage.getItem(NAV_LAYOUT_KEY)) localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(data.navLayout));
+    renderNav();
     render();
     if(currentPage==='tasks')renderTasks();
     if(currentPage==='goals')renderGoals();
@@ -4643,7 +4667,7 @@ async function asWriteFile(){
   asDot('busy');
   try{
     const payload = JSON.stringify(
-      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,accounts,nwHistory,savedAt:new Date().toISOString()},
+      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),savedAt:new Date().toISOString()},
       null, 2
     );
     const writable = await _asFileHandle.createWritable();
@@ -5544,7 +5568,7 @@ let _verPanelOpen  = false;
 function verSnapshot(){
   try{
     const payload = JSON.stringify(
-      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,accounts,nwHistory,savedAt:new Date().toISOString()}
+      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),savedAt:new Date().toISOString()}
     );
     const snap = {
       ts: Date.now(),
@@ -6463,6 +6487,84 @@ function highlightBill(itemId){
   }, 120);
 }
 
+/* ═══════════════════════════════════════════════════════
+   Sidebar resize
+   Drag the right edge to any width between 160px and 420px.
+   Width stored in localStorage and applied via CSS var.
+   ═══════════════════════════════════════════════════════ */
+const SIDEBAR_W_KEY = 'lifeos_sidebar_w';
+const SIDEBAR_MIN   = 160;
+const SIDEBAR_MAX   = 420;
+
+function sidebarApplyWidth(w){
+  document.documentElement.style.setProperty('--sidebar-w', w+'px');
+}
+
+function sidebarLoadWidth(){
+  const saved = parseInt(localStorage.getItem(SIDEBAR_W_KEY));
+  if(saved && saved >= SIDEBAR_MIN && saved <= SIDEBAR_MAX){
+    sidebarApplyWidth(saved);
+  }
+}
+
+(function sidebarResizeInit(){
+  const handle = document.getElementById('sidebar-resize-handle');
+  if(!handle) return;
+  let startX, startW;
+
+  handle.addEventListener('mousedown', function(e){
+    e.preventDefault();
+    const app = document.getElementById('app');
+    if(app && app.classList.contains('collapsed')) return; // don't resize when collapsed
+    startX = e.clientX;
+    startW = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-w')) || 220;
+    handle.classList.add('dragging');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+
+    function onMove(e){
+      const delta = e.clientX - startX;
+      const newW  = Math.min(SIDEBAR_MAX, Math.max(SIDEBAR_MIN, startW + delta));
+      sidebarApplyWidth(newW);
+    }
+    function onUp(){
+      handle.classList.remove('dragging');
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      // Save width
+      const w = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-w'));
+      localStorage.setItem(SIDEBAR_W_KEY, w);
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+
+  // Touch support
+  handle.addEventListener('touchstart', function(e){
+    const app = document.getElementById('app');
+    if(app && app.classList.contains('collapsed')) return;
+    startX = e.touches[0].clientX;
+    startW = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-w')) || 220;
+    handle.classList.add('dragging');
+    function onTouch(e){ 
+      const delta = e.touches[0].clientX - startX;
+      sidebarApplyWidth(Math.min(SIDEBAR_MAX, Math.max(SIDEBAR_MIN, startW + delta)));
+    }
+    function onEnd(){
+      handle.classList.remove('dragging');
+      const w = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-w'));
+      localStorage.setItem(SIDEBAR_W_KEY, w);
+      document.removeEventListener('touchmove', onTouch);
+      document.removeEventListener('touchend', onEnd);
+    }
+    document.addEventListener('touchmove', onTouch, {passive:true});
+    document.addEventListener('touchend', onEnd);
+  }, {passive:true});
+})();
+
+sidebarLoadWidth();
 loadData();
 asRestoreStatus();
 checkReminders();

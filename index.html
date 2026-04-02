@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tracker</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='8'%20fill='%25231a1a1a'/%3E%3Crect%20width='32'%20height='32'%20rx='8'%20fill='%25231D9E75'%20opacity='0.15'/%3E%3Ctext%20x='16'%20y='22'%20font-family='system-ui,sans-serif'%20font-size='18'%20font-weight='700'%20fill='%25231D9E75'%20text-anchor='middle'%3EL%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:opsz,wght@9..40,400;9..40,500&display=swap" rel="stylesheet">
@@ -95,6 +96,7 @@ body{
 .nav-edit-btn:hover{background:var(--surface3);color:var(--text);border-color:var(--border3)}
 .nav-edit-btn.active{background:var(--amber-dim);color:var(--amber);border-color:var(--amber-border)}
 .app.collapsed .nav-edit-btn{display:none}
+.app.collapsed #cycle-setting-wrap{display:none}
 /* Nav sections wrapper — rendered dynamically in edit mode */
 #nav-sections-wrap{display:flex;flex-direction:column;gap:0}
 /* Edit-mode section label */
@@ -1345,6 +1347,19 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
     </div>
     <button class="nav-item" id="nav-dashboard" onclick="switchPage('dashboard')" style="margin-bottom:4px"><span class="nav-icon">&#9632;</span><span class="nav-label"> Dashboard</span></button>
     <div id="nav-sections-wrap"></div>
+    <div class="sidebar-section">Settings</div>
+    <div style="padding:6px 10px 10px;background:var(--surface2);border-radius:8px;border:0.5px solid var(--border);margin-bottom:4px" id="cycle-setting-wrap">
+      <div style="font-size:10px;color:var(--text3);margin-bottom:6px;font-weight:500">Billing cycle starts on</div>
+      <div style="display:flex;align-items:center;gap:7px">
+        <input id="cycle-day-input" type="number" min="1" max="28" value="1"
+          style="width:52px;height:28px;border-radius:6px;border:0.5px solid var(--border2);background:var(--surface3);color:var(--text);padding:0 8px;font-size:13px;font-family:var(--mono);outline:none"
+          oninput="this.value=Math.min(28,Math.max(1,parseInt(this.value)||1))">
+        <span style="font-size:12px;color:var(--text3)">of each month</span>
+        <button onclick="saveCycleDay()" style="height:28px;padding:0 10px;border-radius:6px;border:0.5px solid var(--accent-border);background:var(--accent-dim);color:var(--accent);font-size:11px;font-weight:500;cursor:pointer;font-family:var(--font);transition:all .15s;margin-left:auto">Save</button>
+      </div>
+      <div id="cycle-label-preview" style="font-size:10px;color:var(--text3);margin-top:5px"></div>
+    </div>
+    <div class="app.collapsed #cycle-setting-wrap{display:none}"></div>
     <div class="sidebar-section">Auto-save</div>
     <div class="as-wrap">
       <div class="as-status">
@@ -1998,6 +2013,84 @@ function toMonthly(a,c){return c==='yearly'?a/12:c==='weekly'?a*4.33:c==='quarte
 function toAnnual(a,c){return c==='yearly'?a:c==='weekly'?a*52:c==='quarterly'?a*4:a*12;}
 function fmt(n){return n.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function todayStr(){const t=new Date();return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;}
+
+/* ── Billing cycle ─────────────────────────────────────────
+   CYCLE_START_DAY: the day of month the cycle begins.
+   Default 1 (calendar month). User can change in Settings.
+   Stored in localStorage as 'lifeos_cycle_start'.
+
+   Example with day=26:
+     If today = 28 Mar → cycle = 26 Mar – 25 Apr
+     If today = 15 Mar → cycle = 26 Feb – 25 Mar
+   ─────────────────────────────────────────────────────── */
+const CYCLE_KEY = 'lifeos_cycle_start';
+
+function getCycleDay(){
+  const v = parseInt(localStorage.getItem(CYCLE_KEY));
+  return (!isNaN(v) && v >= 1 && v <= 28) ? v : 1;
+}
+
+function cycleStart(refDate){
+  const d   = refDate || new Date();
+  const day = getCycleDay();
+  if(day <= 1) return new Date(d.getFullYear(), d.getMonth(), 1);
+  if(d.getDate() >= day){
+    return new Date(d.getFullYear(), d.getMonth(), day);
+  } else {
+    return new Date(d.getFullYear(), d.getMonth()-1, day);
+  }
+}
+
+function cycleEnd(refDate){
+  const start = cycleStart(refDate);
+  const day   = getCycleDay();
+  if(day <= 1){
+    // ends last day of that calendar month
+    return new Date(start.getFullYear(), start.getMonth()+1, 0);
+  }
+  // ends one day before same day next month (i.e. day-1 of next month)
+  return new Date(start.getFullYear(), start.getMonth()+1, day-1);
+}
+
+function cycleLabel(refDate){
+  const s = cycleStart(refDate), e = cycleEnd(refDate);
+  const day = getCycleDay();
+  if(day <= 1){
+    return s.toLocaleString('en',{month:'long',year:'numeric'});
+  }
+  return s.getDate()+' '+MONTHS[s.getMonth()]+' – '+
+         e.getDate()+' '+MONTHS[e.getMonth()]+' '+e.getFullYear();
+}
+
+// Is a payment date within the current cycle?
+function inCycle(dateStr, refDate){
+  const d = new Date(dateStr);
+  const s = cycleStart(refDate);
+  const e = cycleEnd(refDate);
+  e.setHours(23,59,59,999);
+  return d >= s && d <= e;
+}
+
+// What actual date does a dueDay fall on in the current cycle?
+function dueDateInCycle(dueDay, refDate){
+  const s   = cycleStart(refDate);
+  const day = getCycleDay();
+  if(day <= 1){
+    return new Date(s.getFullYear(), s.getMonth(), dueDay);
+  }
+  // Days >= cycleDay fall in start month; days < cycleDay fall in next month
+  if(dueDay >= day){
+    return new Date(s.getFullYear(), s.getMonth(), dueDay);
+  } else {
+    return new Date(s.getFullYear(), s.getMonth()+1, dueDay);
+  }
+}
+
+function isOverdueCycle(item){
+  if(!item.dueDay) return false;
+  const due = dueDateInCycle(item.dueDay);
+  return due < new Date() && !isPaidThisCycle(item);
+}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 function cycleShort(c){return c==='monthly'?'mo':c==='yearly'?'yr':c==='weekly'?'wk':c==='quarterly'?'qtr':c;}
@@ -2014,8 +2107,7 @@ function isPaidThisCycle(item){
   const now=new Date();
   const c=item.cycle;
   if(c==='monthly'){
-    const ym=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-    return itemPayments.some(p=>p.date.startsWith(ym));
+    return itemPayments.some(p=>inCycle(p.date));
   }
   if(c==='quarterly'){
     const cutoff=new Date(now.getFullYear(),now.getMonth()-2,1);
@@ -2032,8 +2124,7 @@ function isPaidThisCycle(item){
     return itemPayments.some(p=>new Date(p.date)>=mon);
   }
   // fallback: monthly
-  const ym=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-  return itemPayments.some(p=>p.date.startsWith(ym));
+  return itemPayments.some(p=>inCycle(p.date));
 }
 
 function formatShortDate(dateStr){
@@ -2139,20 +2230,21 @@ function handleMobileAdd(){
 /* &#9472;&#9472; Main render &#9472;&#9472; */
 function render(){
   const now=new Date();
-  const ym=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  // cycle-aware paid filter
   const active=items.filter(i=>i.status==='active'&&!i.isTrial);
   const trials=items.filter(i=>i.isTrial);
   const monthly=active.reduce((s,i)=>s+toMonthly(i.amount,i.cycle),0);
   const annual=active.reduce((s,i)=>s+toAnnual(i.amount,i.cycle),0);
-  const paidAmt=payments.filter(p=>p.date.startsWith(ym)).reduce((s,p)=>s+p.amount,0);
-  const paidCt=payments.filter(p=>p.date.startsWith(ym)).length;
-  const overdueCount=active.filter(i=>i.dueDay&&(i.dueDay-now.getDate())<0&&!isPaidThisCycle(i)).length;
+  const cyclePayments=payments.filter(p=>inCycle(p.date));
+  const paidAmt=cyclePayments.reduce((s,p)=>s+p.amount,0);
+  const paidCt=cyclePayments.length;
+  const overdueCount=active.filter(i=>isOverdueCycle(i)).length;
   const expiringTrials=trials.filter(i=>{const d=trialDaysLeft(i.trialEnd);return d!==null&&d<=7&&d>=0;}).length;
 
   const tabbyNextTotal=tabbyItems.filter(t=>!t.instalments.every(i=>i.paid)).reduce((s,t)=>s+(t.total/4),0);
   const totalEntries=items.length+tabbyItems.length;
 
-  document.getElementById('page-sub').innerHTML=`${now.toLocaleString('en',{month:'long',year:'numeric'})} &#183; ${totalEntries} entries`;
+  document.getElementById('page-sub').innerHTML=`${cycleLabel()} &#183; ${totalEntries} entries`;
 
   document.getElementById('metrics').innerHTML=`
     <div class="metric"><div class="metric-label">Monthly</div><div class="metric-value">AED ${fmt(monthly)}</div><div class="metric-sub">${active.length} subs + ${tabbyItems.filter(t=>!t.instalments.every(i=>i.paid)).length} Tabby</div></div>
@@ -2187,14 +2279,12 @@ function render(){
   const overflow=Math.max(0,(today+14)-daysInCurMonth); // days spilling into next month
   const upcoming=[];
   active.forEach(i=>{
-    if(!i.dueDay)return;
-    // Due this month, in window, not yet paid this cycle
-    if(i.dueDay>=today&&i.dueDay<=today+14&&!isPaidThisCycle(i)){
-      upcoming.push({item:i,diff:i.dueDay-today,nextMonth:false});
-    // Due next month within overflow window, not paid next-month either
-    } else if(overflow>0&&i.dueDay<=overflow){
-      const paidNextMonth=payments.some(p=>p.itemId===i.id&&p.date.startsWith(nextYm));
-      if(!paidNextMonth)upcoming.push({item:i,diff:daysInCurMonth-today+i.dueDay,nextMonth:true});
+    if(!i.dueDay||isPaidThisCycle(i))return;
+    const dueDate=dueDateInCycle(i.dueDay);
+    const diff=Math.ceil((dueDate-now)/(1000*60*60*24));
+    if(diff>=0&&diff<=14){
+      const nextMonth=dueDate.getMonth()!==now.getMonth()||dueDate.getFullYear()!==now.getFullYear();
+      upcoming.push({item:i,diff,nextMonth});
     }
   });
   upcoming.sort((a,b)=>a.diff-b.diff);
@@ -2251,7 +2341,8 @@ function render(){
     document.getElementById('items').innerHTML=`<div class="empty">${(items.length||tabbyItems.length)?'No entries match your search':'Add your first subscription or bill to get started<br><span class="kbd-hint">Tip: press <kbd>N</kbd> anywhere to quickly add a new entry</span>'}</div>`;
     return;
   }
-  document.getElementById('items').innerHTML=vis.map(item=>item._tabby?renderTabbyActiveItem(item):renderItem(item,ym)).join('');
+  const ymCur=new Date().toISOString().slice(0,7);
+  document.getElementById('items').innerHTML=vis.map(item=>item._tabby?renderTabbyActiveItem(item):renderItem(item,ymCur)).join('');
   checkReminders();
 }
 
@@ -2791,8 +2882,7 @@ function setFilter(c){filterCat=c;render();}
 
 function togglePaid(id){
   const item=items.find(i=>i.id===id);if(!item)return;
-  const ym=todayStr().slice(0,7);
-  const existing=payments.find(p=>p.itemId===id&&p.date.startsWith(ym));
+  const existing=payments.find(p=>p.itemId===id&&inCycle(p.date));
   if(existing){
     payments=payments.filter(p=>p.id!==existing.id);
     saveData();render();toast(`&#8617; ${item.name} marked as unpaid`);
@@ -3540,6 +3630,7 @@ function renderTaskItem(t){
     <div class="tk-actions">
       <button class="tk-star${t.starred?' on':''}" onclick="toggleTaskStar('${t.id}')" title="${t.starred?'Unstar':'Star'}">&#9733;</button>
       <button class="icon-btn" onclick="openTaskModal('${t.id}')" title="Edit">&#9998;</button>
+      <button class="icon-btn" onclick="duplicateTask('${t.id}')" title="Duplicate">&#10697;</button>
       <button class="icon-btn del" onclick="deleteTask('${t.id}')" title="Delete">&#10005;</button>
     </div>
   </div>`;
@@ -3571,6 +3662,22 @@ function deleteTask(id){
   tasks=tasks.filter(t=>t.id!==id);
   saveTasks();renderTasks();
   toast(`Removed: ${t.title}`,true);
+}
+
+function duplicateTask(id){
+  const t=tasks.find(t=>t.id===id);if(!t)return;
+  const copy={
+    ...t,
+    id:String(Date.now()),
+    title:t.title+' (copy)',
+    done:false,
+    createdAt:Date.now(),
+    subtasks:(t.subtasks||[]).map(s=>({...s,id:String(Date.now()+Math.random()),done:false})),
+  };
+  const idx=tasks.findIndex(t=>t.id===id);
+  tasks.splice(idx+1,0,copy);
+  saveTasks();renderTasks();
+  toast(`Duplicated: ${t.title}`);
 }
 
 /* Task modal */
@@ -4280,7 +4387,7 @@ function dbGreeting(){
   // Quick summary sentence
   const todayTasks=tasks.filter(t=>!t.done&&t.dueDate===todayStr()).length;
   const active=items.filter(i=>i.status==='active'&&!i.isTrial);
-  const overdueB=active.filter(i=>i.dueDay&&(i.dueDay-now.getDate())<0&&!isPaidThisCycle(i)).length;
+  const overdueB=active.filter(i=>isOverdueCycle(i)).length;
   const overdueTasks=tasks.filter(t=>!t.done&&t.dueDate&&t.dueDate<todayStr()).length;
   let summary='';
   if(overdueB+overdueTasks>0){
@@ -4333,9 +4440,9 @@ function dbWidgetFinances(el){
   const ym=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   const active=items.filter(i=>i.status==='active'&&!i.isTrial);
   const monthly=active.reduce((s,i)=>s+toMonthly(i.amount,i.cycle),0);
-  const paidAmt=payments.filter(p=>p.date.startsWith(ym)).reduce((s,p)=>s+p.amount,0);
+  const paidAmt=payments.filter(p=>inCycle(p.date)).reduce((s,p)=>s+p.amount,0);
   const paidPct=monthly>0?Math.round(paidAmt/monthly*100):0;
-  const overdue=active.filter(i=>i.dueDay&&(i.dueDay-now.getDate())<0&&!isPaidThisCycle(i)).length;
+  const overdue=active.filter(i=>isOverdueCycle(i)).length;
   const tabbyOwed=tabbyItems.filter(t=>!t.instalments.every(i=>i.paid)).reduce((s,t)=>s+(t.total/4),0);
   const annual=active.reduce((s,i)=>s+toAnnual(i.amount,i.cycle),0);
   const badge=overdue>0?overdue+' overdue':null;
@@ -4413,7 +4520,7 @@ function dbWidgetAlerts(el){
   const now=new Date();
   const ym=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   const active=items.filter(i=>i.status==='active'&&!i.isTrial);
-  const overdueBills=active.filter(i=>i.dueDay&&(i.dueDay-now.getDate())<0&&!isPaidThisCycle(i));
+  const overdueBills=active.filter(i=>isOverdueCycle(i));
   const overdueTasks=tasks.filter(t=>!t.done&&t.dueDate&&t.dueDate<todayStr());
   const expiringTrials=items.filter(i=>i.isTrial&&trialDaysLeft(i.trialEnd)!==null&&trialDaysLeft(i.trialEnd)<=5&&trialDaysLeft(i.trialEnd)>=0);
   const overdueGoals=goals.filter(g=>glGoalStatus(g)==='overdue');
@@ -4498,15 +4605,12 @@ function dbWidgetBills7(el){
   const active=items.filter(i=>i.status==='active'&&!i.isTrial);
   const upcoming=[];
   active.forEach(i=>{
-    if(!i.dueDay)return;
-    if(i.dueDay>=today&&i.dueDay<=today+7&&!isPaidThisCycle(i)){
-      upcoming.push({item:i,diff:i.dueDay-today,paid:false});
-    } else if(overflow>0&&i.dueDay<=overflow){
-      const pnm=payments.some(p=>p.itemId===i.id&&p.date.startsWith(nextYm));
-      if(!pnm) upcoming.push({item:i,diff:daysInMonth-today+i.dueDay,paid:false});
-    }
+    if(!i.dueDay||isPaidThisCycle(i))return;
+    const dueDate=dueDateInCycle(i.dueDay);
+    const diff=Math.ceil((dueDate-now)/(1000*60*60*24));
+    if(diff>=0&&diff<=7) upcoming.push({item:i,diff,paid:false});
   });
-  upcoming.sort((a,b)=>a.diff-b.diff);
+upcoming.sort((a,b)=>a.diff-b.diff);
   const total=upcoming.reduce((s,u)=>s+u.item.amount,0);
   dbCard(el,{icon:'&#9711;',title:'Bills this week',badge:upcoming.length||null,badgeCls:'db-badge-amber',
     footerLeft:upcoming.length?'AED '+fmt(total)+' due':'',footerLink:'View all',footerPage:'active'});
@@ -5421,18 +5525,14 @@ const REM_NOTIF   = 'lifeos_notif_enabled'; // localStorage key
 /* ── Build the list of upcoming unpaid bills ── */
 function getUpcomingReminders(){
   const now = new Date();
-  const today = now.getDate();
-  const ym = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-  const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
   const active = items.filter(i=>i.status==='active'&&!i.isTrial&&i.dueDay);
   const results = [];
   active.forEach(i=>{
     if(isPaidThisCycle(i)) return;
-    let diff = i.dueDay - today;
-    // Wrap to next month if due day already passed
-    if(diff < 0) diff = daysInMonth - today + i.dueDay;
-    if(diff <= REM_DAYS && diff >= 0){
-      results.push({item:i, diff, overdue: diff === 0 && i.dueDay < today});
+    const dueDate = dueDateInCycle(i.dueDay);
+    const diff = Math.ceil((dueDate - now)/(1000*60*60*24));
+    if(diff <= REM_DAYS && diff >= -1){
+      results.push({item:i, diff:Math.max(0,diff), overdue: dueDate < now});
     }
   });
   // Also include Tabby instalments due within 3 days
@@ -5932,11 +6032,10 @@ function aiSetKey(k){ localStorage.setItem(AI_KEY_STORE, k.trim()); }
 function aiFinancialContext(){
   // Build a compact, token-efficient snapshot of the user's finances
   const now   = new Date();
-  const ym    = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   const active = items.filter(i=>i.status==='active'&&!i.isTrial);
   const monthly = active.reduce((s,i)=>s+toMonthly(i.amount,i.cycle),0);
-  const paidAmt = payments.filter(p=>p.date.startsWith(ym)).reduce((s,p)=>s+p.amount,0);
-  const overdue = active.filter(i=>i.dueDay&&(i.dueDay-now.getDate())<0&&!isPaidThisCycle(i));
+  const paidAmt = payments.filter(p=>inCycle(p.date)).reduce((s,p)=>s+p.amount,0);
+  const overdue = active.filter(i=>isOverdueCycle(i));
   const assets  = accounts.reduce((s,a)=>s+(parseFloat(a.balance)||0),0);
   const liabs   = loans.filter(l=>!l.paidOff).reduce((s,l)=>s+lnRemainingBalance(l),0);
   const net     = assets - liabs;
@@ -6424,10 +6523,10 @@ function showPaidBreakdown(){
   const now = new Date();
   const ym  = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   const monthPayments = payments
-    .filter(p=>p.date.startsWith(ym))
+    .filter(p=>inCycle(p.date))
     .slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
   const total = monthPayments.reduce((s,p)=>s+p.amount,0);
-  const monthLabel = now.toLocaleString('en',{month:'long',year:'numeric'});
+  const monthLabel = cycleLabel();
 
   // Build rows
   const rows = monthPayments.map(p=>{
@@ -6565,6 +6664,26 @@ function sidebarLoadWidth(){
 })();
 
 sidebarLoadWidth();
+function saveCycleDay(){
+  const v = parseInt(document.getElementById('cycle-day-input').value)||1;
+  const clamped = Math.min(28, Math.max(1, v));
+  localStorage.setItem(CYCLE_KEY, clamped);
+  document.getElementById('cycle-day-input').value = clamped;
+  updateCyclePreview();
+  render();
+  renderDashboard();
+  toast('\u2713 Billing cycle updated — starts day ' + clamped);
+}
+
+function updateCyclePreview(){
+  const inp = document.getElementById('cycle-day-input');
+  const prev = document.getElementById('cycle-label-preview');
+  if(!inp||!prev) return;
+  const saved = parseInt(localStorage.getItem(CYCLE_KEY))||1;
+  inp.value = saved;
+  prev.textContent = 'Current cycle: ' + cycleLabel();
+}
+
 loadData();
 asRestoreStatus();
 checkReminders();

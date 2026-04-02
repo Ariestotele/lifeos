@@ -1787,6 +1787,24 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
         </div>
       </div>
       <div class="metrics" id="emi-metrics"></div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+        <select class="sort-select" id="ln-sort" onchange="renderLoans()" style="flex:1;min-width:160px">
+          <option value="balance">Sort: Remaining balance</option>
+          <option value="urgency">Sort: Most urgent</option>
+          <option value="emi">Sort: Monthly EMI</option>
+          <option value="name">Sort: Name</option>
+          <option value="added">Sort: Recently added</option>
+        </select>
+        <select class="sort-select" id="ln-filter" onchange="renderLoans()">
+          <option value="all">All loans</option>
+          <option value="active">Active only</option>
+          <option value="paidoff">Paid off only</option>
+          <option value="personal">Personal</option>
+          <option value="car">Car</option>
+          <option value="mortgage">Mortgage</option>
+          <option value="friendly">Friendly debt</option>
+        </select>
+      </div>
       <div id="emi-list"></div>
     </div>
 
@@ -1979,7 +1997,7 @@ let nwHistory=[];
 const AC_TYPES={savings:{label:'Savings',icon:'💰',group:'liquid'},current:{label:'Current',icon:'🏦',group:'liquid'},cash:{label:'Cash',icon:'💵',group:'liquid'},investment:{label:'Investment',icon:'📈',group:'investments'},crypto:{label:'Crypto',icon:'💎',group:'investments'},gold:{label:'Gold',icon:'🥇',group:'investments'},fixeddeposit:{label:'Fixed Deposit',icon:'🔒',group:'fixed'},other:{label:'Other',icon:'📋',group:'liquid'}};
 const AC_GROUPS={liquid:'Liquid / Cash',investments:'Investments',fixed:'Fixed / Term deposits'};
 const AC_COLORS=['#4A8ECC','#1D9E75','#C98A1A','#C46A8A','#7A74D4','#C95050','#C97840','#5DCAA5','#888880'];
-const LN_COLORS={personal:'#4A8ECC',car:'#1D9E75',mortgage:'#C98A1A',education:'#7A74D4',business:'#C46A8A',other:'#888880'};
+const LN_COLORS={personal:'#4A8ECC',car:'#1D9E75',mortgage:'#C98A1A',education:'#7A74D4',business:'#C46A8A',friendly:'#C46A8A',other:'#888880'};
 const QN_COLORS=['none','#4A8ECC','#1D9E75','#C98A1A','#C46A8A','#7A74D4','#C95050','#C97840'];
 const QN_COLOR_LABELS={'none':'Default','#4A8ECC':'Blue','#1D9E75':'Green','#C98A1A':'Amber','#C46A8A':'Pink','#7A74D4':'Purple','#C95050':'Red','#C97840':'Orange'};
 const GL_EMOJIS=['🎯','💰','🏠','✈️','💎','📈','🏋️','📚','🚗','💻','🌍','❤️','🎓','🏆','🌱','⚡','🔑','🛡️','🎨','🎵'];
@@ -2393,6 +2411,7 @@ function renderItem(item,ym){
     <div>
       <div class="item-name">
         <span>${esc(item.name)}</span>
+        ${item.dueDay&&!item.isTrial?`<span style="font-size:11px;font-weight:400;color:var(--text3)">${item.dueDay} ${MONTHS[dueDateInCycle(item.dueDay).getMonth()]}</span>`:''}
         ${isP?'<span class="badge badge-paused">paused</span>':''}
         ${paidNow?'<span class="badge badge-paid">paid</span>':''}
         ${item.isTrial?`<span class="badge ${trialDaysLeft(item.trialEnd)<0?'badge-trial-expired':trialDaysLeft(item.trialEnd)<=3?'badge-trial-urgent':'badge-trial'}">${trialBadgeLabel(item.trialEnd)}</span>`:''}
@@ -5065,12 +5084,39 @@ function renderLoans(){
     cont.innerHTML = '<div class="emi-empty"><div style="font-size:32px;margin-bottom:10px;opacity:.4">&#127968;</div><div style="font-size:15px;font-weight:500;color:var(--text2);margin-bottom:6px">No loans added yet</div><div style="font-size:13px">Add your first loan to track EMI and payoff progress</div></div>';
     return;
   }
-  // Sort: active first, then by remaining balance desc
-  const sorted = loans.slice().sort((a,b)=>{
-    if(a.paidOff !== b.paidOff) return a.paidOff?1:-1;
-    return lnRemainingBalance(b) - lnRemainingBalance(a);
+  const sortBy   = (document.getElementById('ln-sort')||{}).value || 'balance';
+  const filterBy = (document.getElementById('ln-filter')||{}).value || 'all';
+
+  // Filter
+  let visible = loans.filter(l=>{
+    if(filterBy==='active')   return !l.paidOff;
+    if(filterBy==='paidoff')  return l.paidOff;
+    if(['personal','car','mortgage','education','business','friendly','other'].includes(filterBy))
+      return l.type===filterBy;
+    return true;
   });
-  cont.innerHTML = '<div class="emi-grid">' + sorted.map(l=>lnCardHTML(l)).join('') + '</div>';
+
+  // Sort — urgency = closest payoff date first
+  visible = visible.slice().sort((a,b)=>{
+    if(a.paidOff !== b.paidOff) return a.paidOff?1:-1;
+    if(sortBy==='balance')  return lnRemainingBalance(b)-lnRemainingBalance(a);
+    if(sortBy==='urgency'){
+      const ma=lnMonthsRemaining(a)||9999, mb=lnMonthsRemaining(b)||9999;
+      return ma-mb;
+    }
+    if(sortBy==='emi'){
+      const ea=a.emiOverride||lnCalcMonthlyEMI(a.principal,a.rate,a.tenure);
+      const eb=b.emiOverride||lnCalcMonthlyEMI(b.principal,b.rate,b.tenure);
+      return eb-ea;
+    }
+    if(sortBy==='name') return (a.name||'').localeCompare(b.name||'');
+    if(sortBy==='added') return (b.createdAt||0)-(a.createdAt||0);
+    return 0;
+  });
+
+  cont.innerHTML = visible.length
+    ? '<div class="emi-grid">' + visible.map(l=>lnCardHTML(l)).join('') + '</div>'
+    : '<div class="emi-empty" style="padding:2rem">No loans match this filter.</div>';
 }
 
 function lnCardHTML(l){
@@ -5083,6 +5129,8 @@ function lnCardHTML(l){
   const payoffDate = lnPayoffDate(l);
   const monthsLeft = lnMonthsRemaining(l);
   const isPaidOff = l.paidOff || remaining <= 0;
+
+  const isFriendly = l.type === 'friendly';
 
   let payoffChip = '';
   if(isPaidOff){
@@ -5106,6 +5154,21 @@ function lnCardHTML(l){
         <button class="icon-btn del" onclick="deleteLoan('${l.id}')" title="Delete">&#10005;</button>
       </div>
     </div>
+    ${isFriendly ? `
+    <div class="emi-kpis">
+      <div class="emi-kpi" style="grid-column:span 2">
+        <div class="emi-kpi-label">Amount owed</div>
+        <div class="emi-kpi-val red">AED ${fmt(parseFloat(l.principal)||0)}</div>
+        <div class="emi-kpi-sub">0% interest · no EMI</div>
+      </div>
+      <div class="emi-kpi" style="grid-column:span 2">
+        <div class="emi-kpi-label">${l.dueDate?'Repay by':'Status'}</div>
+        <div class="emi-kpi-val" style="${l.dueDate&&new Date(l.dueDate)<new Date()?'color:var(--red)':''}">
+          ${l.dueDate?new Date(l.dueDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'Flexible'}
+        </div>
+        <div class="emi-kpi-sub">${l.lender?'Owed to '+esc(l.lender):''}</div>
+      </div>
+    </div>` : `
     <div class="emi-kpis">
       <div class="emi-kpi">
         <div class="emi-kpi-label">Monthly EMI</div>
@@ -5127,7 +5190,7 @@ function lnCardHTML(l){
         <div class="emi-kpi-val amber">AED ${fmt(Math.max(0,totalInterest))}</div>
         <div class="emi-kpi-sub">AED ${fmt(totalPayable)} payable</div>
       </div>
-    </div>
+    </div>`}
     <div class="emi-prog-label">
       <span class="emi-prog-name">Repaid</span>
       <span class="emi-prog-pct">${pct}%</span>
@@ -5141,6 +5204,21 @@ function lnCardHTML(l){
 }
 
 /* ── Modal ── */
+function lnTypeChange(){
+  const type = document.getElementById('ln-type').value;
+  const isFriendly = type === 'friendly';
+  const rateField    = document.getElementById('ln-rate-field');
+  const tenureRow    = document.getElementById('ln-tenure-row');
+  const dueDateRow   = document.getElementById('ln-duedate-row');
+  const preview      = document.getElementById('ln-preview');
+  const emiOverride  = document.getElementById('ln-emi-override');
+  if(rateField)  rateField.style.display  = isFriendly ? 'none' : '';
+  if(tenureRow)  tenureRow.style.display  = isFriendly ? 'none' : '';
+  if(dueDateRow) dueDateRow.style.display = isFriendly ? '' : 'none';
+  if(isFriendly && preview) preview.style.display = 'none';
+  if(!isFriendly) lnCalcEMI();
+}
+
 function lnCalcEMI(){
   const p = parseFloat(document.getElementById('ln-principal').value)||0;
   const r = parseFloat(document.getElementById('ln-rate').value)||0;
@@ -5167,11 +5245,13 @@ function openLoanModal(id){
   document.getElementById('ln-rate').value = l?l.rate||'':'';
   document.getElementById('ln-tenure').value = l?l.tenure||'':'';
   document.getElementById('ln-start').value = l?l.startDate||'':'';
+  document.getElementById('ln-start-friendly').value = l?l.startDate||'':'';
+  document.getElementById('ln-duedate').value = l?l.dueDate||'':'';
   document.getElementById('ln-emi-override').value = l?l.emiOverride||'':'';
   document.getElementById('ln-paid').value = l?l.amountPaid||'':'';
   document.getElementById('ln-notes').value = l?l.notes||'':'';
   document.getElementById('ln-preview').style.display='none';
-  lnCalcEMI();
+  lnTypeChange();
   document.getElementById('loan-modal').style.display='flex';
   setTimeout(()=>document.getElementById('ln-name').focus(),50);
 }
@@ -5181,21 +5261,27 @@ function closeLoanModal(){document.getElementById('loan-modal').style.display='n
 function saveLoan(){
   const name = document.getElementById('ln-name').value.trim();
   if(!name){document.getElementById('ln-name').focus();return;}
+  const lnType = document.getElementById('ln-type').value;
+  const isFriendly = lnType === 'friendly';
   const principal = parseFloat(document.getElementById('ln-principal').value)||0;
-  const rate = parseFloat(document.getElementById('ln-rate').value)||0;
-  const tenure = parseInt(document.getElementById('ln-tenure').value)||0;
-  if(!principal||!tenure){toast('Please enter principal and tenure');return;}
-  const emiOverride = parseFloat(document.getElementById('ln-emi-override').value)||0;
+  const rate = isFriendly ? 0 : (parseFloat(document.getElementById('ln-rate').value)||0);
+  const tenure = isFriendly ? 0 : (parseInt(document.getElementById('ln-tenure').value)||0);
+  if(!principal){toast('Please enter the amount');return;}
+  if(!isFriendly && !tenure){toast('Please enter principal and tenure');return;}
+  const emiOverride = isFriendly ? 0 : (parseFloat(document.getElementById('ln-emi-override').value)||0);
+  const dueDate = isFriendly ? (document.getElementById('ln-duedate').value||null) : null;
+  const friendlyStart = isFriendly ? (document.getElementById('ln-start-friendly').value||null) : null;
   const existing = lnEditId?loans.find(l=>l.id===lnEditId):null;
   const obj={
     id: lnEditId||String(Date.now()),
     name, principal, rate, tenure,
     type: document.getElementById('ln-type').value,
     lender: document.getElementById('ln-lender').value.trim(),
-    startDate: document.getElementById('ln-start').value||null,
+    startDate: isFriendly ? friendlyStart : (document.getElementById('ln-start').value||null),
     emiOverride: emiOverride||null,
     amountPaid: parseFloat(document.getElementById('ln-paid').value)||0,
     notes: document.getElementById('ln-notes').value.trim(),
+    dueDate: dueDate,
     paidOff: existing?existing.paidOff:false,
     createdAt: existing?existing.createdAt:Date.now(),
   };
@@ -6790,12 +6876,13 @@ renderNav();
     <div class="field"><label>Loan name</label><input id="ln-name" type="text" placeholder="e.g. Car loan, Personal loan&#8230;" autocomplete="off"></div>
     <div class="fields-row">
       <div class="field"><label>Loan type</label>
-        <select id="ln-type">
+        <select id="ln-type" onchange="lnTypeChange()">
           <option value="personal">Personal loan</option>
           <option value="car">Car loan</option>
           <option value="mortgage">Mortgage</option>
           <option value="education">Education loan</option>
           <option value="business">Business loan</option>
+          <option value="friendly">&#129309; Friendly debt</option>
           <option value="other">Other</option>
         </select>
       </div>
@@ -6803,11 +6890,15 @@ renderNav();
     </div>
     <div class="fields-row">
       <div class="field"><label>Principal amount (AED)</label><input id="ln-principal" type="number" min="0" step="1" placeholder="100000" oninput="lnCalcEMI()"></div>
-      <div class="field"><label>Annual interest rate (%)</label><input id="ln-rate" type="number" min="0" step="0.01" placeholder="5.5" oninput="lnCalcEMI()"></div>
+      <div class="field" id="ln-rate-field"><label>Annual interest rate (%)</label><input id="ln-rate" type="number" min="0" step="0.01" placeholder="5.5" oninput="lnCalcEMI()"></div>
     </div>
-    <div class="fields-row">
+    <div class="fields-row" id="ln-tenure-row">
       <div class="field"><label>Tenure (months)</label><input id="ln-tenure" type="number" min="1" step="1" placeholder="60" oninput="lnCalcEMI()"></div>
       <div class="field"><label>Start date</label><input id="ln-start" type="date" oninput="lnCalcEMI()"></div>
+    </div>
+    <div class="fields-row" id="ln-duedate-row" style="display:none">
+      <div class="field"><label>Due date (when to repay by)</label><input id="ln-duedate" type="date"></div>
+      <div class="field"><label>Start date</label><input id="ln-start-friendly" type="date"></div>
     </div>
     <!-- EMI Preview -->
     <div id="ln-preview" style="background:var(--surface2);border-radius:var(--radius);padding:12px;margin-bottom:1rem;display:none">

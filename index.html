@@ -762,6 +762,29 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 .tk-list-manage-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--border)}
 .tk-list-manage-row:last-child{border-bottom:none}
 .tk-list-color-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* ── Pay-from account popup ── */
+.pay-popup-backdrop{position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);backdrop-filter:blur(4px)}
+.pay-popup{background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius-lg);width:min(380px,92vw);overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.pay-popup-head{padding:14px 16px 12px;border-bottom:0.5px solid var(--border)}
+.pay-popup-title{font-size:14px;font-weight:600;color:var(--text)}
+.pay-popup-sub{font-size:12px;color:var(--text3);margin-top:3px}
+.pay-popup-body{padding:12px 16px}
+.pay-ac-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;border:0.5px solid var(--border);cursor:pointer;margin-bottom:6px;transition:all .15s}
+.pay-ac-row:hover{border-color:var(--border2);background:var(--surface2)}
+.pay-ac-row.selected{border-color:var(--accent-border);background:var(--accent-dim)}
+.pay-ac-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.pay-ac-name{font-size:13px;font-weight:500;color:var(--text);flex:1}
+.pay-ac-bal{font-size:12px;color:var(--text3);font-family:var(--mono)}
+.pay-ac-check{width:16px;height:16px;border-radius:50%;border:0.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;transition:all .15s}
+.pay-ac-row.selected .pay-ac-check{background:var(--accent);border-color:var(--accent);color:#fff}
+.pay-after{font-size:11px;color:var(--text3);padding:6px 0 10px;display:flex;justify-content:space-between;align-items:center}
+.pay-after-val{font-size:12px;font-weight:500;color:var(--text);font-family:var(--mono)}
+.pay-popup-foot{padding:10px 16px 14px;display:flex;flex-direction:column;gap:6px}
+.pay-confirm-btn{height:36px;border-radius:8px;border:none;background:var(--positive);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);transition:opacity .15s}
+.pay-confirm-btn:hover{opacity:.88}
+.pay-skip-btn{height:30px;border-radius:8px;border:0.5px solid var(--border2);background:transparent;color:var(--text3);font-size:12px;cursor:pointer;font-family:var(--font);transition:all .15s}
+.pay-skip-btn:hover{color:var(--text);border-color:var(--border3)}
 /* ── AI Insight widget ── */
 .ai-insight-body{padding:6px 0 2px}
 .ai-insight-text{font-size:13px;color:var(--text);line-height:1.65;font-style:italic}
@@ -1808,6 +1831,36 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
       <div id="emi-list"></div>
     </div>
 
+    <!-- Receivables page -->
+    <div id="page-receivables" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Receivables</div>
+          <div class="page-sub" id="recv-sub">Money owed to you</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn primary" onclick="openRecvModal()">+ Add receivable</button>
+        </div>
+      </div>
+      <div class="metrics" id="recv-metrics"></div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+        <select class="sort-select" id="recv-sort" onchange="renderReceivables()" style="flex:1;min-width:160px">
+          <option value="amount">Sort: Amount</option>
+          <option value="urgency">Sort: Most overdue</option>
+          <option value="name">Sort: Name</option>
+          <option value="added">Sort: Recently added</option>
+        </select>
+        <select class="sort-select" id="recv-filter" onchange="renderReceivables()">
+          <option value="all">All</option>
+          <option value="pending">Pending</option>
+          <option value="collected">Collected</option>
+          <option value="person">Person</option>
+          <option value="work">Work / Company</option>
+        </select>
+      </div>
+      <div id="recv-list"></div>
+    </div>
+
     <!-- Accounts page -->
     <div id="page-accounts" style="display:none">
       <div class="page-header">
@@ -1940,6 +1993,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
     <div class="field"><label>Status</label>
       <select id="f-status"><option value="active">Active</option><option value="paused">Paused</option></select>
     </div>
+    <div class="field"><label>Pay from account (optional)</label><select id="f-pay-account"><option value="">— No account —</option></select></div>
     <!-- Trial section -->
     <div class="toggle-row">
       <input type="checkbox" class="toggle-check" id="f-trial" onchange="toggleTrialFields()">
@@ -1981,7 +2035,7 @@ const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A'
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
-const KEY_TASKS='subtracker_tasks', KEY_LISTS='subtracker_lists', KEY_GOALS='subtracker_goals', KEY_NOTES='subtracker_notes', KEY_LOANS='subtracker_loans', KEY_ACCOUNTS='subtracker_accounts', KEY_NW='subtracker_networth';
+const KEY_TASKS='subtracker_tasks', KEY_LISTS='subtracker_lists', KEY_GOALS='subtracker_goals', KEY_NOTES='subtracker_notes', KEY_LOANS='subtracker_loans', KEY_ACCOUNTS='subtracker_accounts', KEY_NW='subtracker_networth', KEY_RECV='subtracker_receivables';
 
 let items=[], payments=[], tabbyItems=[], editId=null, tabbyEditId=null, tabbyColor=COLORS[4];
 let filterCat='All', selectedColor=COLORS[0];
@@ -1992,6 +2046,7 @@ let modalSubtasks=[];
 let goals=[], glEditId=null, glLogId=null, glFilterCat='all', glSelectedEmoji='🎯', glMsInputs=[];
 let notes=[], qnEditId=null, qnFilterTag='all', qnSelectedColor='none', qnModalTags=[];
 let loans=[], lnEditId=null;
+let receivables=[], rvEditId=null;
 let accounts=[], acEditId=null, acSelectedColor='#4A8ECC';
 let nwHistory=[];
 const AC_TYPES={savings:{label:'Savings',icon:'💰',group:'liquid'},current:{label:'Current',icon:'🏦',group:'liquid'},cash:{label:'Cash',icon:'💵',group:'liquid'},investment:{label:'Investment',icon:'📈',group:'investments'},crypto:{label:'Crypto',icon:'💎',group:'investments'},gold:{label:'Gold',icon:'🥇',group:'investments'},fixeddeposit:{label:'Fixed Deposit',icon:'🔒',group:'fixed'},other:{label:'Other',icon:'📋',group:'liquid'}};
@@ -2014,6 +2069,7 @@ function saveData(){
 function saveGoals(){try{localStorage.setItem(KEY_GOALS,JSON.stringify(goals));}catch(e){}asAutoSave();}
 function saveNotes(){try{localStorage.setItem(KEY_NOTES,JSON.stringify(notes));}catch(e){}asAutoSave();}
 function saveLoans(){try{localStorage.setItem(KEY_LOANS,JSON.stringify(loans));}catch(e){}asAutoSave();}
+function saveReceivables(){try{localStorage.setItem(KEY_RECV,JSON.stringify(receivables));}catch(e){}asAutoSave();}
 function saveAccounts(){try{localStorage.setItem(KEY_ACCOUNTS,JSON.stringify(accounts));}catch(e){}asAutoSave();}
 function saveNetWorth(){try{localStorage.setItem(KEY_NW,JSON.stringify(nwHistory));}catch(e){}}
 
@@ -2026,6 +2082,7 @@ function loadData(){
   try{const d=localStorage.getItem(KEY_GOALS);if(d)goals=JSON.parse(d);}catch(e){goals=[];}
   try{const d=localStorage.getItem(KEY_NOTES);if(d)notes=JSON.parse(d);}catch(e){notes=[];}
   try{const d=localStorage.getItem(KEY_LOANS);if(d)loans=JSON.parse(d);}catch(e){loans=[];}
+  try{const d=localStorage.getItem(KEY_RECV);if(d)receivables=JSON.parse(d);}catch(e){receivables=[];}
   try{const d=localStorage.getItem(KEY_ACCOUNTS);if(d)accounts=JSON.parse(d);}catch(e){accounts=[];}
   try{const d=localStorage.getItem(KEY_NW);if(d)nwHistory=JSON.parse(d);}catch(e){nwHistory=[];}
   render();
@@ -2207,7 +2264,7 @@ function undoDelete(){
 /* &#9472;&#9472; Navigation &#9472;&#9472; */
 function switchPage(p){
   currentPage=p;
-  ['dashboard','active','tabby','trials','history','insights','calc','tasks','goals','calendar','notes','loans','accounts','networth'].forEach(x=>{
+  ['dashboard','active','tabby','trials','history','insights','calc','tasks','goals','calendar','notes','loans','receivables','accounts','networth'].forEach(x=>{
     document.getElementById('page-'+x).style.display=x===p?'':'none';
     const n=document.getElementById('nav-'+x);
     if(n)n.className='nav-item'+(x===p?' active':'');
@@ -2228,6 +2285,7 @@ function switchPage(p){
   if(p==='dashboard')renderDashboard();
   if(p==='notes')renderNotes();
   if(p==='loans')renderLoans();
+  if(p==='receivables')renderReceivables();
   if(p==='accounts')renderAccounts();
   if(p==='networth')renderNetWorth();
   closeMobileSidebar();
@@ -2416,7 +2474,7 @@ function renderItem(item,ym){
         ${paidNow?'<span class="badge badge-paid">paid</span>':''}
         ${item.isTrial?`<span class="badge ${trialDaysLeft(item.trialEnd)<0?'badge-trial-expired':trialDaysLeft(item.trialEnd)<=3?'badge-trial-urgent':'badge-trial'}">${trialBadgeLabel(item.trialEnd)}</span>`:''}
       </div>
-      <div class="item-meta"><span>${item.cat}</span>${resetChip}${showDue?`<span class="item-due ${due.cls}">${due.label}</span>`:''}${!isP&&!item.isTrial?paidMeta:''}</div>
+      <div class="item-meta"><span>${item.cat}</span>${item.payAccountId&&!item.isTrial?(()=>{const _a=accounts.find(a=>a.id===item.payAccountId);return _a?`<span style="font-size:11px;color:var(--accent);opacity:.7">&#8594; ${esc(_a.name)}</span>`:''})():''}${resetChip}${showDue?`<span class="item-due ${due.cls}">${due.label}</span>`:''}${!isP&&!item.isTrial?paidMeta:''}</div>
       ${item.notes?`<div class="item-notes">${esc(item.notes)}</div>`:''}
     </div>
     <div>
@@ -2908,12 +2966,125 @@ function togglePaid(id){
   const item=items.find(i=>i.id===id);if(!item)return;
   const existing=payments.find(p=>p.itemId===id&&inCycle(p.date));
   if(existing){
+    // Un-marking paid — offer to reverse account deduction
     payments=payments.filter(p=>p.id!==existing.id);
-    saveData();render();toast(`&#8617; ${item.name} marked as unpaid`);
+    // Reverse account deduction if one was recorded
+    if(existing.deductedAccountId){
+      const ac=accounts.find(a=>a.id===existing.deductedAccountId);
+      if(ac){
+        const prev=parseFloat(ac.balance)||0;
+        ac.balance=parseFloat((prev+(parseFloat(item.amount)||0)).toFixed(2));
+        ac.updatedAt=Date.now();
+        ac.history=ac.history||[];
+        ac.history.push({balance:ac.balance,date:todayStr(),note:'Reversed: '+item.name});
+        if(ac.history.length>24)ac.history=ac.history.slice(-24);
+        saveAccounts();
+        if(currentPage==='accounts')renderAccounts();
+        if(currentPage==='networth')renderNetWorth();
+      }
+    }
+    saveData();render();
+    toast('&#8617; '+item.name+' unmarked'+(existing.deductedAccountId?' · deduction reversed':''));
   } else {
-    payments.unshift({id:String(Date.now()),itemId:item.id,name:item.name,cat:item.cat,amount:item.amount,date:todayStr(),note:''});
-    saveData();render();toast(`&#10003; ${item.name} marked as paid`);
+    // Marking paid — show account picker popup
+    showPayFromPopup(item);
   }
+}
+
+function showPayFromPopup(item){
+  // Remove any existing popup
+  const ex=document.getElementById('pay-popup-wrap');if(ex)ex.remove();
+
+  const defaultAcId = item.payAccountId||'';
+  const activeAccounts = accounts.filter(a=>!a.archived);
+
+  const rowsHtml = activeAccounts.length
+    ? activeAccounts.map(a=>`
+        <div class="pay-ac-row${a.id===defaultAcId?' selected':''}" id="pac-${a.id}" onclick="selectPayAc('${a.id}')">
+          <div class="pay-ac-dot" style="background:${a.color||'#888'}"></div>
+          <div class="pay-ac-name">${esc(a.name)}</div>
+          <div class="pay-ac-bal">AED ${fmt(a.balance)}</div>
+          <div class="pay-ac-check">${a.id===defaultAcId?'&#10003;':''}</div>
+        </div>`).join('')
+    : '<div style="font-size:12px;color:var(--text3);padding:8px 0">No accounts set up yet.</div>';
+
+  const selectedAc = activeAccounts.find(a=>a.id===defaultAcId)||activeAccounts[0];
+  const afterBal = selectedAc
+    ? 'AED '+fmt((parseFloat(selectedAc.balance)||0)-(parseFloat(item.amount)||0))
+    : '—';
+
+  const popup = document.createElement('div');
+  popup.id='pay-popup-wrap';
+  popup.className='pay-popup-backdrop';
+  popup.innerHTML=`
+    <div class="pay-popup">
+      <div class="pay-popup-head">
+        <div class="pay-popup-title">Mark ${esc(item.name)} as paid</div>
+        <div class="pay-popup-sub">AED ${fmt(item.amount)} &nbsp;·&nbsp; deduct from which account?</div>
+      </div>
+      <div class="pay-popup-body">
+        <div id="pay-ac-list">${rowsHtml}</div>
+        ${activeAccounts.length?`<div class="pay-after" id="pay-after-row">
+          <span>Balance after deduction</span>
+          <span class="pay-after-val" id="pay-after-val">${afterBal}</span>
+        </div>`:''}
+      </div>
+      <div class="pay-popup-foot">
+        <button class="pay-confirm-btn" onclick="confirmPayFrom('${item.id}')">&#10003; Confirm &amp; deduct</button>
+        <button class="pay-skip-btn" onclick="confirmPayFrom('${item.id}',true)">Mark paid without deducting</button>
+      </div>
+    </div>`;
+  popup.addEventListener('click',function(e){if(e.target===popup)popup.remove();});
+  document.body.appendChild(popup);
+  window._payItemId=item.id;
+  window._paySelectedAcId=defaultAcId||(activeAccounts[0]?activeAccounts[0].id:'');
+}
+
+function selectPayAc(acId){
+  window._paySelectedAcId=acId;
+  document.querySelectorAll('.pay-ac-row').forEach(r=>{
+    const sel=r.id==='pac-'+acId;
+    r.classList.toggle('selected',sel);
+    r.querySelector('.pay-ac-check').innerHTML=sel?'&#10003;':'';
+  });
+  // Update after-balance preview
+  const item=items.find(i=>i.id===window._payItemId);
+  const ac=accounts.find(a=>a.id===acId);
+  const afterEl=document.getElementById('pay-after-val');
+  if(afterEl&&item&&ac){
+    const after=(parseFloat(ac.balance)||0)-(parseFloat(item.amount)||0);
+    afterEl.textContent='AED '+fmt(after);
+    afterEl.style.color=after<0?'var(--red)':'var(--text)';
+  }
+}
+
+function confirmPayFrom(itemId, skipDeduction){
+  const popup=document.getElementById('pay-popup-wrap');
+  const item=items.find(i=>i.id===itemId);if(!item)return;
+  const acId=skipDeduction?null:window._paySelectedAcId;
+  const paymentId=String(Date.now());
+  payments.unshift({id:paymentId,itemId:item.id,name:item.name,cat:item.cat,amount:item.amount,date:todayStr(),note:'',deductedAccountId:acId||null});
+
+  if(acId){
+    const ac=accounts.find(a=>a.id===acId);
+    if(ac){
+      const prev=parseFloat(ac.balance)||0;
+      ac.balance=parseFloat((prev-(parseFloat(item.amount)||0)).toFixed(2));
+      ac.updatedAt=Date.now();
+      ac.history=ac.history||[];
+      ac.history.push({balance:ac.balance,date:todayStr(),note:'Paid: '+item.name});
+      if(ac.history.length>24)ac.history=ac.history.slice(-24);
+      saveAccounts();
+      if(currentPage==='accounts')renderAccounts();
+      if(currentPage==='networth')renderNetWorth();
+      toast('&#10003; '+item.name+' paid &nbsp;·&nbsp; AED '+fmt(item.amount)+' deducted from '+ac.name);
+    }
+  } else {
+    toast('&#10003; '+item.name+' marked as paid');
+  }
+
+  saveData();render();
+  if(popup)popup.remove();
 }
 
 function duplicateItem(id){
@@ -3133,7 +3304,7 @@ document.getElementById('tabby-modal').addEventListener('click',e=>{if(e.target=
 
 function exportJSON(){
   if(!items.length&&!payments.length&&!tabbyItems.length&&!tasks.length){toast('Nothing to back up yet');return;}
-  const data=JSON.stringify({items,payments,tabbyItems,tasks,lists,goals,notes,loans,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),exportedAt:new Date().toISOString()},null,2);
+  const data=JSON.stringify({items,payments,tabbyItems,tasks,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),exportedAt:new Date().toISOString()},null,2);
   const d=new Date();
   const filename='bills-backup-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'.json';
   verSnapshot(true);
@@ -3192,7 +3363,8 @@ function applyRestore(mode){
     loans=data.loans||[];
     accounts=data.accounts||[];
     nwHistory=data.nwHistory||[];
-    saveData();saveTasks();saveLists();saveGoals();saveNotes();saveLoans();saveAccounts();saveNetWorth();
+    receivables=data.receivables||[];
+    saveData();saveTasks();saveLists();saveGoals();saveNotes();saveLoans();saveReceivables();saveAccounts();saveNetWorth();
     if(data.dbLayout)  localStorage.setItem(DB_LAYOUT_KEY,  JSON.stringify(data.dbLayout));
     if(data.navLayout) localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(data.navLayout));
     renderNav();
@@ -3228,7 +3400,9 @@ function applyRestore(mode){
     tasks=[...(data.tasks||[]),...tasks.filter(t=>!bkIds.tasks.has(t.id))];
     lists=[...(data.lists||[]),...lists.filter(l=>!bkIds.lists.has(l.id))];
     goals=[...(data.goals||[]),...goals.filter(g=>!bkIds.goals.has(g.id))];
-    saveData();saveTasks();saveLists();saveGoals();saveNotes();saveLoans();saveAccounts();saveNetWorth();
+    const rvIds=new Set((data.receivables||[]).map(r=>r.id));
+    receivables=[...(data.receivables||[]),...receivables.filter(r=>!rvIds.has(r.id))];
+    saveData();saveTasks();saveLists();saveGoals();saveNotes();saveLoans();saveReceivables();saveAccounts();saveNetWorth();
     // Merge layouts: only apply from backup if local layout is empty
     if(data.dbLayout  && !localStorage.getItem(DB_LAYOUT_KEY))  localStorage.setItem(DB_LAYOUT_KEY,  JSON.stringify(data.dbLayout));
     if(data.navLayout && !localStorage.getItem(NAV_LAYOUT_KEY)) localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(data.navLayout));
@@ -3277,6 +3451,12 @@ function openModal(id,forceTrial=false){
   document.getElementById('trial-fields').style.display=isTrial?'block':'none';
   selectedColor=item?.color||COLORS[0];
   renderColorPicker();
+  const fPayAc=document.getElementById('f-pay-account');
+  if(fPayAc){
+    fPayAc.innerHTML='<option value="">— No account —</option>'+
+      accounts.filter(a=>!a.archived).map(a=>`<option value="${a.id}">${esc(a.name)} — AED ${fmt(a.balance)}</option>`).join('');
+    fPayAc.value=item?.payAccountId||'';
+  }
   document.getElementById('modal').style.display='flex';
   setTimeout(()=>document.getElementById('f-name').focus(),50);
 }
@@ -3302,13 +3482,41 @@ function saveItem(){
     status:document.getElementById('f-status').value,
     color:selectedColor,
     isTrial,
-    trialEnd:isTrial?document.getElementById('f-trial-end').value:null
+    trialEnd:isTrial?document.getElementById('f-trial-end').value:null,
+    payAccountId:document.getElementById('f-pay-account').value||null,
   };
-  if(editId){const idx=items.findIndex(i=>i.id===editId);if(idx>-1)items[idx]=obj;}
+  // If editing and amount changed, adjust the linked account balance for any paid cycle payment
+  if(editId){
+    const prev=items.find(i=>i.id===editId);
+    const prevAmount=prev?parseFloat(prev.amount)||0:0;
+    const newAmount=parseFloat(obj.amount)||0;
+    if(prev && prevAmount!==newAmount){
+      const cyclePay=payments.find(p=>p.itemId===editId&&inCycle(p.date)&&p.deductedAccountId);
+      if(cyclePay){
+        const ac=accounts.find(a=>a.id===cyclePay.deductedAccountId);
+        if(ac){
+          const diff=newAmount-prevAmount; // positive = bill went up = deduct more
+          ac.balance=parseFloat((parseFloat(ac.balance)-diff).toFixed(2));
+          ac.updatedAt=Date.now();
+          ac.history=ac.history||[];
+          ac.history.push({balance:ac.balance,date:todayStr(),note:'Adjusted: '+obj.name+' (amount changed)'});
+          if(ac.history.length>24)ac.history=ac.history.slice(-24);
+          saveAccounts();
+          if(currentPage==='accounts')renderAccounts();
+          if(currentPage==='networth')renderNetWorth();
+          toast('Updated '+obj.name+' · account adjusted by AED '+fmt(Math.abs(diff))+(diff>0?' (deducted more)':' (refunded difference)'));
+        }
+        // Update the payment record amount too
+        cyclePay.amount=newAmount;
+      }
+    }
+    const idx=items.findIndex(i=>i.id===editId);if(idx>-1)items[idx]=obj;
+  }
   else items.unshift(obj);
   saveData();closeModal();render();
   if(currentPage==='trials')renderTrials();
-  toast(editId?`Updated ${obj.name}`:`Added ${obj.name}`);
+  if(!editId||!(()=>{const p=payments.find(pp=>pp.itemId===editId&&inCycle(pp.date)&&pp.deductedAccountId);return p&&parseFloat(items.find(i=>i.id===editId)?.amount)!==parseFloat(p?.amount);})())
+    toast(editId?'Updated '+obj.name:'Added '+obj.name);
 }
 
 /* &#9472;&#9472; Calculator &#9472;&#9472; */
@@ -4795,7 +5003,7 @@ async function asWriteFile(){
   asDot('busy');
   try{
     const payload = JSON.stringify(
-      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),savedAt:new Date().toISOString()},
+      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),savedAt:new Date().toISOString()},
       null, 2
     );
     const writable = await _asFileHandle.createWritable();
@@ -5767,7 +5975,7 @@ function verSnapshot(force){
       if(Date.now() - lastTs < VER_MIN_GAP) return;
     }
     const payload = JSON.stringify(
-      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),savedAt:new Date().toISOString()}
+      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),savedAt:new Date().toISOString()}
     );
     // Store the current auto-save filename as the snapshot title
     const filename = localStorage.getItem(AS_FILE_KEY)||null;
@@ -6481,6 +6689,7 @@ const NAV_ITEMS = [
   {id:'trials',   icon:'&#9203;',  label:'Free trials',      section:'Finances'},
   {id:'accounts', icon:'&#127981;',label:'Accounts',         section:'Finances'},
   {id:'loans',    icon:'&#127968;',label:'Loans',            section:'Finances'},
+  {id:'receivables',icon:'&#9775;', label:'Receivables',      section:'Finances'},
   {id:'networth', icon:'&#10022;', label:'Net Worth',        section:'Finances'},
   {id:'history',  icon:'&#9719;',  label:'History',          section:'Tools'},
   {id:'insights', icon:'&#9673;',  label:'Insights',         section:'Tools'},
@@ -6806,6 +7015,160 @@ function updateCyclePreview(){
   prev.textContent = 'Current cycle: ' + cycleLabel();
 }
 
+/* ═══════════════════════════════════════════════════════
+   Receivables — money owed TO the user
+   ═══════════════════════════════════════════════════════ */
+const RECV_TYPE_COLORS = {person:'#9B7FE8', work:'#4A8ECC', other:'#888880'};
+const RECV_TYPE_ICONS  = {person:'&#129309;', work:'&#127970;', other:'&#9679;'};
+
+function openRecvModal(id){
+  rvEditId = id||null;
+  const r = id ? receivables.find(r=>r.id===id) : null;
+  document.getElementById('recv-modal-title').textContent = r ? 'Edit receivable' : 'Add receivable';
+  document.getElementById('rv-name').value    = r?.name||'';
+  document.getElementById('rv-amount').value  = r?.amount||'';
+  document.getElementById('rv-type').value    = r?.type||'person';
+  document.getElementById('rv-from').value    = r?.from||'';
+  document.getElementById('rv-date').value    = r?.date||new Date().toISOString().slice(0,10);
+  document.getElementById('rv-due').value     = r?.dueDate||'';
+  document.getElementById('rv-notes').value   = r?.notes||'';
+  document.getElementById('recv-modal').style.display='flex';
+  document.getElementById('rv-name').focus();
+}
+function closeRecvModal(){
+  document.getElementById('recv-modal').style.display='none';
+  rvEditId=null;
+}
+
+function saveRecv(){
+  const name   = document.getElementById('rv-name').value.trim();
+  const amount = parseFloat(document.getElementById('rv-amount').value);
+  if(!name){document.getElementById('rv-name').focus();return;}
+  if(isNaN(amount)||amount<=0){document.getElementById('rv-amount').focus();return;}
+  const obj = {
+    id:       rvEditId||String(Date.now()),
+    name, amount,
+    type:     document.getElementById('rv-type').value,
+    from:     document.getElementById('rv-from').value.trim(),
+    date:     document.getElementById('rv-date').value||new Date().toISOString().slice(0,10),
+    dueDate:  document.getElementById('rv-due').value||null,
+    notes:    document.getElementById('rv-notes').value.trim(),
+    collected: rvEditId ? (receivables.find(r=>r.id===rvEditId)?.collected||false) : false,
+    createdAt: rvEditId ? (receivables.find(r=>r.id===rvEditId)?.createdAt||Date.now()) : Date.now(),
+  };
+  if(rvEditId){ const idx=receivables.findIndex(r=>r.id===rvEditId); if(idx>-1)receivables[idx]=obj; }
+  else receivables.unshift(obj);
+  saveReceivables(); closeRecvModal(); renderReceivables();
+  toast(rvEditId ? `Updated ${obj.name}` : `Added ${obj.name}`);
+}
+
+function markRecvCollected(id){
+  const r=receivables.find(r=>r.id===id); if(!r) return;
+  r.collected=!r.collected;
+  r.collectedDate=r.collected?new Date().toISOString().slice(0,10):null;
+  saveReceivables(); renderReceivables();
+  toast(r.collected?`\u2713 Collected: ${r.name}`:`\u21b5 Reopened: ${r.name}`);
+}
+
+function deleteRecv(id){
+  const r=receivables.find(r=>r.id===id); if(!r) return;
+  receivables=receivables.filter(r=>r.id!==id);
+  saveReceivables(); renderReceivables();
+  toast(`Removed: ${r.name}`, true);
+}
+
+function renderReceivables(){
+  const pending   = receivables.filter(r=>!r.collected);
+  const collected = receivables.filter(r=>r.collected);
+  const total     = pending.reduce((s,r)=>s+(parseFloat(r.amount)||0),0);
+  const overdue   = pending.filter(r=>r.dueDate&&new Date(r.dueDate)<new Date()).length;
+
+  document.getElementById('recv-sub').textContent =
+    receivables.length+' receivable'+(receivables.length!==1?'s':'')+
+    (collected.length?' · '+collected.length+' collected':'');
+
+  document.getElementById('recv-metrics').innerHTML = `
+    <div class="metric" style="border-color:var(--positive-border);background:linear-gradient(135deg,rgba(31,170,126,.07) 0%,var(--surface) 60%)">
+      <div class="metric-label">Total owed to you</div>
+      <div class="metric-value" style="color:var(--positive)">AED ${fmt(total)}</div>
+      <div class="metric-sub">${pending.length} pending</div>
+    </div>
+    ${overdue?`<div class="metric red"><div class="metric-label">Overdue</div><div class="metric-value">${overdue}</div><div class="metric-sub">past due date</div></div>`:''}
+    ${collected.length?`<div class="metric"><div class="metric-label">Collected</div><div class="metric-value">${collected.length}</div><div class="metric-sub">AED ${fmt(collected.reduce((s,r)=>s+(parseFloat(r.amount)||0),0))} recovered</div></div>`:''}
+  `;
+
+  const cont = document.getElementById('recv-list');
+  if(!receivables.length){
+    cont.innerHTML='<div class="emi-empty"><div style="font-size:32px;margin-bottom:10px;opacity:.4">&#9775;</div><div style="font-size:15px;font-weight:500;color:var(--text2);margin-bottom:6px">No receivables yet</div><div style="font-size:13px;color:var(--text3)">Track money owed to you by people or companies</div></div>';
+    return;
+  }
+
+  const sortBy   = (document.getElementById('recv-sort')||{}).value||'amount';
+  const filterBy = (document.getElementById('recv-filter')||{}).value||'all';
+
+  let vis = receivables.filter(r=>{
+    if(filterBy==='pending')   return !r.collected;
+    if(filterBy==='collected') return r.collected;
+    if(filterBy==='person')    return r.type==='person';
+    if(filterBy==='work')      return r.type==='work';
+    return true;
+  });
+
+  vis = vis.slice().sort((a,b)=>{
+    // Always show pending before collected
+    if(a.collected!==b.collected) return a.collected?1:-1;
+    if(sortBy==='amount')  return (parseFloat(b.amount)||0)-(parseFloat(a.amount)||0);
+    if(sortBy==='urgency'){
+      const da=a.dueDate?new Date(a.dueDate).getTime():Infinity;
+      const db=b.dueDate?new Date(b.dueDate).getTime():Infinity;
+      return da-db;
+    }
+    if(sortBy==='name')  return (a.name||'').localeCompare(b.name||'');
+    if(sortBy==='added') return (b.createdAt||0)-(a.createdAt||0);
+    return 0;
+  });
+
+  cont.innerHTML = '<div class="emi-grid">' + vis.map(r=>{
+    const color   = RECV_TYPE_COLORS[r.type]||'#888';
+    const icon    = RECV_TYPE_ICONS[r.type]||'';
+    const isOD    = !r.collected && r.dueDate && new Date(r.dueDate)<new Date();
+    const daysSince = Math.floor((Date.now()-new Date(r.date).getTime())/(1000*60*60*24));
+    const sinceStr  = daysSince===0?'Today':daysSince===1?'Yesterday':`${daysSince}d ago`;
+    const dueLbl    = r.dueDate
+      ? `<span style="font-size:11px;${isOD?'color:var(--red)':'color:var(--text3)'}">
+           ${isOD?'Overdue · ':''} Due ${new Date(r.dueDate).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
+         </span>` : '';
+
+    return `<div class="emi-card${r.collected?' emi-paid-off':''}">
+      <div class="emi-card-stripe" style="background:${color}"></div>
+      <div class="emi-card-head">
+        <div style="min-width:0">
+          <div class="emi-card-title">${icon} ${esc(r.name)}</div>
+          <div class="emi-card-sub">${r.from?esc(r.from):''}${r.from&&r.type?' · ':''}${r.type?r.type.charAt(0).toUpperCase()+r.type.slice(1):''}</div>
+        </div>
+        <div class="emi-actions">
+          ${!r.collected?`<button class="icon-btn pay" onclick="markRecvCollected('${r.id}')" title="Mark collected">&#10003;</button>`:''}
+          <button class="icon-btn" onclick="openRecvModal('${r.id}')" title="Edit">&#9998;</button>
+          <button class="icon-btn del" onclick="deleteRecv('${r.id}')" title="Delete">&#10005;</button>
+        </div>
+      </div>
+      <div class="emi-kpis">
+        <div class="emi-kpi" style="grid-column:span 2">
+          <div class="emi-kpi-label">Amount owed</div>
+          <div class="emi-kpi-val" style="color:var(--positive)">AED ${fmt(parseFloat(r.amount)||0)}</div>
+          <div class="emi-kpi-sub">${sinceStr} · ${r.collected?'<span style="color:var(--positive)">Collected '+formatShortDate(r.collectedDate||r.date)+'</span>':'Pending'}</div>
+        </div>
+        <div class="emi-kpi" style="grid-column:span 2">
+          <div class="emi-kpi-label">${r.dueDate?'Due date':'Lent on'}</div>
+          <div class="emi-kpi-val" style="font-size:14px">${r.dueDate?new Date(r.dueDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):formatShortDate(r.date)}</div>
+          <div class="emi-kpi-sub">${r.notes?esc(r.notes.slice(0,40))+(r.notes.length>40?'…':''):''}</div>
+        </div>
+      </div>
+      ${!r.collected&&r.dueDate?`<div style="padding:0 16px 12px">${dueLbl}</div>`:''}
+    </div>`;
+  }).join('') + '</div>';
+}
+
 loadData();
 asRestoreStatus();
 checkReminders();
@@ -7063,6 +7426,35 @@ renderNav();
     <span class="mnav-icon">&#9776;</span>Menu
   </button>
 </nav>
+
+
+<!-- Receivables modal -->
+<div class="modal-backdrop" id="recv-modal" style="display:none" onclick="if(event.target===this)closeRecvModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
+    <div class="modal-title" id="recv-modal-title">Add receivable</div>
+    <div class="field"><label>Description</label><input id="rv-name" type="text" placeholder="e.g. Salary advance, Split dinner, Project payment…" autocomplete="off"></div>
+    <div class="fields-row">
+      <div class="field"><label>Amount (AED)</label><input id="rv-amount" type="number" min="0" step="0.01" placeholder="0.00"></div>
+      <div class="field"><label>Type</label>
+        <select id="rv-type">
+          <option value="person">&#129309; Person</option>
+          <option value="work">&#127970; Work / Company</option>
+          <option value="other">&#9679; Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="fields-row">
+      <div class="field"><label>From (name)</label><input id="rv-from" type="text" placeholder="e.g. Ahmed, Acme Corp…"></div>
+      <div class="field"><label>Date lent</label><input id="rv-date" type="date"></div>
+    </div>
+    <div class="field"><label>Expected by (optional)</label><input id="rv-due" type="date"></div>
+    <div class="field"><label>Notes (optional)</label><textarea id="rv-notes" placeholder="Context, reference, agreement…" style="height:54px"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeRecvModal()">Cancel</button>
+      <button class="btn primary" onclick="saveRecv()">Save</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>

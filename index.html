@@ -6407,21 +6407,30 @@ async function aiFetchInsight(force){
   const context = aiFinancialContext();
   const prompt = `You are a friendly personal finance assistant. Based on this user's real financial data, write ONE short, specific, helpful observation or tip (max 25 words). Be concrete — mention actual numbers or specific bills/goals from the data. Do not start with "I" or "You". No pleasantries.\n\nUser data:\n${context}`;
 
-  const resp = await fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{
-      'Content-Type':'application/json',
-      'x-api-key': key,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-allow-browser': 'true',
-    },
-    body:JSON.stringify({
-      model:'claude-haiku-4-5-20251001',
-      max_tokens:80,
-      messages:[{role:'user',content:prompt}],
-    }),
-  });
-  if(!resp.ok) throw new Error('API error '+resp.status);
+  let resp;
+  try {
+    resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-allow-browser': 'true',
+      },
+      body:JSON.stringify({
+        model:'claude-haiku-4-5-20251001',
+        max_tokens:80,
+        messages:[{role:'user',content:prompt}],
+      }),
+    });
+  } catch(netErr){
+    throw new Error('Network error — check your API key or try refreshing. ('+netErr.message+')');
+  }
+  if(!resp.ok){
+    let errMsg='API error '+resp.status;
+    try{ const e=await resp.json(); errMsg=e?.error?.message||errMsg; }catch(e){}
+    throw new Error(errMsg);
+  }
   const data = await resp.json();
   const text = (data.content||[]).map(b=>b.text||'').join('').trim();
   localStorage.setItem(AI_INS_STORE, JSON.stringify({date:today, text}));
@@ -6474,7 +6483,15 @@ function dbWidgetAIInsight(el){
       if(text) aiShowInsight(body, text, false);
       else body.innerHTML='<div class="ai-insight-body"><div style="font-size:12px;color:var(--text3)">Could not fetch insight. Check your API key.</div></div>';
     }).catch(e=>{
-      body.innerHTML='<div class="ai-insight-body"><div style="font-size:12px;color:var(--red)">Error: '+esc(e.message)+'</div></div>';
+      const isAuthErr = e.message.includes('401')||e.message.includes('403')||e.message.includes('authentication');
+      body.innerHTML='<div class="ai-insight-body">'+
+        '<div style="font-size:12px;color:var(--red);margin-bottom:8px">'+esc(e.message)+'</div>'+
+        (isAuthErr?'<div style="font-size:11px;color:var(--text3)">Check your API key in the input below.</div>'+
+          '<div class="ai-insight-key-row" style="margin-top:8px">'+
+            '<input class="ai-insight-key-input" id="ai-key-input" type="password" placeholder="sk-ant-...">'+
+            '<button class="ai-insight-save-btn" onclick="aiSaveKeyAndRun()">Update key</button>'+
+          '</div>':'<button class="ai-insight-refresh-btn" onclick="aiRefreshInsight()" style="margin-top:4px">&#8635; Try again</button>')+
+      '</div>';
     });
   }
 }
@@ -6486,7 +6503,10 @@ function aiShowInsight(body, text, fresh){
       '<div class="ai-insight-text">\u201c'+esc(text)+'\u201d</div>'+
       '<div class="ai-insight-meta">'+
         '<span>'+(fresh?'Just generated':'Cached for today \u00b7 '+today)+'</span>'+
-        '<button class="ai-insight-refresh-btn" onclick="aiRefreshInsight()" title="Generate a fresh insight">&#8635; Refresh</button>'+
+        '<div style="display:flex;gap:8px;align-items:center">'+
+          '<button class="ai-insight-refresh-btn" onclick="aiRefreshInsight()" title="Generate a fresh insight">&#8635; Refresh</button>'+
+          '<button class="ai-insight-refresh-btn" onclick="aiShowKeyInput()" title="Change API key">&#128273; Key</button>'+
+        '</div>'+
       '</div>'+
     '</div>';
 }
@@ -6515,7 +6535,51 @@ function aiSaveKeyAndRun(){
   const inp = document.getElementById('ai-key-input');
   if(!inp||!inp.value.trim()){inp&&inp.focus();return;}
   aiSetKey(inp.value);
-  // Re-render the widget
+  const widgetEl = document.getElementById('dbw-aiinsight');
+  if(widgetEl) try{ dbWidgetAIInsight(widgetEl); }catch(e){}
+}
+
+function aiShowKeyInput(){
+  const body = document.getElementById('dbwb-aiinsight');
+  if(!body) return;
+  const currentKey = aiGetKey();
+  const masked = currentKey ? 'sk-ant-…'+currentKey.slice(-6) : '';
+  body.innerHTML =
+    '<div class="ai-insight-body">'+
+      '<div style="font-size:12px;color:var(--text2);margin-bottom:6px">'+
+        (currentKey ? 'Current key: <span style="font-family:var(--mono);font-size:11px;color:var(--text3)">'+masked+'</span>' : 'No API key set')+
+      '</div>'+
+      '<div class="ai-insight-key-row">'+
+        '<input class="ai-insight-key-input" id="ai-key-input" type="password" placeholder="Paste new key (sk-ant-...)">'+
+        '<button class="ai-insight-save-btn" onclick="aiSaveKeyAndRun()">Save</button>'+
+      '</div>'+
+      '<div style="display:flex;gap:8px;margin-top:8px">'+
+        (currentKey ? '<button class="ai-insight-refresh-btn" onclick="aiClearKey()" style="color:var(--red)">&#128465; Remove key</button>' : '')+
+        '<button class="ai-insight-refresh-btn" onclick="aiCancelKeyInput()">&#10005; Cancel</button>'+
+      '</div>'+
+      '<div style="font-size:10px;color:var(--text3);margin-top:6px">Key is stored only in your browser — never shared.</div>'+
+    '</div>';
+  setTimeout(()=>{ const i=document.getElementById('ai-key-input'); if(i)i.focus(); }, 50);
+}
+
+function aiCancelKeyInput(){
+  const body = document.getElementById('dbwb-aiinsight');
+  if(!body) return;
+  const key = aiGetKey();
+  if(!key){ dbWidgetAIInsight(document.getElementById('dbw-aiinsight')); return; }
+  // Re-show the cached insight if available
+  const today = new Date().toISOString().slice(0,10);
+  try{
+    const cached = JSON.parse(localStorage.getItem(AI_INS_STORE)||'{}');
+    if(cached.date===today && cached.text){ aiShowInsight(body, cached.text, false); return; }
+  }catch(e){}
+  dbWidgetAIInsight(document.getElementById('dbw-aiinsight'));
+}
+
+function aiClearKey(){
+  if(!confirm('Remove your Anthropic API key? The AI Insight widget will stop working until a new key is entered.')) return;
+  localStorage.removeItem(AI_KEY_STORE);
+  localStorage.removeItem(AI_INS_STORE);
   const widgetEl = document.getElementById('dbw-aiinsight');
   if(widgetEl) try{ dbWidgetAIInsight(widgetEl); }catch(e){}
 }

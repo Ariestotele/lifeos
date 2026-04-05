@@ -762,6 +762,29 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 .tk-list-manage-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--border)}
 .tk-list-manage-row:last-child{border-bottom:none}
 .tk-list-color-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* ── Pay-from account popup ── */
+.pay-popup-backdrop{position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);backdrop-filter:blur(4px)}
+.pay-popup{background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius-lg);width:min(380px,92vw);overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.pay-popup-head{padding:14px 16px 12px;border-bottom:0.5px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.pay-popup-title{font-size:14px;font-weight:600;color:var(--text)}
+.pay-popup-sub{font-size:12px;color:var(--text3);margin-top:3px}
+.pay-popup-body{padding:12px 16px}
+.pay-ac-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;border:0.5px solid var(--border);cursor:pointer;margin-bottom:6px;transition:all .15s}
+.pay-ac-row:hover{border-color:var(--border2);background:var(--surface2)}
+.pay-ac-row.selected{border-color:var(--accent-border);background:var(--accent-dim)}
+.pay-ac-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.pay-ac-name{font-size:13px;font-weight:500;color:var(--text);flex:1}
+.pay-ac-bal{font-size:12px;color:var(--text3);font-family:var(--mono)}
+.pay-ac-check{width:16px;height:16px;border-radius:50%;border:0.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;transition:all .15s}
+.pay-ac-row.selected .pay-ac-check{background:var(--accent);border-color:var(--accent);color:#fff}
+.pay-after{font-size:11px;color:var(--text3);padding:6px 0 10px;display:flex;justify-content:space-between;align-items:center}
+.pay-after-val{font-size:12px;font-weight:500;color:var(--text);font-family:var(--mono)}
+.pay-popup-foot{padding:10px 16px 14px;display:flex;flex-direction:column;gap:6px}
+.pay-confirm-btn{height:36px;border-radius:8px;border:none;background:var(--positive);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);transition:opacity .15s}
+.pay-confirm-btn:hover{opacity:.88}
+.pay-skip-btn{height:30px;border-radius:8px;border:0.5px solid var(--border2);background:transparent;color:var(--text3);font-size:12px;cursor:pointer;font-family:var(--font);transition:all .15s}
+.pay-skip-btn:hover{color:var(--text);border-color:var(--border3)}
 /* ── AI Insight widget ── */
 .ai-insight-body{padding:6px 0 2px}
 .ai-insight-text{font-size:13px;color:var(--text);line-height:1.65;font-style:italic}
@@ -778,6 +801,33 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 .ai-insight-key-input:focus{border-color:var(--accent-border)}
 .ai-insight-save-btn{height:26px;padding:0 10px;border-radius:5px;border:0.5px solid var(--accent-border);background:var(--accent-dim);color:var(--accent);font-size:11px;font-weight:500;cursor:pointer;font-family:var(--font);white-space:nowrap;transition:all .15s}
 .ai-insight-save-btn:hover{background:var(--accent);color:#000}
+/* ── AI Insight cards ── */
+.ai-cards{display:flex;flex-direction:column;gap:8px;padding:2px 0}
+.ai-card{border-radius:10px;padding:13px 14px 11px;border:0.5px solid;position:relative;overflow:hidden}
+/* Thick left accent bar */
+.ai-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;border-radius:3px 0 0 3px}
+.ai-card.alert{background:rgba(224,82,82,.06);border-color:rgba(224,82,82,.25)}
+.ai-card.alert::before{background:var(--red)}
+.ai-card.opportunity{background:rgba(31,170,126,.06);border-color:rgba(31,170,126,.22)}
+.ai-card.opportunity::before{background:var(--positive)}
+.ai-card.trend{background:rgba(74,142,204,.06);border-color:rgba(74,142,204,.22)}
+.ai-card.trend::before{background:var(--accent)}
+.ai-card.tip{background:rgba(201,138,26,.06);border-color:rgba(201,138,26,.22)}
+.ai-card.tip::before{background:var(--amber)}
+.ai-card-header{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.ai-card-icon{font-size:15px;line-height:1;flex-shrink:0}
+.ai-card-tag{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.ai-card.alert .ai-card-tag{color:var(--red)}
+.ai-card.opportunity .ai-card-tag{color:var(--positive)}
+.ai-card.trend .ai-card-tag{color:var(--accent)}
+.ai-card.tip .ai-card-tag{color:var(--amber)}
+.ai-card-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.3}
+.ai-card-text{font-size:12px;color:var(--text2);line-height:1.6}
+.ai-card-action{font-size:11px;font-weight:500;margin-top:8px;padding:6px 8px;border-radius:6px;display:inline-flex;align-items:center;gap:5px}
+.ai-card.alert .ai-card-action{background:rgba(224,82,82,.1);color:var(--red)}
+.ai-card.opportunity .ai-card-action{background:rgba(31,170,126,.1);color:var(--positive)}
+.ai-card.trend .ai-card-action{background:rgba(74,142,204,.1);color:var(--accent)}
+.ai-card.tip .ai-card-action{background:rgba(201,138,26,.1);color:var(--amber)}
 
 /* ── Net Worth ── */
 .nw-hero{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:2rem;text-align:center;margin-bottom:1.25rem;position:relative;overflow:hidden}
@@ -940,8 +990,8 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 .emi-card.emi-paid-off{opacity:.5}
 .emi-card-stripe{position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius-lg) var(--radius-lg) 0 0}
 .emi-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}
-.emi-card-title{font-size:14px;font-weight:500;color:var(--text)}
-.emi-card-sub{font-size:11px;color:var(--text3);margin-top:3px}
+.emi-card-title{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.02em;line-height:1.2}
+.emi-card-sub{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-top:2px}
 .emi-actions{display:flex;gap:4px;flex-shrink:0}
 .emi-kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
 .emi-kpi{background:var(--surface2);border-radius:var(--radius);padding:9px 11px}
@@ -1628,6 +1678,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
               <input id="tk-search" type="text" placeholder="Search tasks&#8230; (press T to add)" oninput="renderTasks()">
             </div>
             <select class="sort-select" id="tk-sort" onchange="renderTasks()">
+              <option value="urgency">Sort: Urgency</option>
               <option value="created">Sort: Recent</option>
               <option value="due">Sort: Due date</option>
               <option value="priority">Sort: Priority</option>
@@ -1949,6 +2000,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
           <option value="yearly">Yearly</option>
           <option value="weekly">Weekly</option>
           <option value="quarterly">Quarterly</option>
+          <option value="once">One-time</option>
         </select>
       </div>
     </div>
@@ -1972,6 +2024,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
     <div class="field"><label>Status</label>
       <select id="f-status"><option value="active">Active</option><option value="paused">Paused</option></select>
     </div>
+    <div class="field"><label>Pay from account (optional)</label><select id="f-pay-account"><option value="">— No account —</option></select></div>
     <!-- Trial section -->
     <div class="toggle-row">
       <input type="checkbox" class="toggle-check" id="f-trial" onchange="toggleTrialFields()">
@@ -2012,7 +2065,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '1.3';
+const APP_VERSION = '2.2';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_TASKS='subtracker_tasks', KEY_LISTS='subtracker_lists', KEY_GOALS='subtracker_goals', KEY_NOTES='subtracker_notes', KEY_LOANS='subtracker_loans', KEY_ACCOUNTS='subtracker_accounts', KEY_NW='subtracker_networth', KEY_RECV='subtracker_receivables';
 
@@ -2070,7 +2123,32 @@ function loadData(){
 }
 
 /* &#9472;&#9472; Helpers &#9472;&#9472; */
-function toMonthly(a,c){return c==='yearly'?a/12:c==='weekly'?a*4.33:c==='quarterly'?a/3:a;}
+function toMonthly(a,c){return c==='yearly'?a/12:c==='weekly'?a*4.33:c==='quarterly'?a/3:c==='once'?0:a;}
+function billActiveInCycle(item, refDate){
+  if(!item.startDate) return true;
+  const startMs = new Date(item.startDate + '-01').getTime();
+  const ce = cycleEnd(refDate || new Date());
+  return startMs <= ce.getTime();
+}
+
+function billDuration(startDate){
+  if(!startDate) return null;
+  const start = new Date(startDate+'-01');
+  const now   = new Date();
+  let months  = (now.getFullYear()-start.getFullYear())*12+(now.getMonth()-start.getMonth());
+  if(months < 0) return null;
+  if(months === 0) return 'Started this month';
+  const yrs = Math.floor(months/12), mo = months%12;
+  if(yrs===0) return mo+'mo';
+  if(mo===0)  return yrs+'yr';
+  return yrs+'yr '+mo+'mo';
+}
+
+function billSinceLabel(startDate){
+  if(!startDate) return null;
+  const d = new Date(startDate+'-01');
+  return 'Since '+MONTHS[d.getMonth()]+' '+d.getFullYear();
+}
 function toAnnual(a,c){return c==='yearly'?a:c==='weekly'?a*52:c==='quarterly'?a*4:a*12;}
 function fmt(n){return n.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function todayStr(){const t=new Date();return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;}
@@ -2154,7 +2232,7 @@ function isOverdueCycle(item){
 }
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-function cycleShort(c){return c==='monthly'?'mo':c==='yearly'?'yr':c==='weekly'?'wk':c==='quarterly'?'qtr':c;}
+function cycleShort(c){return c==='monthly'?'mo':c==='yearly'?'yr':c==='weekly'?'wk':c==='quarterly'?'qtr':c==='once'?'once':c;}
 
 /* Returns true if item has been paid within its current billing cycle.
    monthly   → payment exists with date in current YYYY-MM
@@ -2167,7 +2245,7 @@ function isPaidThisCycle(item){
   if(!itemPayments.length)return false;
   const now=new Date();
   const c=item.cycle;
-  if(c==='monthly'){
+  if(c==='monthly'||c==='once'){
     return itemPayments.some(p=>inCycle(p.date));
   }
   if(c==='quarterly'){
@@ -2453,12 +2531,13 @@ function renderItem(item,ym){
         ${paidNow?'<span class="badge badge-paid">paid</span>':''}
         ${item.isTrial?`<span class="badge ${trialDaysLeft(item.trialEnd)<0?'badge-trial-expired':trialDaysLeft(item.trialEnd)<=3?'badge-trial-urgent':'badge-trial'}">${trialBadgeLabel(item.trialEnd)}</span>`:''}
       </div>
-      <div class="item-meta"><span>${item.cat}</span>${resetChip}${showDue?`<span class="item-due ${due.cls}">${due.label}</span>`:''}${!isP&&!item.isTrial?paidMeta:''}</div>
+      <div class="item-meta"><span>${item.cat}</span>${item.payAccountId&&!item.isTrial?(()=>{const _a=accounts.find(a=>a.id===item.payAccountId);return _a?`<span style="font-size:11px;color:var(--accent);opacity:.7">&#8594; ${esc(_a.name)}</span>`:''})():''}${resetChip}${showDue?`<span class="item-due ${due.cls}">${due.label}</span>`:''}${!isP&&!item.isTrial?paidMeta:''}</div>
       ${item.notes?`<div class="item-notes">${esc(item.notes)}</div>`:''}
     </div>
     <div>
-        <div class="item-amount">AED ${fmt(item.amount)}<span style="font-size:11px;font-weight:400;color:var(--text3)"> / ${cycleShort(item.cycle)}</span></div>
-        ${item.cycle!=='monthly'?`<div class="item-amount-sub">&#8776; AED ${Math.round(mAmt)}/mo</div>`:''}
+        <div class="item-amount">AED ${fmt(item.amount)}${item.cycle!=='once'?`<span style="font-size:11px;font-weight:400;color:var(--text3)"> / ${cycleShort(item.cycle)}</span>`:''}</div>
+        ${item.cycle!=='monthly'&&item.cycle!=='once'?`<div class="item-amount-sub">&#8776; AED ${Math.round(mAmt)}/mo</div>`:''}
+        ${item.cycle==='once'?'<div class="item-amount-sub" style="color:var(--accent)">One-time</div>':''}
       </div>
     <div class="item-actions">
       ${!isP&&!item.isTrial?`<button class="icon-btn pay${paidNow?' done':''}" onclick="togglePaid('${item.id}')" title="${paidNow?'Click to unpay':'Mark as paid'}">&#10003; Paid</button>`:''}
@@ -2946,11 +3025,106 @@ function togglePaid(id){
   const existing=payments.find(p=>p.itemId===id&&inCycle(p.date));
   if(existing){
     payments=payments.filter(p=>p.id!==existing.id);
-    saveData();render();toast(`&#8617; ${item.name} marked as unpaid`);
+    // Reverse account deduction if one was recorded
+    if(existing.deductedAccountId){
+      const ac=accounts.find(a=>a.id===existing.deductedAccountId);
+      if(ac){
+        ac.balance=parseFloat((parseFloat(ac.balance)+(parseFloat(item.amount)||0)).toFixed(2));
+        ac.updatedAt=Date.now();
+        ac.history=ac.history||[];
+        ac.history.push({balance:ac.balance,date:todayStr(),note:'Reversed: '+item.name});
+        if(ac.history.length>24)ac.history=ac.history.slice(-24);
+        saveAccounts();
+        if(currentPage==='accounts')renderAccounts();
+        if(currentPage==='networth')renderNetWorth();
+      }
+    }
+    saveData();render();
+    toast('\u21b5 '+item.name+' unmarked'+(existing.deductedAccountId?' \u00b7 deduction reversed':''));
   } else {
-    payments.unshift({id:String(Date.now()),itemId:item.id,name:item.name,cat:item.cat,amount:item.amount,date:todayStr(),note:''});
-    saveData();render();toast(`&#10003; ${item.name} marked as paid`);
+    showPayFromPopup(item);
   }
+}
+
+function showPayFromPopup(item){
+  const ex=document.getElementById('pay-popup-wrap');if(ex)ex.remove();
+  const defaultAcId=item.payAccountId||'';
+  const activeAccounts=accounts.filter(a=>!a.archived);
+  const rowsHtml=activeAccounts.length
+    ? activeAccounts.map(a=>`
+        <div class="pay-ac-row${a.id===defaultAcId?' selected':''}" id="pac-${a.id}" onclick="selectPayAc('${a.id}')">
+          <div class="pay-ac-dot" style="background:${a.color||'#888'}"></div>
+          <div class="pay-ac-name">${esc(a.name)}</div>
+          <div class="pay-ac-bal">AED ${fmt(a.balance)}</div>
+          <div class="pay-ac-check">${a.id===defaultAcId?'&#10003;':''}</div>
+        </div>`).join('')
+    : '<div style="font-size:12px;color:var(--text3);padding:8px 0">No accounts set up yet.</div>';
+  const selAc=activeAccounts.find(a=>a.id===defaultAcId)||activeAccounts[0];
+  const afterBal=selAc?'AED '+fmt((parseFloat(selAc.balance)||0)-(parseFloat(item.amount)||0)):'—';
+  const popup=document.createElement('div');
+  popup.id='pay-popup-wrap';
+  popup.className='pay-popup-backdrop';
+  popup.innerHTML=`
+    <div class="pay-popup">
+      <div class="pay-popup-head">
+        <div><div class="pay-popup-title">Mark ${esc(item.name)} as paid</div><div class="pay-popup-sub">AED ${fmt(item.amount)} &nbsp;\u00b7&nbsp; deduct from which account?</div></div>
+        <button class="modal-close-btn" onclick="document.getElementById('pay-popup-wrap').remove()">&#10005;</button>
+      </div>
+      <div class="pay-popup-body">
+        <div id="pay-ac-list">${rowsHtml}</div>
+        ${activeAccounts.length?`<div class="pay-after" id="pay-after-row"><span>Balance after deduction</span><span class="pay-after-val" id="pay-after-val">${afterBal}</span></div>`:''}
+      </div>
+      <div class="pay-popup-foot">
+        <button class="pay-confirm-btn" onclick="confirmPayFrom('${item.id}')">&#10003; Confirm &amp; deduct</button>
+        <button class="pay-skip-btn" onclick="confirmPayFrom('${item.id}',true)">Mark paid without deducting</button>
+      </div>
+    </div>`;
+  popup.addEventListener('click',function(e){if(e.target===popup)popup.remove();});
+  document.body.appendChild(popup);
+  window._payItemId=item.id;
+  window._paySelectedAcId=defaultAcId||(activeAccounts[0]?activeAccounts[0].id:'');
+}
+
+function selectPayAc(acId){
+  window._paySelectedAcId=acId;
+  document.querySelectorAll('.pay-ac-row').forEach(r=>{
+    const sel=r.id==='pac-'+acId;
+    r.classList.toggle('selected',sel);
+    r.querySelector('.pay-ac-check').innerHTML=sel?'&#10003;':'';
+  });
+  const item=items.find(i=>i.id===window._payItemId);
+  const ac=accounts.find(a=>a.id===acId);
+  const afterEl=document.getElementById('pay-after-val');
+  if(afterEl&&item&&ac){
+    const after=(parseFloat(ac.balance)||0)-(parseFloat(item.amount)||0);
+    afterEl.textContent='AED '+fmt(after);
+    afterEl.style.color=after<0?'var(--red)':'var(--text)';
+  }
+}
+
+function confirmPayFrom(itemId,skipDeduction){
+  const popup=document.getElementById('pay-popup-wrap');
+  const item=items.find(i=>i.id===itemId);if(!item)return;
+  const acId=skipDeduction?null:window._paySelectedAcId;
+  payments.unshift({id:String(Date.now()),itemId:item.id,name:item.name,cat:item.cat,amount:item.amount,date:todayStr(),note:'',deductedAccountId:acId||null});
+  if(acId){
+    const ac=accounts.find(a=>a.id===acId);
+    if(ac){
+      ac.balance=parseFloat((parseFloat(ac.balance)-(parseFloat(item.amount)||0)).toFixed(2));
+      ac.updatedAt=Date.now();
+      ac.history=ac.history||[];
+      ac.history.push({balance:ac.balance,date:todayStr(),note:'Paid: '+item.name});
+      if(ac.history.length>24)ac.history=ac.history.slice(-24);
+      saveAccounts();
+      if(currentPage==='accounts')renderAccounts();
+      if(currentPage==='networth')renderNetWorth();
+      toast('\u2713 '+item.name+' paid \u00b7 AED '+fmt(item.amount)+' deducted from '+ac.name);
+    }
+  } else {
+    toast('\u2713 '+item.name+' marked as paid');
+  }
+  saveData();render();
+  if(popup)popup.remove();
 }
 
 function duplicateItem(id){
@@ -3321,6 +3495,12 @@ function openModal(id,forceTrial=false){
   document.getElementById('trial-fields').style.display=isTrial?'block':'none';
   selectedColor=item?.color||COLORS[0];
   renderColorPicker();
+  const fPayAc=document.getElementById('f-pay-account');
+  if(fPayAc){
+    fPayAc.innerHTML='<option value="">— No account —</option>'+
+      accounts.filter(a=>!a.archived).map(a=>`<option value="${a.id}">${esc(a.name)} — AED ${fmt(a.balance)}</option>`).join('');
+    fPayAc.value=item?.payAccountId||'';
+  }
   document.getElementById('modal').style.display='flex';
   setTimeout(()=>document.getElementById('f-name').focus(),50);
 }
@@ -3346,13 +3526,35 @@ function saveItem(){
     status:document.getElementById('f-status').value,
     color:selectedColor,
     isTrial,
-    trialEnd:isTrial?document.getElementById('f-trial-end').value:null
+    trialEnd:isTrial?document.getElementById('f-trial-end').value:null,
+    payAccountId:document.getElementById('f-pay-account').value||null,
   };
-  if(editId){const idx=items.findIndex(i=>i.id===editId);if(idx>-1)items[idx]=obj;}
-  else items.unshift(obj);
+  // If editing and amount changed, adjust linked account for current cycle payment
+  if(editId){
+    const prev=items.find(i=>i.id===editId);
+    if(prev&&parseFloat(prev.amount)!==parseFloat(obj.amount)){
+      const cyclePay=payments.find(p=>p.itemId===editId&&inCycle(p.date)&&p.deductedAccountId);
+      if(cyclePay){
+        const ac=accounts.find(a=>a.id===cyclePay.deductedAccountId);
+        if(ac){
+          const diff=parseFloat(obj.amount)-parseFloat(prev.amount);
+          ac.balance=parseFloat((parseFloat(ac.balance)-diff).toFixed(2));
+          ac.updatedAt=Date.now();
+          ac.history=ac.history||[];
+          ac.history.push({balance:ac.balance,date:todayStr(),note:'Adjusted: '+obj.name+' (amount changed)'});
+          if(ac.history.length>24)ac.history=ac.history.slice(-24);
+          saveAccounts();
+          toast('Updated '+obj.name+' · account adjusted by AED '+fmt(Math.abs(diff))+(diff>0?' (deducted more)':' (refunded difference)'));
+        }
+        cyclePay.amount=parseFloat(obj.amount);
+      }
+    }
+    const idx=items.findIndex(i=>i.id===editId);if(idx>-1)items[idx]=obj;
+  } else items.unshift(obj);
   saveData();closeModal();render();
   if(currentPage==='trials')renderTrials();
-  toast(editId?`Updated ${obj.name}`:`Added ${obj.name}`);
+  if(!editId)toast('Added '+obj.name);
+  else if(!payments.find(p=>p.itemId===editId&&inCycle(p.date)&&p.deductedAccountId))toast('Updated '+obj.name);
 }
 
 /* &#9472;&#9472; Calculator &#9472;&#9472; */
@@ -3656,8 +3858,26 @@ function renderTasks(){
     if(q&&!t.title.toLowerCase().includes(q)&&!(t.notes||'').toLowerCase().includes(q)&&!(t.tags||[]).some(tag=>tag.toLowerCase().includes(q)))return false;
     return true;
   });
-  const sort=(document.getElementById('tk-sort')||{}).value||'created';
-  if(sort==='due')vis.sort((a,b)=>{if(!a.dueDate&&!b.dueDate)return 0;if(!a.dueDate)return 1;if(!b.dueDate)return -1;return a.dueDate.localeCompare(b.dueDate);});
+  const sort=(document.getElementById('tk-sort')||{}).value||'urgency';
+  if(sort==='urgency'){
+    // Urgency = priority weight + due date proximity
+    // Overdue tasks always float to top, then by priority, then by how soon due
+    const priW={urgent:1000,high:100,medium:10,low:1,none:0};
+    const urgencyScore=t=>{
+      let score=priW[t.priority||'none']||0;
+      if(t.dueDate){
+        const daysLeft=Math.ceil((new Date(t.dueDate)-new Date())/(1000*60*60*24));
+        if(daysLeft<0)       score+=5000; // overdue → always top
+        else if(daysLeft===0)score+=2000; // due today
+        else if(daysLeft<=3) score+=500;  // due very soon
+        else if(daysLeft<=7) score+=100;  // due this week
+        else                 score+=Math.max(0,50-daysLeft); // further = less urgent
+      }
+      return score;
+    };
+    vis.sort((a,b)=>urgencyScore(b)-urgencyScore(a));
+  }
+  else if(sort==='due')vis.sort((a,b)=>{if(!a.dueDate&&!b.dueDate)return 0;if(!a.dueDate)return 1;if(!b.dueDate)return -1;return a.dueDate.localeCompare(b.dueDate);});
   else if(sort==='priority')vis.sort((a,b)=>(priOrder[b.priority]||0)-(priOrder[a.priority]||0));
   else if(sort==='name')vis.sort((a,b)=>a.title.localeCompare(b.title));
   else if(sort==='starred')vis.sort((a,b)=>(b.starred?1:0)-(a.starred?1:0));
@@ -5185,12 +5405,15 @@ function lnCardHTML(l){
     payoffChip = `<span class="emi-payoff-chip ${chipCls}">${mo}</span>`;
   }
 
-  return `<div class="emi-card${isPaidOff?' emi-paid-off':''}">
+  return `<div class="emi-card${isPaidOff?' emi-paid-off':''}" id="loan-${l.id}">
     <div class="emi-card-stripe" style="background:${color}"></div>
     <div class="emi-card-head">
       <div>
-        <div class="emi-card-title">${esc(l.name)}</div>
-        <div class="emi-card-sub">${esc(l.lender||'')}${l.lender&&l.type?' · ':''}${l.type?l.type.charAt(0).toUpperCase()+l.type.slice(1):''}</div>
+        <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+          <div class="emi-card-title">${esc(l.name)}</div>
+          ${l.type?`<span class="emi-card-sub">${l.type.charAt(0).toUpperCase()+l.type.slice(1)}</span>`:''}
+        </div>
+        ${l.lender?`<div class="emi-card-lender" style="color:${color};filter:brightness(1.35) saturate(1.1)"><div class="emi-card-lender-dot" style="background:${color};filter:brightness(1.35)"></div>${esc(l.lender)}</div>`:``}
       </div>
       <div class="emi-actions">
         ${!isPaidOff?`<button class="icon-btn pay" onclick="markLoanPaidOff('${l.id}')" title="Mark paid off">&#10003;</button>`:''}
@@ -6058,17 +6281,17 @@ function renderNetWorth(){
       const pct = liabs > 0 ? Math.round(rem/liabs*100) : 0;
       const colors = typeof LN_COLORS!=='undefined' ? LN_COLORS : {};
       const color = colors[l.type]||'#888';
-      return '<div class="nw-row">' +
-        '<div class="nw-row-left">' +
-          '<div class="nw-row-icon" style="background:'+color+'22">🏠</div>' +
-          '<div><div class="nw-row-name">' + esc(l.name) + '</div>' +
-          '<div class="nw-row-sub">' + esc(l.lender||l.type||'') + '</div></div>' +
-        '</div>' +
-        '<div style="display:flex;align-items:center;gap:8px">' +
-          '<div class="nw-row-pct">' + pct + '%</div>' +
-          '<div class="nw-row-amt red">AED ' + fmt(rem) + '</div>' +
-        '</div>' +
-      '</div>';
+      return `<div class="nw-row" style="cursor:pointer" onclick="highlightLoan('${l.id}')" title="View in Loans">
+        <div class="nw-row-left">
+          <div class="nw-row-icon" style="background:${color}22">&#127968;</div>
+          <div><div class="nw-row-name">${esc(l.name)}</div>
+          <div class="nw-row-sub">${esc(l.lender||l.type||'')}</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="nw-row-pct">${pct}%</div>
+          <div class="nw-row-amt red">AED ${fmt(rem)}</div>
+        </div>
+      </div>`;
     }).join('') :
     '<div style="text-align:center;padding:1rem;font-size:12px;color:var(--text3)">No active loans<br><span style="color:var(--accent);font-size:11px">\u2713 Debt-free!</span></div>';
 
@@ -6196,33 +6419,64 @@ function aiGetKey(){ return localStorage.getItem(AI_KEY_STORE)||''; }
 function aiSetKey(k){ localStorage.setItem(AI_KEY_STORE, k.trim()); }
 
 function aiFinancialContext(){
-  // Build a compact, token-efficient snapshot of the user's finances
-  const now   = new Date();
-  const active = items.filter(i=>i.status==='active'&&!i.isTrial);
+  const now  = new Date();
+  const active = items.filter(i=>i.status==='active'&&!i.isTrial&&billActiveInCycle(i));
   const monthly = active.reduce((s,i)=>s+toMonthly(i.amount,i.cycle),0);
-  const paidAmt = payments.filter(p=>inCycle(p.date)).reduce((s,p)=>s+p.amount,0);
+  const paidThisCycle = payments.filter(p=>inCycle(p.date));
+  const paidAmt = paidThisCycle.reduce((s,p)=>s+p.amount,0);
+  const unpaid = active.filter(i=>!isPaidThisCycle(i));
   const overdue = active.filter(i=>isOverdueCycle(i));
+  // Previous cycle comparison
+  const prevEnd = new Date(cycleStart()); prevEnd.setDate(prevEnd.getDate()-1);
+  const prevStart = cycleStart(prevEnd);
+  const prevPaid = payments.filter(p=>{const d=new Date(p.date);return d>=prevStart&&d<=prevEnd;}).reduce((s,p)=>s+p.amount,0);
+  // Upcoming 7 days
+  const upcoming7 = active.filter(i=>{
+    if(!i.dueDay||isPaidThisCycle(i))return false;
+    const diff=Math.ceil((dueDateInCycle(i.dueDay)-now)/(1000*60*60*24));
+    return diff>=0&&diff<=7;
+  });
   const assets  = accounts.reduce((s,a)=>s+(parseFloat(a.balance)||0),0);
   const liabs   = loans.filter(l=>!l.paidOff).reduce((s,l)=>s+lnRemainingBalance(l),0);
-  const net     = assets - liabs;
-  const tabbyActive = tabbyItems.filter(t=>!t.instalments.every(i=>i.paid));
-  const goalsProg = goals.filter(g=>g.status!=='done').map(g=>({
-    name:g.name, target:g.target, current:g.current||0
-  }));
-  const topBills = active.slice().sort((a,b)=>toMonthly(b.amount,b.cycle)-toMonthly(a.amount,a.cycle)).slice(0,5)
-    .map(i=>i.name+' AED '+Math.round(toMonthly(i.amount,i.cycle))+'/mo');
+  const net     = assets-liabs;
+  const topBills = active.slice().sort((a,b)=>toMonthly(b.amount,b.cycle)-toMonthly(a.amount,a.cycle))
+    .slice(0,6).map(i=>i.name+' AED '+Math.round(toMonthly(i.amount,i.cycle))+'/mo'+(isPaidThisCycle(i)?'[paid]':''));
+  const activeGoals = goals.filter(g=>g.status!=='done'&&g.target>0).map(g=>{
+    const pct=Math.round((g.current||0)/g.target*100);
+    const dl=g.deadline?Math.ceil((new Date(g.deadline)-now)/(1000*60*60*24)):null;
+    return g.name+': '+pct+'% of AED '+Math.round(g.target)+(dl!==null?' ('+dl+'d left)':'');
+  });
+  const activeLoans = loans.filter(l=>!l.paidOff).map(l=>{
+    const rem=Math.round(lnRemainingBalance(l));
+    const emi=Math.round(l.emiOverride||lnCalcMonthlyEMI(l.principal,l.rate,l.tenure));
+    const mo=lnMonthsRemaining(l);
+    return l.name+': AED '+rem+' remaining, AED '+emi+'/mo, '+mo+' months left';
+  });
+  const pendingRecv=receivables?receivables.filter(r=>!r.collected):[];
+  const tabbyActive=tabbyItems.filter(t=>!t.instalments.every(i=>i.paid));
 
   return [
-    'Monthly subscriptions/bills: AED '+Math.round(monthly)+' ('+active.length+' active)',
-    'Paid this month so far: AED '+Math.round(paidAmt),
-    overdue.length ? 'Overdue bills: '+overdue.map(i=>i.name).join(', ') : 'No overdue bills',
-    'Top bills: '+topBills.join(' | '),
-    tabbyActive.length ? 'Tabby instalments active: '+tabbyActive.length+' plans' : '',
-    'Total assets: AED '+Math.round(assets)+' across '+accounts.length+' accounts',
-    'Total liabilities: AED '+Math.round(liabs)+' across '+loans.filter(l=>!l.paidOff).length+' loans',
-    'Net worth: AED '+Math.round(net),
-    goalsProg.length ? 'Goals: '+goalsProg.map(g=>g.name+' '+Math.round(g.target>0?g.current/g.target*100:0)+'%').join(', ') : '',
-    'Today: '+now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}),
+    '=== CURRENT BILLING CYCLE ===',
+    'Cycle: '+cycleLabel(),
+    'Total monthly bills: AED '+Math.round(monthly)+' ('+active.length+' active)',
+    'Paid so far: AED '+Math.round(paidAmt)+' ('+Math.round(monthly>0?paidAmt/monthly*100:0)+'% of cycle)',
+    'Previous cycle total: AED '+Math.round(prevPaid)+(prevPaid>0?' — change: AED '+(Math.round(paidAmt-prevPaid)):''),
+    unpaid.length?'Unpaid this cycle: '+unpaid.map(i=>i.name+' AED '+Math.round(i.amount)).join(', '):'All bills paid this cycle!',
+    overdue.length?'⚠ OVERDUE: '+overdue.map(i=>i.name+' AED '+Math.round(i.amount)).join(', '):'No overdue bills',
+    upcoming7.length?'Due next 7 days: '+upcoming7.map(i=>i.name+' AED '+Math.round(i.amount)+' in '+Math.ceil((dueDateInCycle(i.dueDay)-now)/(1000*60*60*24))+'d').join(', '):'',
+    '','=== TOP BILLS ===',
+    topBills.join(' | '),
+    tabbyActive.length?'Tabby active: '+tabbyActive.length+' plans':'',
+    '','=== ACCOUNTS & NET WORTH ===',
+    'Assets: AED '+Math.round(assets)+' | Liabilities: AED '+Math.round(liabs)+' | Net worth: AED '+Math.round(net),
+    accounts.slice().sort((a,b)=>(parseFloat(b.balance)||0)-(parseFloat(a.balance)||0)).slice(0,4)
+      .map(a=>a.name+' AED '+Math.round(parseFloat(a.balance)||0)).join(' | '),
+    '','=== LOANS ===',
+    activeLoans.length?activeLoans.join(' | '):'No active loans',
+    '','=== GOALS ===',
+    activeGoals.length?activeGoals.join(' | '):'No active goals',
+    pendingRecv.length?'Money owed to you: AED '+Math.round(pendingRecv.reduce((s,r)=>s+(parseFloat(r.amount)||0),0))+' from '+pendingRecv.length+' people':'',
+    'Today: '+now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}),
   ].filter(Boolean).join('\n');
 }
 
@@ -6230,90 +6484,103 @@ async function aiFetchInsight(force){
   const today = new Date().toISOString().slice(0,10);
   if(!force){
     try{
-      const cached = JSON.parse(localStorage.getItem(AI_INS_STORE)||'{}');
-      if(cached.date===today && cached.text) return cached.text;
+      const cached=JSON.parse(localStorage.getItem(AI_INS_STORE)||'{}');
+      if(cached.date===today&&cached.insights) return cached.insights;
     }catch(e){}
   }
-  const key = aiGetKey();
-  if(!key) return null; // no key yet
-  const context = aiFinancialContext();
-  const prompt = `You are a friendly personal finance assistant. Based on this user's real financial data, write ONE short, specific, helpful observation or tip (max 25 words). Be concrete — mention actual numbers or specific bills/goals from the data. Do not start with "I" or "You". No pleasantries.\n\nUser data:\n${context}`;
+  const key=aiGetKey();
+  if(!key) return null;
+  const context=aiFinancialContext();
+  const prompt=`You are a proactive personal finance analyst. Analyse this user's LifeOS data and return 4-5 specific, actionable insights they can act on TODAY.
+
+Return ONLY a valid JSON array. No markdown, no explanation, just the array.
+Each object must have exactly these fields:
+- "category": one of "alert", "opportunity", "trend", "tip"
+- "icon": one relevant emoji
+- "title": 3-5 word summary
+- "text": 1-2 sentences using REAL names and REAL numbers from the data. Be specific.
+- "action": one concrete next step (max 10 words)
+
+Rules:
+- alert = urgent problem needing immediate action (overdue bill, low balance vs upcoming bills, missed payment, loan urgency)
+- opportunity = specific money-saving or money-making action (cancel X, pay off Y early, move money to earn more)
+- trend = pattern over time with specific numbers (spending up/down vs last cycle, goal velocity, net worth change)
+- tip = specific actionable advice based on their actual situation (not generic advice)
+- Never say "consider" or "you might want to" — be direct
+- Use actual bill/account/goal/loan names from the data
+
+User data:
+${context}`;
 
   let resp;
   try{
-    resp = await fetch('https://api.anthropic.com/v1/messages',{
+    resp=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{
         'Content-Type':'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-allow-browser': 'true',
+        'x-api-key':key,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-allow-browser':'true',
       },
       body:JSON.stringify({
         model:'claude-haiku-4-5-20251001',
-        max_tokens:80,
+        max_tokens:800,
         messages:[{role:'user',content:prompt}],
       }),
     });
-  } catch(netErr){
+  }catch(netErr){
     throw new Error('Network error — check your API key or try refreshing. ('+netErr.message+')');
   }
   if(!resp.ok){
     let errMsg='API error '+resp.status;
-    try{ const e=await resp.json(); errMsg=e?.error?.message||errMsg; }catch(e){}
+    try{const e=await resp.json();errMsg=e?.error?.message||errMsg;}catch(e){}
     throw new Error(errMsg);
   }
-  const data = await resp.json();
-  const text = (data.content||[]).map(b=>b.text||'').join('').trim();
-  localStorage.setItem(AI_INS_STORE, JSON.stringify({date:today, text}));
-  return text;
+  const data=await resp.json();
+  const raw=(data.content||[]).map(b=>b.text||'').join('').trim();
+  const clean=raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim();
+  const insights=JSON.parse(clean);
+  localStorage.setItem(AI_INS_STORE,JSON.stringify({date:today,insights}));
+  return insights;
 }
 
 /* ── Widget render ── */
 function dbWidgetAIInsight(el){
-  dbCard(el,{icon:'&#10024;',title:'AI insight',badgeCls:'db-badge-purple'});
-  const body = document.getElementById('dbwb-aiinsight');
-  if(!body) return;
-  const key = aiGetKey();
-
+  dbCard(el,{icon:'&#10024;',title:'AI insights',badgeCls:'db-badge-purple'});
+  const body=document.getElementById('dbwb-aiinsight');
+  if(!body)return;
+  const key=aiGetKey();
   if(!key){
-    // No API key — show setup UI
-    body.innerHTML =
+    body.innerHTML=
       '<div class="ai-insight-body">'+
         '<div style="font-size:12px;color:var(--text2);margin-bottom:8px">'+
-          'Enter your <a href="https://console.anthropic.com/settings/keys" style="color:var(--accent)">Anthropic API key</a> to get daily AI observations about your finances.'+
+          'Enter your <a href="https://console.anthropic.com/settings/keys" style="color:var(--accent)">Anthropic API key</a> to get actionable daily insights.'+
         '</div>'+
         '<div class="ai-insight-key-row">'+
           '<input class="ai-insight-key-input" id="ai-key-input" type="password" placeholder="sk-ant-...">'+
           '<button class="ai-insight-save-btn" onclick="aiSaveKeyAndRun()">Save &amp; run</button>'+
         '</div>'+
-        '<div style="font-size:10px;color:var(--text3);margin-top:6px">Key is stored only in your browser — never sent anywhere except Anthropic.</div>'+
+        '<div style="font-size:10px;color:var(--text3);margin-top:6px">Key stored only in your browser.</div>'+
       '</div>';
     return;
   }
-
-  // Has key — show loading state then fetch
-  body.innerHTML =
+  body.innerHTML=
     '<div class="ai-insight-body">'+
-      '<div class="ai-insight-text loading" id="ai-ins-text">'+
+      '<div class="ai-insight-text loading">'+
         '<div class="ai-insight-loading-dot"></div>'+
         '<div class="ai-insight-loading-dot"></div>'+
         '<div class="ai-insight-loading-dot"></div>'+
-        '<span style="margin-left:2px">Thinking\u2026</span>'+
+        '<span style="margin-left:6px">Analysing your finances\u2026</span>'+
       '</div>'+
     '</div>';
-
-  // Check cache first (non-blocking)
-  const today = new Date().toISOString().slice(0,10);
-  let cached = null;
-  try{ const s=localStorage.getItem(AI_INS_STORE); if(s){ const p=JSON.parse(s); if(p.date===today) cached=p.text; } }catch(e){}
-
-  if(cached){
-    aiShowInsight(body, cached, false);
-  } else {
-    aiFetchInsight(false).then(text=>{
-      if(text) aiShowInsight(body, text, false);
-      else body.innerHTML='<div class="ai-insight-body"><div style="font-size:12px;color:var(--text3)">Could not fetch insight. Check your API key.</div></div>';
+  const today=new Date().toISOString().slice(0,10);
+  let cached=null;
+  try{const s=localStorage.getItem(AI_INS_STORE);if(s){const p=JSON.parse(s);if(p.date===today&&p.insights)cached=p.insights;}}catch(e){}
+  if(cached){aiShowInsights(body,cached,false);}
+  else{
+    aiFetchInsight(false).then(ins=>{
+      if(ins)aiShowInsights(body,ins,false);
+      else body.innerHTML='<div class="ai-insight-body"><div style="font-size:12px;color:var(--text3)">Could not generate insights. Check your API key.</div></div>';
     }).catch(e=>{
       body.innerHTML='<div class="ai-insight-body">'+
         '<div style="font-size:12px;color:var(--red);margin-bottom:10px">'+esc(e.message)+'</div>'+
@@ -6330,45 +6597,78 @@ function dbWidgetAIInsight(el){
   }
 }
 
-function aiShowInsight(body, text, fresh){
-  const today = new Date().toISOString().slice(0,10);
-  body.innerHTML =
+function aiShowInsights(body,insights,fresh){
+  if(!Array.isArray(insights)||!insights.length){
+    body.innerHTML='<div class="ai-insight-body"><div style="font-size:12px;color:var(--text3)">No insights generated.</div></div>';
+    return;
+  }
+  const today=new Date().toISOString().slice(0,10);
+  const cards=insights.map(ins=>{
+    const cat=ins.category||'tip';
+    const icons={alert:'🚨',opportunity:'💡',trend:'📊',tip:'💬'};
+    const labels={alert:'Alert',opportunity:'Opportunity',trend:'Trend',tip:'Tip'};
+    return `<div class="ai-card ${cat}">
+      <div class="ai-card-header">
+        <span class="ai-card-icon">${ins.icon||icons[cat]||''}</span>
+        <span class="ai-card-tag">${labels[cat]||cat}</span>
+      </div>
+      ${ins.title?`<div class="ai-card-title">${esc(ins.title)}</div>`:''}
+      <div class="ai-card-text">${esc(ins.text)}</div>
+      ${ins.action?`<div class="ai-card-action"><span>&#8594;</span>${esc(ins.action)}</div>`:''}
+    </div>`;
+  }).join('');
+  body.innerHTML=
     '<div class="ai-insight-body">'+
-      '<div class="ai-insight-text">\u201c'+esc(text)+'\u201d</div>'+
+      '<div class="ai-cards">'+cards+'</div>'+
       '<div class="ai-insight-meta">'+
-        '<span>'+(fresh?'Just generated':'Cached for today \u00b7 '+today)+'</span>'+
-        '<button class="ai-insight-refresh-btn" onclick="aiRefreshInsight()" title="Generate a fresh insight">&#8635; Refresh</button>'+
+        '<span>'+(fresh?'Just generated':'Updated today')+' \u00b7 '+insights.length+' insights</span>'+
+        '<div style="display:flex;gap:8px">'+
+          '<button class="ai-insight-refresh-btn" onclick="aiRefreshInsight()">&#8635; Refresh</button>'+
+          '<button class="ai-insight-refresh-btn" onclick="aiShowKeyInput()">&#128273; Key</button>'+
+        '</div>'+
       '</div>'+
     '</div>';
 }
 
 function aiRefreshInsight(){
-  const body = document.getElementById('dbwb-aiinsight');
-  if(!body) return;
-  body.innerHTML =
-    '<div class="ai-insight-body">'+
-      '<div class="ai-insight-text loading">'+
-        '<div class="ai-insight-loading-dot"></div>'+
-        '<div class="ai-insight-loading-dot"></div>'+
-        '<div class="ai-insight-loading-dot"></div>'+
-        '<span style="margin-left:2px">Refreshing\u2026</span>'+
-      '</div>'+
-    '</div>';
-  aiFetchInsight(true).then(text=>{
-    if(text) aiShowInsight(body, text, true);
-    else body.innerHTML='<div class="ai-insight-body"><div style="font-size:12px;color:var(--text3)">Could not fetch insight.</div></div>';
+  const body=document.getElementById('dbwb-aiinsight');
+  if(!body)return;
+  body.innerHTML='<div class="ai-insight-body"><div class="ai-insight-text loading"><div class="ai-insight-loading-dot"></div><div class="ai-insight-loading-dot"></div><div class="ai-insight-loading-dot"></div><span style="margin-left:6px">Refreshing\u2026</span></div></div>';
+  aiFetchInsight(true).then(ins=>{
+    if(ins)aiShowInsights(body,ins,true);
+    else body.innerHTML='<div class="ai-insight-body"><div style="font-size:12px;color:var(--text3)">Could not fetch insights.</div></div>';
   }).catch(e=>{
     body.innerHTML='<div class="ai-insight-body"><div style="font-size:12px;color:var(--red)">Error: '+esc(e.message)+'</div></div>';
   });
 }
 
+function aiShowKeyInput(){
+  const body=document.getElementById('dbwb-aiinsight');if(!body)return;
+  const cur=aiGetKey();
+  body.innerHTML='<div class="ai-insight-body">'+
+    '<div style="font-size:12px;color:var(--text2);margin-bottom:6px">'+(cur?'Current key: <span style="font-family:var(--mono);font-size:11px;color:var(--text3)">sk-ant-\u2026'+cur.slice(-6)+'</span>':'No key set')+'</div>'+
+    '<div class="ai-insight-key-row"><input class="ai-insight-key-input" id="ai-key-input" type="password" placeholder="Paste new key"><button class="ai-insight-save-btn" onclick="aiSaveKeyAndRun()">Save</button></div>'+
+    '<div style="display:flex;gap:8px;margin-top:8px">'+
+      (cur?'<button class="ai-insight-refresh-btn" onclick="aiClearKey()" style="color:var(--red)">&#128465; Remove</button>':'')+
+      '<button class="ai-insight-refresh-btn" onclick="aiRefreshInsight()">&#10005; Cancel</button>'+
+    '</div>'+
+  '</div>';
+  setTimeout(()=>{const i=document.getElementById('ai-key-input');if(i)i.focus();},50);
+}
+
+function aiClearKey(){
+  if(!confirm('Remove API key?'))return;
+  localStorage.removeItem(AI_KEY_STORE);localStorage.removeItem(AI_INS_STORE);
+  dbWidgetAIInsight(document.getElementById('dbw-aiinsight'));
+}
+
 function aiSaveKeyAndRun(){
-  const inp = document.getElementById('ai-key-input');
+  const inp=document.getElementById('ai-key-input');
   if(!inp||!inp.value.trim()){inp&&inp.focus();return;}
   aiSetKey(inp.value);
-  // Re-render the widget
-  const widgetEl = document.getElementById('dbw-aiinsight');
-  if(widgetEl) try{ dbWidgetAIInsight(widgetEl); }catch(e){}
+  localStorage.removeItem(AI_INS_STORE);
+  const widgetEl=document.getElementById('dbw-aiinsight');
+  if(widgetEl)try{dbWidgetAIInsight(widgetEl);}catch(e){}
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -6763,6 +7063,22 @@ function closePaidBreakdown(){
 }
 
 /* ── Highlight a specific bill from the reminder banner ── */
+function highlightLoan(loanId){
+  switchPage('loans');
+  setTimeout(function(){
+    const el = document.getElementById('loan-'+loanId);
+    if(!el) return;
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+    el.classList.remove('loan-highlight');
+    void el.offsetWidth;
+    el.classList.add('loan-highlight');
+    el.addEventListener('animationend', function onEnd(){
+      el.classList.remove('loan-highlight');
+      el.removeEventListener('animationend', onEnd);
+    });
+  }, 120);
+}
+
 function highlightBill(itemId){
   switchPage('active');
   // Wait for render then scroll + pulse

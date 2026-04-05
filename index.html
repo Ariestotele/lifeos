@@ -1388,7 +1388,9 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
     <button class="nav-item" onclick="exportJSON()"><span class="nav-icon">&#8595;</span><span class="nav-label"> Backup data</span></button>
     <button class="nav-item" onclick="document.getElementById('import-input').click()"><span class="nav-icon">&#8593;</span><span class="nav-label"> Restore backup</span></button>
     <button class="nav-item" onclick="exportCSV()"><span class="nav-icon">&#8599;</span><span class="nav-label"> Export CSV</span></button>
-    <div class="sidebar-bottom"></div>
+    <div class="sidebar-bottom">
+      <div style="font-size:10px;color:var(--text3);text-align:center;padding:4px 0;font-family:var(--mono)" id="app-version-label">v<span id="app-ver-num"></span></div>
+    </div>
   <div class="sidebar-resize-handle" id="sidebar-resize-handle"></div>
   </aside>
   <input type="file" id="import-input" accept=".json" style="display:none" onchange="importJSON(event)">
@@ -2010,6 +2012,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const APP_VERSION = '1.2';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_TASKS='subtracker_tasks', KEY_LISTS='subtracker_lists', KEY_GOALS='subtracker_goals', KEY_NOTES='subtracker_notes', KEY_LOANS='subtracker_loans', KEY_ACCOUNTS='subtracker_accounts', KEY_NW='subtracker_networth', KEY_RECV='subtracker_receivables';
 
@@ -3167,7 +3170,7 @@ document.getElementById('tabby-modal').addEventListener('click',e=>{if(e.target=
 
 function exportJSON(){
   if(!items.length&&!payments.length&&!tabbyItems.length&&!tasks.length){toast('Nothing to back up yet');return;}
-  const data=JSON.stringify({items,payments,tabbyItems,tasks,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),exportedAt:new Date().toISOString()},null,2);
+  const data=JSON.stringify({items,payments,tabbyItems,tasks,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),exportedAt:new Date().toISOString()},null,2);
   const d=new Date();
   const filename='bills-backup-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'.json';
   verSnapshot(true);
@@ -3230,7 +3233,9 @@ function applyRestore(mode){
     saveData();saveTasks();saveLists();saveGoals();saveNotes();saveLoans();saveReceivables();saveAccounts();saveNetWorth();
     if(data.dbLayout)  localStorage.setItem(DB_LAYOUT_KEY,  JSON.stringify(data.dbLayout));
     if(data.navLayout) localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(data.navLayout));
+    if(data.cycleStart) localStorage.setItem(CYCLE_KEY, data.cycleStart);
     renderNav();
+    updateCyclePreview();
     render();
     if(currentPage==='tasks')renderTasks();
     if(currentPage==='goals')renderGoals();
@@ -3269,7 +3274,9 @@ function applyRestore(mode){
     // Merge layouts: only apply from backup if local layout is empty
     if(data.dbLayout  && !localStorage.getItem(DB_LAYOUT_KEY))  localStorage.setItem(DB_LAYOUT_KEY,  JSON.stringify(data.dbLayout));
     if(data.navLayout && !localStorage.getItem(NAV_LAYOUT_KEY)) localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(data.navLayout));
+    if(data.cycleStart) localStorage.setItem(CYCLE_KEY, data.cycleStart);
     renderNav();
+    updateCyclePreview();
     render();
     if(currentPage==='tasks')renderTasks();
     if(currentPage==='goals')renderGoals();
@@ -4832,7 +4839,7 @@ async function asWriteFile(){
   asDot('busy');
   try{
     const payload = JSON.stringify(
-      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),savedAt:new Date().toISOString()},
+      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),savedAt:new Date().toISOString()},
       null, 2
     );
     const writable = await _asFileHandle.createWritable();
@@ -5804,7 +5811,7 @@ function verSnapshot(force){
       if(Date.now() - lastTs < VER_MIN_GAP) return;
     }
     const payload = JSON.stringify(
-      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),savedAt:new Date().toISOString()}
+      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),savedAt:new Date().toISOString()}
     );
     // Store the current auto-save filename as the snapshot title
     const filename = localStorage.getItem(AS_FILE_KEY)||null;
@@ -6232,16 +6239,30 @@ async function aiFetchInsight(force){
   const context = aiFinancialContext();
   const prompt = `You are a friendly personal finance assistant. Based on this user's real financial data, write ONE short, specific, helpful observation or tip (max 25 words). Be concrete — mention actual numbers or specific bills/goals from the data. Do not start with "I" or "You". No pleasantries.\n\nUser data:\n${context}`;
 
-  const resp = await fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      model:'claude-haiku-4-5-20251001',
-      max_tokens:80,
-      messages:[{role:'user',content:prompt}],
-    }),
-  });
-  if(!resp.ok) throw new Error('API error '+resp.status);
+  let resp;
+  try{
+    resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-allow-browser': 'true',
+      },
+      body:JSON.stringify({
+        model:'claude-haiku-4-5-20251001',
+        max_tokens:80,
+        messages:[{role:'user',content:prompt}],
+      }),
+    });
+  } catch(netErr){
+    throw new Error('Network error — check your API key or try refreshing. ('+netErr.message+')');
+  }
+  if(!resp.ok){
+    let errMsg='API error '+resp.status;
+    try{ const e=await resp.json(); errMsg=e?.error?.message||errMsg; }catch(e){}
+    throw new Error(errMsg);
+  }
   const data = await resp.json();
   const text = (data.content||[]).map(b=>b.text||'').join('').trim();
   localStorage.setItem(AI_INS_STORE, JSON.stringify({date:today, text}));
@@ -6294,7 +6315,17 @@ function dbWidgetAIInsight(el){
       if(text) aiShowInsight(body, text, false);
       else body.innerHTML='<div class="ai-insight-body"><div style="font-size:12px;color:var(--text3)">Could not fetch insight. Check your API key.</div></div>';
     }).catch(e=>{
-      body.innerHTML='<div class="ai-insight-body"><div style="font-size:12px;color:var(--red)">Error: '+esc(e.message)+'</div></div>';
+      body.innerHTML='<div class="ai-insight-body">'+
+        '<div style="font-size:12px;color:var(--red);margin-bottom:10px">'+esc(e.message)+'</div>'+
+        '<div class="ai-insight-key-row">'+
+          '<input class="ai-insight-key-input" id="ai-key-input" type="password" placeholder="Paste API key (sk-ant-...)">'+
+          '<button class="ai-insight-save-btn" onclick="aiSaveKeyAndRun()">Save key</button>'+
+        '</div>'+
+        '<div style="display:flex;gap:10px;margin-top:8px;align-items:center">'+
+          '<button class="ai-insight-refresh-btn" onclick="aiRefreshInsight()">&#8635; Try again</button>'+
+          '<a href="https://console.anthropic.com/settings/keys" target="_blank" style="font-size:10px;color:var(--accent)">Get API key &#8599;</a>'+
+        '</div>'+
+      '</div>';
     });
   }
 }
@@ -7000,6 +7031,7 @@ function renderReceivables(){
 
 loadData();
 asRestoreStatus();
+const _vn=document.getElementById('app-ver-num');if(_vn)_vn.textContent=APP_VERSION;
 checkReminders();
 renderNav();
 </script>

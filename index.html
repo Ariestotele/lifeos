@@ -762,29 +762,6 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 .tk-list-manage-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--border)}
 .tk-list-manage-row:last-child{border-bottom:none}
 .tk-list-color-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-
-/* ── Pay-from account popup ── */
-.pay-popup-backdrop{position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);backdrop-filter:blur(4px)}
-.pay-popup{background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius-lg);width:min(380px,92vw);overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.4)}
-.pay-popup-head{padding:14px 16px 12px;border-bottom:0.5px solid var(--border)}
-.pay-popup-title{font-size:14px;font-weight:600;color:var(--text)}
-.pay-popup-sub{font-size:12px;color:var(--text3);margin-top:3px}
-.pay-popup-body{padding:12px 16px}
-.pay-ac-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;border:0.5px solid var(--border);cursor:pointer;margin-bottom:6px;transition:all .15s}
-.pay-ac-row:hover{border-color:var(--border2);background:var(--surface2)}
-.pay-ac-row.selected{border-color:var(--accent-border);background:var(--accent-dim)}
-.pay-ac-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.pay-ac-name{font-size:13px;font-weight:500;color:var(--text);flex:1}
-.pay-ac-bal{font-size:12px;color:var(--text3);font-family:var(--mono)}
-.pay-ac-check{width:16px;height:16px;border-radius:50%;border:0.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;transition:all .15s}
-.pay-ac-row.selected .pay-ac-check{background:var(--accent);border-color:var(--accent);color:#fff}
-.pay-after{font-size:11px;color:var(--text3);padding:6px 0 10px;display:flex;justify-content:space-between;align-items:center}
-.pay-after-val{font-size:12px;font-weight:500;color:var(--text);font-family:var(--mono)}
-.pay-popup-foot{padding:10px 16px 14px;display:flex;flex-direction:column;gap:6px}
-.pay-confirm-btn{height:36px;border-radius:8px;border:none;background:var(--positive);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);transition:opacity .15s}
-.pay-confirm-btn:hover{opacity:.88}
-.pay-skip-btn{height:30px;border-radius:8px;border:0.5px solid var(--border2);background:transparent;color:var(--text3);font-size:12px;cursor:pointer;font-family:var(--font);transition:all .15s}
-.pay-skip-btn:hover{color:var(--text);border-color:var(--border3)}
 /* ── AI Insight widget ── */
 .ai-insight-body{padding:6px 0 2px}
 .ai-insight-text{font-size:13px;color:var(--text);line-height:1.65;font-style:italic}
@@ -1452,11 +1429,11 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
           <input id="search" type="text" placeholder="Search&#8230; (press N to add)" oninput="render()">
         </div>
         <select class="sort-select" id="sort" onchange="render()">
-          <option value="due">Sort: Due date</option>
           <option value="default">Sort: Default</option>
           <option value="name">Sort: Name</option>
           <option value="amount-desc">Sort: Highest</option>
           <option value="amount-asc">Sort: Lowest</option>
+          <option value="due">Sort: Due date</option>
         </select>
       </div>
       <div class="filter-row" id="filters"></div>
@@ -1993,7 +1970,6 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
     <div class="field"><label>Status</label>
       <select id="f-status"><option value="active">Active</option><option value="paused">Paused</option></select>
     </div>
-    <div class="field"><label>Pay from account (optional)</label><select id="f-pay-account"><option value="">— No account —</option></select></div>
     <!-- Trial section -->
     <div class="toggle-row">
       <input type="checkbox" class="toggle-check" id="f-trial" onchange="toggleTrialFields()">
@@ -2092,32 +2068,6 @@ function loadData(){
 
 /* &#9472;&#9472; Helpers &#9472;&#9472; */
 function toMonthly(a,c){return c==='yearly'?a/12:c==='weekly'?a*4.33:c==='quarterly'?a/3:a;}
-function billActiveInCycle(item, refDate){
-  if(!item.startDate) return true;
-  const startMs = new Date(item.startDate + '-01').getTime();
-  const ce = cycleEnd(refDate || new Date());
-  return startMs <= ce.getTime();
-}
-
-function billDuration(startDate){
-  if(!startDate) return null;
-  const start = new Date(startDate+'-01');
-  const now   = new Date();
-  let months  = (now.getFullYear()-start.getFullYear())*12 + (now.getMonth()-start.getMonth());
-  if(months < 0) return null;
-  if(months === 0) return 'Started this month';
-  const yrs = Math.floor(months/12);
-  const mo  = months % 12;
-  if(yrs === 0) return mo+'mo';
-  if(mo  === 0) return yrs+'yr';
-  return yrs+'yr '+mo+'mo';
-}
-
-function billSinceLabel(startDate){
-  if(!startDate) return null;
-  const d = new Date(startDate+'-01');
-  return 'Since '+MONTHS[d.getMonth()]+' '+d.getFullYear();
-}
 function toAnnual(a,c){return c==='yearly'?a:c==='weekly'?a*52:c==='quarterly'?a*4:a*12;}
 function fmt(n){return n.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function todayStr(){const t=new Date();return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;}
@@ -2444,7 +2394,7 @@ function render(){
   if(sortVal==='name')vis.sort((a,b)=>a.name.localeCompare(b.name));
   else if(sortVal==='amount-desc')vis.sort((a,b)=>toMonthly(b.amount,b.cycle)-toMonthly(a.amount,a.cycle));
   else if(sortVal==='amount-asc')vis.sort((a,b)=>toMonthly(a.amount,a.cycle)-toMonthly(b.amount,b.cycle));
-  else vis.sort((a,b)=>(a.dueDay||99)-(b.dueDay||99)); // due date is default
+  else if(sortVal==='due')vis.sort((a,b)=>(a.dueDay||99)-(b.dueDay||99));
 
   if(!vis.length){
     document.getElementById('items').innerHTML=`<div class="empty">${(items.length||tabbyItems.length)?'No entries match your search':'Add your first subscription or bill to get started<br><span class="kbd-hint">Tip: press <kbd>N</kbd> anywhere to quickly add a new entry</span>'}</div>`;
@@ -2500,7 +2450,7 @@ function renderItem(item,ym){
         ${paidNow?'<span class="badge badge-paid">paid</span>':''}
         ${item.isTrial?`<span class="badge ${trialDaysLeft(item.trialEnd)<0?'badge-trial-expired':trialDaysLeft(item.trialEnd)<=3?'badge-trial-urgent':'badge-trial'}">${trialBadgeLabel(item.trialEnd)}</span>`:''}
       </div>
-      <div class="item-meta"><span>${item.cat}</span>${item.payAccountId&&!item.isTrial?(()=>{const _a=accounts.find(a=>a.id===item.payAccountId);return _a?`<span style="font-size:11px;color:var(--accent);opacity:.7">&#8594; ${esc(_a.name)}</span>`:''})():''}${resetChip}${showDue?`<span class="item-due ${due.cls}">${due.label}</span>`:''}${!isP&&!item.isTrial?paidMeta:''}</div>
+      <div class="item-meta"><span>${item.cat}</span>${resetChip}${showDue?`<span class="item-due ${due.cls}">${due.label}</span>`:''}${!isP&&!item.isTrial?paidMeta:''}</div>
       ${item.notes?`<div class="item-notes">${esc(item.notes)}</div>`:''}
     </div>
     <div>
@@ -2992,125 +2942,12 @@ function togglePaid(id){
   const item=items.find(i=>i.id===id);if(!item)return;
   const existing=payments.find(p=>p.itemId===id&&inCycle(p.date));
   if(existing){
-    // Un-marking paid — offer to reverse account deduction
     payments=payments.filter(p=>p.id!==existing.id);
-    // Reverse account deduction if one was recorded
-    if(existing.deductedAccountId){
-      const ac=accounts.find(a=>a.id===existing.deductedAccountId);
-      if(ac){
-        const prev=parseFloat(ac.balance)||0;
-        ac.balance=parseFloat((prev+(parseFloat(item.amount)||0)).toFixed(2));
-        ac.updatedAt=Date.now();
-        ac.history=ac.history||[];
-        ac.history.push({balance:ac.balance,date:todayStr(),note:'Reversed: '+item.name});
-        if(ac.history.length>24)ac.history=ac.history.slice(-24);
-        saveAccounts();
-        if(currentPage==='accounts')renderAccounts();
-        if(currentPage==='networth')renderNetWorth();
-      }
-    }
-    saveData();render();
-    toast('&#8617; '+item.name+' unmarked'+(existing.deductedAccountId?' · deduction reversed':''));
+    saveData();render();toast(`&#8617; ${item.name} marked as unpaid`);
   } else {
-    // Marking paid — show account picker popup
-    showPayFromPopup(item);
+    payments.unshift({id:String(Date.now()),itemId:item.id,name:item.name,cat:item.cat,amount:item.amount,date:todayStr(),note:''});
+    saveData();render();toast(`&#10003; ${item.name} marked as paid`);
   }
-}
-
-function showPayFromPopup(item){
-  // Remove any existing popup
-  const ex=document.getElementById('pay-popup-wrap');if(ex)ex.remove();
-
-  const defaultAcId = item.payAccountId||'';
-  const activeAccounts = accounts.filter(a=>!a.archived);
-
-  const rowsHtml = activeAccounts.length
-    ? activeAccounts.map(a=>`
-        <div class="pay-ac-row${a.id===defaultAcId?' selected':''}" id="pac-${a.id}" onclick="selectPayAc('${a.id}')">
-          <div class="pay-ac-dot" style="background:${a.color||'#888'}"></div>
-          <div class="pay-ac-name">${esc(a.name)}</div>
-          <div class="pay-ac-bal">AED ${fmt(a.balance)}</div>
-          <div class="pay-ac-check">${a.id===defaultAcId?'&#10003;':''}</div>
-        </div>`).join('')
-    : '<div style="font-size:12px;color:var(--text3);padding:8px 0">No accounts set up yet.</div>';
-
-  const selectedAc = activeAccounts.find(a=>a.id===defaultAcId)||activeAccounts[0];
-  const afterBal = selectedAc
-    ? 'AED '+fmt((parseFloat(selectedAc.balance)||0)-(parseFloat(item.amount)||0))
-    : '—';
-
-  const popup = document.createElement('div');
-  popup.id='pay-popup-wrap';
-  popup.className='pay-popup-backdrop';
-  popup.innerHTML=`
-    <div class="pay-popup">
-      <div class="pay-popup-head">
-        <div class="pay-popup-title">Mark ${esc(item.name)} as paid</div>
-        <div class="pay-popup-sub">AED ${fmt(item.amount)} &nbsp;·&nbsp; deduct from which account?</div>
-      </div>
-      <div class="pay-popup-body">
-        <div id="pay-ac-list">${rowsHtml}</div>
-        ${activeAccounts.length?`<div class="pay-after" id="pay-after-row">
-          <span>Balance after deduction</span>
-          <span class="pay-after-val" id="pay-after-val">${afterBal}</span>
-        </div>`:''}
-      </div>
-      <div class="pay-popup-foot">
-        <button class="pay-confirm-btn" onclick="confirmPayFrom('${item.id}')">&#10003; Confirm &amp; deduct</button>
-        <button class="pay-skip-btn" onclick="confirmPayFrom('${item.id}',true)">Mark paid without deducting</button>
-      </div>
-    </div>`;
-  popup.addEventListener('click',function(e){if(e.target===popup)popup.remove();});
-  document.body.appendChild(popup);
-  window._payItemId=item.id;
-  window._paySelectedAcId=defaultAcId||(activeAccounts[0]?activeAccounts[0].id:'');
-}
-
-function selectPayAc(acId){
-  window._paySelectedAcId=acId;
-  document.querySelectorAll('.pay-ac-row').forEach(r=>{
-    const sel=r.id==='pac-'+acId;
-    r.classList.toggle('selected',sel);
-    r.querySelector('.pay-ac-check').innerHTML=sel?'&#10003;':'';
-  });
-  // Update after-balance preview
-  const item=items.find(i=>i.id===window._payItemId);
-  const ac=accounts.find(a=>a.id===acId);
-  const afterEl=document.getElementById('pay-after-val');
-  if(afterEl&&item&&ac){
-    const after=(parseFloat(ac.balance)||0)-(parseFloat(item.amount)||0);
-    afterEl.textContent='AED '+fmt(after);
-    afterEl.style.color=after<0?'var(--red)':'var(--text)';
-  }
-}
-
-function confirmPayFrom(itemId, skipDeduction){
-  const popup=document.getElementById('pay-popup-wrap');
-  const item=items.find(i=>i.id===itemId);if(!item)return;
-  const acId=skipDeduction?null:window._paySelectedAcId;
-  const paymentId=String(Date.now());
-  payments.unshift({id:paymentId,itemId:item.id,name:item.name,cat:item.cat,amount:item.amount,date:todayStr(),note:'',deductedAccountId:acId||null});
-
-  if(acId){
-    const ac=accounts.find(a=>a.id===acId);
-    if(ac){
-      const prev=parseFloat(ac.balance)||0;
-      ac.balance=parseFloat((prev-(parseFloat(item.amount)||0)).toFixed(2));
-      ac.updatedAt=Date.now();
-      ac.history=ac.history||[];
-      ac.history.push({balance:ac.balance,date:todayStr(),note:'Paid: '+item.name});
-      if(ac.history.length>24)ac.history=ac.history.slice(-24);
-      saveAccounts();
-      if(currentPage==='accounts')renderAccounts();
-      if(currentPage==='networth')renderNetWorth();
-      toast('&#10003; '+item.name+' paid &nbsp;·&nbsp; AED '+fmt(item.amount)+' deducted from '+ac.name);
-    }
-  } else {
-    toast('&#10003; '+item.name+' marked as paid');
-  }
-
-  saveData();render();
-  if(popup)popup.remove();
 }
 
 function duplicateItem(id){
@@ -3330,7 +3167,7 @@ document.getElementById('tabby-modal').addEventListener('click',e=>{if(e.target=
 
 function exportJSON(){
   if(!items.length&&!payments.length&&!tabbyItems.length&&!tasks.length){toast('Nothing to back up yet');return;}
-  const data=JSON.stringify({items,payments,tabbyItems,tasks,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),exportedAt:new Date().toISOString()},null,2);
+  const data=JSON.stringify({items,payments,tabbyItems,tasks,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),exportedAt:new Date().toISOString()},null,2);
   const d=new Date();
   const filename='bills-backup-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'.json';
   verSnapshot(true);
@@ -3393,9 +3230,7 @@ function applyRestore(mode){
     saveData();saveTasks();saveLists();saveGoals();saveNotes();saveLoans();saveReceivables();saveAccounts();saveNetWorth();
     if(data.dbLayout)  localStorage.setItem(DB_LAYOUT_KEY,  JSON.stringify(data.dbLayout));
     if(data.navLayout) localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(data.navLayout));
-    if(data.cycleStart) localStorage.setItem(CYCLE_KEY, data.cycleStart);
     renderNav();
-    updateCyclePreview();
     render();
     if(currentPage==='tasks')renderTasks();
     if(currentPage==='goals')renderGoals();
@@ -3434,9 +3269,7 @@ function applyRestore(mode){
     // Merge layouts: only apply from backup if local layout is empty
     if(data.dbLayout  && !localStorage.getItem(DB_LAYOUT_KEY))  localStorage.setItem(DB_LAYOUT_KEY,  JSON.stringify(data.dbLayout));
     if(data.navLayout && !localStorage.getItem(NAV_LAYOUT_KEY)) localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(data.navLayout));
-    if(data.cycleStart) localStorage.setItem(CYCLE_KEY, data.cycleStart);
     renderNav();
-    updateCyclePreview();
     render();
     if(currentPage==='tasks')renderTasks();
     if(currentPage==='goals')renderGoals();
@@ -3481,12 +3314,6 @@ function openModal(id,forceTrial=false){
   document.getElementById('trial-fields').style.display=isTrial?'block':'none';
   selectedColor=item?.color||COLORS[0];
   renderColorPicker();
-  const fPayAc=document.getElementById('f-pay-account');
-  if(fPayAc){
-    fPayAc.innerHTML='<option value="">— No account —</option>'+
-      accounts.filter(a=>!a.archived).map(a=>`<option value="${a.id}">${esc(a.name)} — AED ${fmt(a.balance)}</option>`).join('');
-    fPayAc.value=item?.payAccountId||'';
-  }
   document.getElementById('modal').style.display='flex';
   setTimeout(()=>document.getElementById('f-name').focus(),50);
 }
@@ -3512,41 +3339,13 @@ function saveItem(){
     status:document.getElementById('f-status').value,
     color:selectedColor,
     isTrial,
-    trialEnd:isTrial?document.getElementById('f-trial-end').value:null,
-    payAccountId:document.getElementById('f-pay-account').value||null,
+    trialEnd:isTrial?document.getElementById('f-trial-end').value:null
   };
-  // If editing and amount changed, adjust the linked account balance for any paid cycle payment
-  if(editId){
-    const prev=items.find(i=>i.id===editId);
-    const prevAmount=prev?parseFloat(prev.amount)||0:0;
-    const newAmount=parseFloat(obj.amount)||0;
-    if(prev && prevAmount!==newAmount){
-      const cyclePay=payments.find(p=>p.itemId===editId&&inCycle(p.date)&&p.deductedAccountId);
-      if(cyclePay){
-        const ac=accounts.find(a=>a.id===cyclePay.deductedAccountId);
-        if(ac){
-          const diff=newAmount-prevAmount; // positive = bill went up = deduct more
-          ac.balance=parseFloat((parseFloat(ac.balance)-diff).toFixed(2));
-          ac.updatedAt=Date.now();
-          ac.history=ac.history||[];
-          ac.history.push({balance:ac.balance,date:todayStr(),note:'Adjusted: '+obj.name+' (amount changed)'});
-          if(ac.history.length>24)ac.history=ac.history.slice(-24);
-          saveAccounts();
-          if(currentPage==='accounts')renderAccounts();
-          if(currentPage==='networth')renderNetWorth();
-          toast('Updated '+obj.name+' · account adjusted by AED '+fmt(Math.abs(diff))+(diff>0?' (deducted more)':' (refunded difference)'));
-        }
-        // Update the payment record amount too
-        cyclePay.amount=newAmount;
-      }
-    }
-    const idx=items.findIndex(i=>i.id===editId);if(idx>-1)items[idx]=obj;
-  }
+  if(editId){const idx=items.findIndex(i=>i.id===editId);if(idx>-1)items[idx]=obj;}
   else items.unshift(obj);
   saveData();closeModal();render();
   if(currentPage==='trials')renderTrials();
-  if(!editId||!(()=>{const p=payments.find(pp=>pp.itemId===editId&&inCycle(pp.date)&&pp.deductedAccountId);return p&&parseFloat(items.find(i=>i.id===editId)?.amount)!==parseFloat(p?.amount);})())
-    toast(editId?'Updated '+obj.name:'Added '+obj.name);
+  toast(editId?`Updated ${obj.name}`:`Added ${obj.name}`);
 }
 
 /* &#9472;&#9472; Calculator &#9472;&#9472; */
@@ -5033,7 +4832,7 @@ async function asWriteFile(){
   asDot('busy');
   try{
     const payload = JSON.stringify(
-      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),savedAt:new Date().toISOString()},
+      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),savedAt:new Date().toISOString()},
       null, 2
     );
     const writable = await _asFileHandle.createWritable();
@@ -6005,7 +5804,7 @@ function verSnapshot(force){
       if(Date.now() - lastTs < VER_MIN_GAP) return;
     }
     const payload = JSON.stringify(
-      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),savedAt:new Date().toISOString()}
+      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),savedAt:new Date().toISOString()}
     );
     // Store the current auto-save filename as the snapshot title
     const filename = localStorage.getItem(AS_FILE_KEY)||null;
@@ -6390,97 +6189,34 @@ function aiGetKey(){ return localStorage.getItem(AI_KEY_STORE)||''; }
 function aiSetKey(k){ localStorage.setItem(AI_KEY_STORE, k.trim()); }
 
 function aiFinancialContext(){
-  const now = new Date();
-  const active = items.filter(i=>i.status==='active'&&!i.isTrial&&billActiveInCycle(i));
+  // Build a compact, token-efficient snapshot of the user's finances
+  const now   = new Date();
+  const active = items.filter(i=>i.status==='active'&&!i.isTrial);
   const monthly = active.reduce((s,i)=>s+toMonthly(i.amount,i.cycle),0);
-
-  // Current cycle paid
-  const paidThisCycle = payments.filter(p=>inCycle(p.date));
-  const paidAmt = paidThisCycle.reduce((s,p)=>s+p.amount,0);
-  const unpaidBills = active.filter(i=>!isPaidThisCycle(i)&&!i.isTrial);
-
-  // Previous cycle paid (for comparison)
-  const prevCycleEnd = new Date(cycleStart()); prevCycleEnd.setDate(prevCycleEnd.getDate()-1);
-  const prevCycleStart = cycleStart(prevCycleEnd);
-  const prevPaid = payments.filter(p=>{ const d=new Date(p.date); return d>=prevCycleStart&&d<=prevCycleEnd; })
-    .reduce((s,p)=>s+p.amount,0);
-
-  // Overdue
+  const paidAmt = payments.filter(p=>inCycle(p.date)).reduce((s,p)=>s+p.amount,0);
   const overdue = active.filter(i=>isOverdueCycle(i));
-
-  // Upcoming in next 7 days
-  const upcoming7 = active.filter(i=>{
-    if(!i.dueDay||isPaidThisCycle(i)) return false;
-    const due = dueDateInCycle(i.dueDay);
-    const diff = Math.ceil((due-now)/(1000*60*60*24));
-    return diff>=0&&diff<=7;
-  });
-
-  // Accounts
-  const assets = accounts.reduce((s,a)=>s+(parseFloat(a.balance)||0),0);
-  const liabs  = loans.filter(l=>!l.paidOff).reduce((s,l)=>s+lnRemainingBalance(l),0);
-  const net    = assets-liabs;
-
-  // Goals
-  const activeGoals = goals.filter(g=>g.status!=='done'&&g.target>0).map(g=>{
-    const pct = Math.round((g.current||0)/g.target*100);
-    const daysLeft = g.deadline ? Math.ceil((new Date(g.deadline)-now)/(1000*60*60*24)) : null;
-    return g.name+' '+pct+'%'+(daysLeft!==null?' ('+daysLeft+'d left)':'')+(g.target?' target AED '+Math.round(g.target):'');
-  });
-
-  // Loans — most urgent
-  const activeLoans = loans.filter(l=>!l.paidOff).map(l=>({
-    name:l.name,
-    remaining:Math.round(lnRemainingBalance(l)),
-    emi:Math.round(l.emiOverride||lnCalcMonthlyEMI(l.principal,l.rate,l.tenure)),
-    months:lnMonthsRemaining(l),
-  }));
-
-  // Top bills by cost
-  const topBills = active.slice().sort((a,b)=>toMonthly(b.amount,b.cycle)-toMonthly(a.amount,a.cycle))
-    .slice(0,5).map(i=>i.name+' AED '+Math.round(toMonthly(i.amount,i.cycle))+'/mo'+(isPaidThisCycle(i)?' [paid]':''));
-
-  // Receivables
-  const pendingRecv = receivables.filter(r=>!r.collected);
-  const recvTotal   = pendingRecv.reduce((s,r)=>s+(parseFloat(r.amount)||0),0);
-  const overdueRecv = pendingRecv.filter(r=>r.dueDate&&new Date(r.dueDate)<now);
-
-  // Tabby
+  const assets  = accounts.reduce((s,a)=>s+(parseFloat(a.balance)||0),0);
+  const liabs   = loans.filter(l=>!l.paidOff).reduce((s,l)=>s+lnRemainingBalance(l),0);
+  const net     = assets - liabs;
   const tabbyActive = tabbyItems.filter(t=>!t.instalments.every(i=>i.paid));
+  const goalsProg = goals.filter(g=>g.status!=='done').map(g=>({
+    name:g.name, target:g.target, current:g.current||0
+  }));
+  const topBills = active.slice().sort((a,b)=>toMonthly(b.amount,b.cycle)-toMonthly(a.amount,a.cycle)).slice(0,5)
+    .map(i=>i.name+' AED '+Math.round(toMonthly(i.amount,i.cycle))+'/mo');
 
-  const lines = [
-    '=== BILLING CYCLE ===',
-    'Current cycle: '+cycleLabel(),
-    'Monthly bills total: AED '+Math.round(monthly)+' ('+active.length+' bills)',
-    'Paid this cycle: AED '+Math.round(paidAmt)+' / AED '+Math.round(monthly)+' ('+Math.round(monthly>0?paidAmt/monthly*100:0)+'%)',
-    'Paid last cycle: AED '+Math.round(prevPaid)+(prevPaid>0?' (change: AED '+(Math.round(paidAmt-prevPaid))+(paidAmt>=prevPaid?'':'')+')':''),
-    unpaidBills.length ? 'Unpaid bills remaining: '+unpaidBills.map(i=>i.name+' AED '+Math.round(i.amount)).join(', ') : 'All bills paid this cycle!',
-    overdue.length ? 'OVERDUE: '+overdue.map(i=>i.name+' AED '+Math.round(i.amount)).join(', ') : 'No overdue bills',
-    upcoming7.length ? 'Due next 7 days: '+upcoming7.map(i=>i.name+' AED '+Math.round(i.amount)+' ('+Math.ceil((dueDateInCycle(i.dueDay)-now)/(1000*60*60*24))+'d)').join(', ') : '',
-    '',
-    '=== TOP BILLS ===',
-    topBills.join(' | '),
-    tabbyActive.length ? 'Tabby plans active: '+tabbyActive.length : '',
-    '',
-    '=== ACCOUNTS & NET WORTH ===',
+  return [
+    'Monthly subscriptions/bills: AED '+Math.round(monthly)+' ('+active.length+' active)',
+    'Paid this month so far: AED '+Math.round(paidAmt),
+    overdue.length ? 'Overdue bills: '+overdue.map(i=>i.name).join(', ') : 'No overdue bills',
+    'Top bills: '+topBills.join(' | '),
+    tabbyActive.length ? 'Tabby instalments active: '+tabbyActive.length+' plans' : '',
     'Total assets: AED '+Math.round(assets)+' across '+accounts.length+' accounts',
-    accounts.slice().sort((a,b)=>(parseFloat(b.balance)||0)-(parseFloat(a.balance)||0)).slice(0,4)
-      .map(a=>a.name+' AED '+Math.round(parseFloat(a.balance)||0)).join(' | '),
-    'Total liabilities: AED '+Math.round(liabs),
+    'Total liabilities: AED '+Math.round(liabs)+' across '+loans.filter(l=>!l.paidOff).length+' loans',
     'Net worth: AED '+Math.round(net),
-    '',
-    '=== LOANS ===',
-    activeLoans.length ? activeLoans.map(l=>l.name+' — AED '+l.remaining+' remaining, AED '+l.emi+'/mo EMI, '+l.months+' months left').join(' | ') : 'No active loans',
-    '',
-    '=== GOALS ===',
-    activeGoals.length ? activeGoals.join(' | ') : 'No active goals',
-    '',
-    '=== MONEY OWED TO YOU ===',
-    pendingRecv.length ? 'AED '+Math.round(recvTotal)+' owed by '+pendingRecv.length+' people/companies'+(overdueRecv.length?' ('+overdueRecv.length+' overdue)':'') : 'Nothing owed to you',
-    '',
-    'Today: '+now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}),
-  ];
-  return lines.filter(l=>l!==null&&l!==undefined).join('\n');
+    goalsProg.length ? 'Goals: '+goalsProg.map(g=>g.name+' '+Math.round(g.target>0?g.current/g.target*100:0)+'%').join(', ') : '',
+    'Today: '+now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}),
+  ].filter(Boolean).join('\n');
 }
 
 async function aiFetchInsight(force){
@@ -6488,154 +6224,89 @@ async function aiFetchInsight(force){
   if(!force){
     try{
       const cached = JSON.parse(localStorage.getItem(AI_INS_STORE)||'{}');
-      if(cached.date===today && cached.insights) return cached.insights;
+      if(cached.date===today && cached.text) return cached.text;
     }catch(e){}
   }
   const key = aiGetKey();
-  if(!key) return null;
+  if(!key) return null; // no key yet
   const context = aiFinancialContext();
+  const prompt = `You are a friendly personal finance assistant. Based on this user's real financial data, write ONE short, specific, helpful observation or tip (max 25 words). Be concrete — mention actual numbers or specific bills/goals from the data. Do not start with "I" or "You". No pleasantries.\n\nUser data:\n${context}`;
 
-  const prompt = `You are a proactive personal finance assistant analysing a user's LifeOS data. Generate 3-5 specific, actionable insights based on the data below.
-
-Return ONLY a JSON array, no other text. Each item must have:
-- "category": one of "alert", "opportunity", "trend", "tip"
-- "icon": one emoji character
-- "text": 1-2 sentences, specific numbers from the data, max 35 words
-
-Categories guide:
-- alert: urgent issues (overdue bills, low balance vs upcoming bills, missed payments)
-- opportunity: ways to save or improve (cancel unused subs, pay off loan early, boost goal)
-- trend: patterns over time (spending up/down, goal progress, net worth change)
-- tip: actionable advice specific to their situation
-
-Be concrete. Use real names and amounts from the data. No generic advice.
-
-User data:
-${context}
-
-Respond with ONLY the JSON array.`;
-
-  let resp;
-  try {
-    resp = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-allow-browser': 'true',
-      },
-      body:JSON.stringify({
-        model:'claude-haiku-4-5-20251001',
-        max_tokens:600,
-        messages:[{role:'user',content:prompt}],
-      }),
-    });
-  } catch(netErr){
-    throw new Error('Network error — check your API key or try refreshing. ('+netErr.message+')');
-  }
-  if(!resp.ok){
-    let errMsg='API error '+resp.status;
-    try{ const e=await resp.json(); errMsg=e?.error?.message||errMsg; }catch(e){}
-    throw new Error(errMsg);
-  }
+  const resp = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-haiku-4-5-20251001',
+      max_tokens:80,
+      messages:[{role:'user',content:prompt}],
+    }),
+  });
+  if(!resp.ok) throw new Error('API error '+resp.status);
   const data = await resp.json();
-  const raw = (data.content||[]).map(b=>b.text||'').join('').trim();
-  // Parse JSON — strip any accidental markdown fences
-  const cleaned = raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim();
-  const insights = JSON.parse(cleaned);
-  localStorage.setItem(AI_INS_STORE, JSON.stringify({date:today, insights}));
-  return insights;
+  const text = (data.content||[]).map(b=>b.text||'').join('').trim();
+  localStorage.setItem(AI_INS_STORE, JSON.stringify({date:today, text}));
+  return text;
 }
 
 /* ── Widget render ── */
 function dbWidgetAIInsight(el){
-  dbCard(el,{icon:'&#10024;',title:'AI insights',badgeCls:'db-badge-purple'});
+  dbCard(el,{icon:'&#10024;',title:'AI insight',badgeCls:'db-badge-purple'});
   const body = document.getElementById('dbwb-aiinsight');
   if(!body) return;
   const key = aiGetKey();
 
   if(!key){
+    // No API key — show setup UI
     body.innerHTML =
       '<div class="ai-insight-body">'+
         '<div style="font-size:12px;color:var(--text2);margin-bottom:8px">'+
-          'Enter your <a href="https://console.anthropic.com/settings/keys" style="color:var(--accent)">Anthropic API key</a> to get daily AI insights about your finances.'+
+          'Enter your <a href="https://console.anthropic.com/settings/keys" style="color:var(--accent)">Anthropic API key</a> to get daily AI observations about your finances.'+
         '</div>'+
         '<div class="ai-insight-key-row">'+
           '<input class="ai-insight-key-input" id="ai-key-input" type="password" placeholder="sk-ant-...">'+
           '<button class="ai-insight-save-btn" onclick="aiSaveKeyAndRun()">Save &amp; run</button>'+
         '</div>'+
-        '<div style="font-size:10px;color:var(--text3);margin-top:6px">Key stored only in your browser.</div>'+
+        '<div style="font-size:10px;color:var(--text3);margin-top:6px">Key is stored only in your browser — never sent anywhere except Anthropic.</div>'+
       '</div>';
     return;
   }
 
-  // Show loading
+  // Has key — show loading state then fetch
   body.innerHTML =
     '<div class="ai-insight-body">'+
-      '<div class="ai-insight-text loading">'+
+      '<div class="ai-insight-text loading" id="ai-ins-text">'+
         '<div class="ai-insight-loading-dot"></div>'+
         '<div class="ai-insight-loading-dot"></div>'+
         '<div class="ai-insight-loading-dot"></div>'+
-        '<span style="margin-left:2px">Analysing your finances\u2026</span>'+
+        '<span style="margin-left:2px">Thinking\u2026</span>'+
       '</div>'+
     '</div>';
 
-  // Check cache
+  // Check cache first (non-blocking)
   const today = new Date().toISOString().slice(0,10);
   let cached = null;
-  try{
-    const s=localStorage.getItem(AI_INS_STORE);
-    if(s){ const p=JSON.parse(s); if(p.date===today&&p.insights) cached=p.insights; }
-  }catch(e){}
+  try{ const s=localStorage.getItem(AI_INS_STORE); if(s){ const p=JSON.parse(s); if(p.date===today) cached=p.text; } }catch(e){}
 
   if(cached){
-    aiShowInsights(body, cached, false);
+    aiShowInsight(body, cached, false);
   } else {
-    aiFetchInsight(false).then(insights=>{
-      if(insights) aiShowInsights(body, insights, false);
-      else body.innerHTML='<div class="ai-insight-body"><div style="font-size:12px;color:var(--text3)">Could not generate insights. Check your API key.</div></div>';
+    aiFetchInsight(false).then(text=>{
+      if(text) aiShowInsight(body, text, false);
+      else body.innerHTML='<div class="ai-insight-body"><div style="font-size:12px;color:var(--text3)">Could not fetch insight. Check your API key.</div></div>';
     }).catch(e=>{
-      body.innerHTML='<div class="ai-insight-body">'+
-        '<div style="font-size:12px;color:var(--red);margin-bottom:10px">'+esc(e.message)+'</div>'+
-        '<div class="ai-insight-key-row">'+
-          '<input class="ai-insight-key-input" id="ai-key-input" type="password" placeholder="Paste API key (sk-ant-...)">'+
-          '<button class="ai-insight-save-btn" onclick="aiSaveKeyAndRun()">Save key</button>'+
-        '</div>'+
-        '<div style="display:flex;gap:10px;margin-top:8px;align-items:center">'+
-          '<button class="ai-insight-refresh-btn" onclick="aiRefreshInsight()">&#8635; Try again</button>'+
-          '<a href="https://console.anthropic.com/settings/keys" target="_blank" style="font-size:10px;color:var(--accent)">Get API key &#8599;</a>'+
-        '</div>'+
-      '</div>';
+      body.innerHTML='<div class="ai-insight-body"><div style="font-size:12px;color:var(--red)">Error: '+esc(e.message)+'</div></div>';
     });
   }
 }
 
-const AI_CAT_LABELS = {alert:'⚠️ Alert', opportunity:'💡 Opportunity', trend:'📈 Trend', tip:'💬 Tip'};
-
-function aiShowInsights(body, insights, fresh){
-  if(!Array.isArray(insights)||!insights.length){
-    body.innerHTML='<div class="ai-insight-body"><div style="font-size:12px;color:var(--text3)">No insights generated.</div></div>';
-    return;
-  }
+function aiShowInsight(body, text, fresh){
   const today = new Date().toISOString().slice(0,10);
-  const cards = insights.map(ins=>{
-    const cat = ins.category||'tip';
-    const label = AI_CAT_LABELS[cat]||cat;
-    return '<div class="ai-card '+cat+'">'+
-      '<div class="ai-card-tag">'+esc(label)+'</div>'+
-      '<div class="ai-card-text">'+esc(ins.text)+'</div>'+
-    '</div>';
-  }).join('');
   body.innerHTML =
     '<div class="ai-insight-body">'+
-      '<div class="ai-cards">'+cards+'</div>'+
+      '<div class="ai-insight-text">\u201c'+esc(text)+'\u201d</div>'+
       '<div class="ai-insight-meta">'+
-        '<span>'+(fresh?'Just generated':'Updated today')+' \u00b7 '+insights.length+' insights</span>'+
-        '<div style="display:flex;gap:8px;align-items:center">'+
-          '<button class="ai-insight-refresh-btn" onclick="aiRefreshInsight()" title="Refresh insights">&#8635; Refresh</button>'+
-          '<button class="ai-insight-refresh-btn" onclick="aiShowKeyInput()" title="Change API key">&#128273; Key</button>'+
-        '</div>'+
+        '<span>'+(fresh?'Just generated':'Cached for today \u00b7 '+today)+'</span>'+
+        '<button class="ai-insight-refresh-btn" onclick="aiRefreshInsight()" title="Generate a fresh insight">&#8635; Refresh</button>'+
       '</div>'+
     '</div>';
 }
@@ -6652,9 +6323,9 @@ function aiRefreshInsight(){
         '<span style="margin-left:2px">Refreshing\u2026</span>'+
       '</div>'+
     '</div>';
-  aiFetchInsight(true).then(insights=>{
-    if(insights) aiShowInsights(body, insights, true);
-    else body.innerHTML='<div class="ai-insight-body"><div style="font-size:12px;color:var(--text3)">Could not fetch insights.</div></div>';
+  aiFetchInsight(true).then(text=>{
+    if(text) aiShowInsight(body, text, true);
+    else body.innerHTML='<div class="ai-insight-body"><div style="font-size:12px;color:var(--text3)">Could not fetch insight.</div></div>';
   }).catch(e=>{
     body.innerHTML='<div class="ai-insight-body"><div style="font-size:12px;color:var(--red)">Error: '+esc(e.message)+'</div></div>';
   });
@@ -6664,49 +6335,7 @@ function aiSaveKeyAndRun(){
   const inp = document.getElementById('ai-key-input');
   if(!inp||!inp.value.trim()){inp&&inp.focus();return;}
   aiSetKey(inp.value);
-  localStorage.removeItem(AI_INS_STORE); // clear cache so it re-fetches with new key
-  const widgetEl = document.getElementById('dbw-aiinsight');
-  if(widgetEl) try{ dbWidgetAIInsight(widgetEl); }catch(e){}
-}
-
-function aiShowKeyInput(){
-  const body = document.getElementById('dbwb-aiinsight');
-  if(!body) return;
-  const currentKey = aiGetKey();
-  const masked = currentKey ? 'sk-ant-\u2026'+currentKey.slice(-6) : '';
-  body.innerHTML =
-    '<div class="ai-insight-body">'+
-      '<div style="font-size:12px;color:var(--text2);margin-bottom:6px">'+
-        (currentKey ? 'Current key: <span style="font-family:var(--mono);font-size:11px;color:var(--text3)">'+masked+'</span>' : 'No API key set')+
-      '</div>'+
-      '<div class="ai-insight-key-row">'+
-        '<input class="ai-insight-key-input" id="ai-key-input" type="password" placeholder="Paste new key (sk-ant-...)">'+
-        '<button class="ai-insight-save-btn" onclick="aiSaveKeyAndRun()">Save</button>'+
-      '</div>'+
-      '<div style="display:flex;gap:8px;margin-top:8px">'+
-        (currentKey ? '<button class="ai-insight-refresh-btn" onclick="aiClearKey()" style="color:var(--red)">&#128465; Remove key</button>' : '')+
-        '<button class="ai-insight-refresh-btn" onclick="aiCancelKeyInput()">&#10005; Cancel</button>'+
-      '</div>'+
-      '<div style="font-size:10px;color:var(--text3);margin-top:6px">Key stored only in your browser.</div>'+
-    '</div>';
-  setTimeout(()=>{ const i=document.getElementById('ai-key-input'); if(i)i.focus(); }, 50);
-}
-
-function aiCancelKeyInput(){
-  const body = document.getElementById('dbwb-aiinsight');
-  if(!body) return;
-  const today = new Date().toISOString().slice(0,10);
-  try{
-    const cached = JSON.parse(localStorage.getItem(AI_INS_STORE)||'{}');
-    if(cached.date===today&&cached.insights){ aiShowInsights(body, cached.insights, false); return; }
-  }catch(e){}
-  dbWidgetAIInsight(document.getElementById('dbw-aiinsight'));
-}
-
-function aiClearKey(){
-  if(!confirm('Remove your Anthropic API key? The AI Insights widget will stop working until a new key is entered.')) return;
-  localStorage.removeItem(AI_KEY_STORE);
-  localStorage.removeItem(AI_INS_STORE);
+  // Re-render the widget
   const widgetEl = document.getElementById('dbw-aiinsight');
   if(widgetEl) try{ dbWidgetAIInsight(widgetEl); }catch(e){}
 }

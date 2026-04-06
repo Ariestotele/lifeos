@@ -87,6 +87,10 @@ body{
 .nav-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0;transition:color .18s}
 .sidebar-section{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;padding:0 10px;margin:1rem 0 4px}
 .sidebar-bottom{margin-top:auto;padding-top:1rem;border-top:0.5px solid var(--border)}
+
+
+
+
 /* ── Sidebar nav edit mode ── */
 .nav-edit-btn{width:100%;height:26px;border-radius:6px;border:0.5px solid var(--border2);
   background:transparent;cursor:pointer;font-size:10px;font-weight:500;
@@ -2065,7 +2069,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '2.3';
+const APP_VERSION = '2.4';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_TASKS='subtracker_tasks', KEY_LISTS='subtracker_lists', KEY_GOALS='subtracker_goals', KEY_NOTES='subtracker_notes', KEY_LOANS='subtracker_loans', KEY_ACCOUNTS='subtracker_accounts', KEY_NW='subtracker_networth', KEY_RECV='subtracker_receivables';
 
@@ -4706,16 +4710,19 @@ function renderDashboard(){
 }
 
 /* ── Helper: build widget shell ─────────────────────── */
-function dbCard(el,{icon,title,badge,badgeCls,footerLeft,footerLink,footerPage,body}){
+function dbCard(el,{icon,title,badge,badgeCls,footerLeft,footerLink,footerPage,body,headColor}){
   const badgeHtml=badge!=null?`<span class="db-badge ${badgeCls||'db-badge-muted'}">${badge}</span>`:'';
   const footerHtml=(footerLeft||footerLink)?`
     <div class="db-widget-footer">
       <span>${footerLeft||''}</span>
       ${footerLink?`<button class="db-link" onclick="switchPage('${footerPage||''}')">${footerLink} &rarr;</button>`:''}
     </div>`:'';
+  const headBg=headColor?`background:${headColor};border-bottom-color:${headColor.replace(',.08)',', .2)').replace(',.07)',', .18)')}`:''
+  // Derive a solid title colour from the headColor by replacing opacity
+  const titleCol=headColor?headColor.replace(/,[\s]*[\d.]+\)$/,',1)').replace('rgba','rgba'):''
   el.innerHTML=`
-    <div class="db-widget-head">
-      <div class="db-widget-title"><span class="db-widget-icon">${icon}</span>${title}</div>
+    <div class="db-widget-head" ${headBg?`style="${headBg}"`:''}> 
+      <div class="db-widget-title" ${titleCol?`style="color:${titleCol}"`:''}><span class="db-widget-icon">${icon}</span>${title}</div>
       ${badgeHtml}
     </div>
     <div class="db-widget-body" id="dbwb-${el.id.replace('dbw-','')}"></div>
@@ -4734,7 +4741,7 @@ function dbWidgetFinances(el){
   const tabbyOwed=tabbyItems.filter(t=>!t.instalments.every(i=>i.paid)).reduce((s,t)=>s+(t.total/4),0);
   const annual=active.reduce((s,i)=>s+toAnnual(i.amount,i.cycle),0);
   const badge=overdue>0?overdue+' overdue':null;
-  dbCard(el,{icon:'&#128176;',title:'Finances',badge,badgeCls:'db-badge-red',footerLink:'View bills',footerPage:'active'});
+  dbCard(el,{icon:'&#128176;',title:'Finances',badge,badgeCls:'db-badge-red',footerLink:'View bills',footerPage:'active',headColor:'rgba(74,142,204,.08)'});
   document.getElementById('dbwb-finances').innerHTML=`
     <div class="db-kpi-grid">
       <div class="db-kpi green">
@@ -4821,7 +4828,7 @@ function dbWidgetAlerts(el){
     const labels={active:'View bills',tasks:'View tasks',goals:'View goals'};
     footerLink=labels[footerPage];
   }
-  dbCard(el,{icon:'&#9888;',title:'Alerts',badge:total||null,badgeCls:'db-badge-red',footerLink,footerPage});
+  dbCard(el,{icon:'&#9888;',title:'Alerts',badge:total||null,badgeCls:'db-badge-red',footerLink,footerPage,headColor:'rgba(224,82,82,.08)'});
   const body=document.getElementById('dbwb-alerts');
   if(!total){body.innerHTML='<div class="db-empty">&#10003; No alerts right now</div>';return;}
   let rows='';
@@ -4843,7 +4850,7 @@ function dbWidgetTasks(el){
     .sort((a,b)=>(PRI_ORDER[a.priority||'none']||4)-(PRI_ORDER[b.priority||'none']||4));
   const total=due.length+overdueTasks.length;
   const badge=total||null;
-  dbCard(el,{icon:'&#9635;',title:'Tasks today',badge,badgeCls:'db-badge-purple',
+  dbCard(el,{icon:'&#9635;',title:'Tasks today',badge,badgeCls:'db-badge-purple',headColor:'rgba(155,127,232,.08)',
     footerLeft:overdueTasks.length?overdueTasks.length+' overdue':'',footerLink:'All tasks',footerPage:'tasks'});
   const body=document.getElementById('dbwb-tasks');
   if(!total){
@@ -4900,7 +4907,7 @@ function dbWidgetBills7(el){
   });
 upcoming.sort((a,b)=>a.diff-b.diff);
   const total=upcoming.reduce((s,u)=>s+u.item.amount,0);
-  dbCard(el,{icon:'&#9711;',title:'Bills this week',badge:upcoming.length||null,badgeCls:'db-badge-amber',
+  dbCard(el,{icon:'&#9711;',title:'Bills this week',badge:upcoming.length||null,badgeCls:'db-badge-amber',headColor:'rgba(201,138,26,.08)',
     footerLeft:upcoming.length?'AED '+fmt(total)+' due':'',footerLink:'View all',footerPage:'active'});
   const body=document.getElementById('dbwb-bills7');
   if(!upcoming.length){body.innerHTML='<div class="db-empty">&#10003; No bills due in 7 days</div>';return;}
@@ -4927,7 +4934,7 @@ upcoming.sort((a,b)=>a.diff-b.diff);
 function dbWidgetGoals(el){
   const active=goals.filter(g=>glGoalStatus(g)==='active');
   const completed=goals.filter(g=>glGoalStatus(g)==='completed').length;
-  dbCard(el,{icon:'&#9651;',title:'Goals',badge:active.length||null,badgeCls:'db-badge-green',
+  dbCard(el,{icon:'&#9651;',title:'Goals',badge:active.length||null,badgeCls:'db-badge-green',headColor:'rgba(31,170,126,.08)',
     footerLeft:completed+' completed',footerLink:'All goals',footerPage:'goals'});
   const body=document.getElementById('dbwb-goals');
   if(!goals.length){body.innerHTML='<div class="db-empty">No goals yet</div>';return;}
@@ -4948,7 +4955,7 @@ function dbWidgetGoals(el){
 
 /* ── Widget: 14-day strip ────────────────────────────── */
 function dbWidgetWeek(el){
-  dbCard(el,{icon:'&#9744;',title:'Next 14 days',footerLink:'Calendar',footerPage:'calendar'});
+  dbCard(el,{icon:'&#9744;',title:'Next 14 days',footerLink:'Calendar',footerPage:'calendar',headColor:'rgba(74,142,204,.07)'});
   const body=document.getElementById('dbwb-week');
   const now=new Date(); now.setHours(0,0,0,0);
   const ym=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
@@ -6281,18 +6288,21 @@ function renderNetWorth(){
       const pct = liabs > 0 ? Math.round(rem/liabs*100) : 0;
       const colors = typeof LN_COLORS!=='undefined' ? LN_COLORS : {};
       const color = colors[l.type]||'#888';
-      return `<div class="nw-row" style="cursor:pointer" onclick="highlightLoan('${l.id}')" title="View in Loans">
-        <div class="nw-row-left">
-          <div class="nw-row-icon" style="background:${color}22">&#127968;</div>
-          <div><div class="nw-row-name">${esc(l.name)}</div>
-          <div class="nw-row-sub">${esc(l.lender||l.type||'')}</div></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <div class="nw-row-pct">${pct}%</div>
-          <div class="nw-row-amt red">AED ${fmt(rem)}</div>
-        </div>
-      </div>`;
-    }).join('') :
+      const _nwDiv = document.createElement('div');
+      _nwDiv.className = 'nw-row';
+      _nwDiv.style.cursor = 'pointer';
+      _nwDiv.title = 'View in Loans';
+      _nwDiv.onclick = (function(id){return function(){highlightLoan(id);};})(l.id);
+      _nwDiv.innerHTML = '<div class="nw-row-left">'
+        + '<div class="nw-row-icon" style="background:'+color+'22">&#127968;</div>'
+        + '<div><div class="nw-row-name">'+esc(l.name)+'</div>'
+        + '<div class="nw-row-sub">'+esc(l.lender||l.type||'')+'</div></div>'
+        + '</div>'
+        + '<div style="display:flex;align-items:center;gap:8px">'
+        + '<div class="nw-row-pct">'+pct+'%</div>'
+        + '<div class="nw-row-amt red">AED '+fmt(rem)+'</div>'
+        + '</div>';
+      return _nwDiv.outerHTML;    }).join('') :
     '<div style="text-align:center;padding:1rem;font-size:12px;color:var(--text3)">No active loans<br><span style="color:var(--accent);font-size:11px">\u2713 Debt-free!</span></div>';
 
   document.getElementById('nw-sections').innerHTML =
@@ -6548,7 +6558,7 @@ ${context}`;
 
 /* ── Widget render ── */
 function dbWidgetAIInsight(el){
-  dbCard(el,{icon:'&#10024;',title:'AI insights',badgeCls:'db-badge-purple'});
+  dbCard(el,{icon:'&#10024;',title:'AI insights',badgeCls:'db-badge-purple',headColor:'rgba(155,127,232,.08)'});
   const body=document.getElementById('dbwb-aiinsight');
   if(!body)return;
   const key=aiGetKey();
@@ -6724,11 +6734,16 @@ renderDashboard = function(){
     // Edit overlay (drag handle + show/hide)
     const overlay = document.createElement('div');
     overlay.className = 'db-widget-edit-overlay';
-    overlay.innerHTML =
-      '<div class="db-drag-handle">&#8942;&#8942;</div>'+
-      '<button class="db-vis-btn" onclick="dbToggleVisible(\''+w.id+'\')" title="'+(w.visible?'Hide':'Show')+' widget">'+
-        (w.visible?'&#128065;':'&#128683;')+
-      '</button>';
+    const _oh = document.createElement('div');
+    _oh.className = 'db-drag-handle';
+    _oh.innerHTML = '&#8942;&#8942;';
+    const _ob = document.createElement('button');
+    _ob.className = 'db-vis-btn';
+    _ob.title = (w.visible?'Hide':'Show')+' widget';
+    _ob.innerHTML = w.visible?'&#128065;':'&#128683;';
+    _ob.onclick = (function(id){return function(){dbToggleVisible(id);};})(w.id);
+    overlay.appendChild(_oh);
+    overlay.appendChild(_ob);
     div.appendChild(overlay);
     grid.appendChild(div);
     if(w.visible){
@@ -7347,12 +7362,14 @@ function renderReceivables(){
   }).join('') + '</div>';
 }
 
+
 loadData();
 asRestoreStatus();
 const _vn=document.getElementById('app-ver-num');if(_vn)_vn.textContent=APP_VERSION;
 checkReminders();
 renderNav();
 updateCyclePreview();
+
 </script>
 <!-- Mobile bottom nav -->
 <!-- Restore modal -->

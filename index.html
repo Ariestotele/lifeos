@@ -2079,7 +2079,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '2.6';
+const APP_VERSION = '2.7';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_TASKS='subtracker_tasks', KEY_LISTS='subtracker_lists', KEY_GOALS='subtracker_goals', KEY_NOTES='subtracker_notes', KEY_LOANS='subtracker_loans', KEY_ACCOUNTS='subtracker_accounts', KEY_NW='subtracker_networth', KEY_RECV='subtracker_receivables';
 
@@ -6513,8 +6513,9 @@ async function aiFetchInsight(force){
     }catch(e){}
   }
   const key=aiGetKey();
-  if(!key) return null;
-  if(!key.startsWith('sk-ant-')) throw new Error('Invalid API key format — key should start with sk-ant-');
+  const proxyUrl=aiGetProxy();
+  if(!proxyUrl && !key) return null;  // no proxy and no key — nothing to do
+  if(!proxyUrl && key && !key.startsWith('sk-ant-')) throw new Error('Invalid API key format — key should start with sk-ant-');
   const context=aiFinancialContext();
   const prompt=`You are a proactive personal finance analyst. Analyse this user's LifeOS data and return 4-5 specific, actionable insights they can act on TODAY.
 
@@ -6537,7 +6538,6 @@ Rules:
 User data:
 ${context}`;
 
-  const proxyUrl = aiGetProxy();
   const endpoint = proxyUrl || 'https://api.anthropic.com/v1/messages';
   const headers = {'Content-Type':'application/json'};
   if(!proxyUrl){
@@ -6584,11 +6584,12 @@ function dbWidgetAIInsight(el){
   const body=document.getElementById('dbwb-aiinsight');
   if(!body)return;
   const key=aiGetKey();
-  if(!key){
+  const proxyUrl=aiGetProxy();
+  if(!key && !proxyUrl){
     body.innerHTML=
       '<div class="ai-insight-body">'+
         '<div style="font-size:12px;color:var(--text2);margin-bottom:8px">'+
-          'Enter your <a href="https://console.anthropic.com/settings/keys" style="color:var(--accent)">Anthropic API key</a> to get actionable daily insights.'+
+          'Enter your <a href="https://console.anthropic.com/settings/keys" style="color:var(--accent)">Anthropic API key</a> to get actionable daily insights, or set up a proxy in Settings.'+
         '</div>'+
         '<div class="ai-insight-key-row">'+
           '<input class="ai-insight-key-input" id="ai-key-input" type="password" placeholder="sk-ant-...">'+

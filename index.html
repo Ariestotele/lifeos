@@ -3358,7 +3358,7 @@ document.getElementById('tabby-modal').addEventListener('click',e=>{if(e.target=
 
 function exportJSON(){
   if(!items.length&&!payments.length&&!tabbyItems.length&&!tasks.length){toast('Nothing to back up yet');return;}
-  const data=JSON.stringify({items,payments,tabbyItems,tasks,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),exportedAt:new Date().toISOString()},null,2);
+  const data=JSON.stringify({items,payments,tabbyItems,tasks,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),proxyUrl:localStorage.getItem(AI_PROXY_STORE)||'',exportedAt:new Date().toISOString()},null,2);
   const d=new Date();
   const filename='bills-backup-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'.json';
   verSnapshot(true);
@@ -3422,6 +3422,7 @@ function applyRestore(mode){
     if(data.dbLayout)  localStorage.setItem(DB_LAYOUT_KEY,  JSON.stringify(data.dbLayout));
     if(data.navLayout) localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(data.navLayout));
     if(data.cycleStart) localStorage.setItem(CYCLE_KEY, data.cycleStart);
+    if(data.proxyUrl){ aiSetProxy(data.proxyUrl); loadProxyUrl(); }
     renderNav();
     updateCyclePreview();
 loadProxyUrl();
@@ -3464,6 +3465,7 @@ loadProxyUrl();
     if(data.dbLayout  && !localStorage.getItem(DB_LAYOUT_KEY))  localStorage.setItem(DB_LAYOUT_KEY,  JSON.stringify(data.dbLayout));
     if(data.navLayout && !localStorage.getItem(NAV_LAYOUT_KEY)) localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(data.navLayout));
     if(data.cycleStart) localStorage.setItem(CYCLE_KEY, data.cycleStart);
+    if(data.proxyUrl){ aiSetProxy(data.proxyUrl); loadProxyUrl(); }
     renderNav();
     updateCyclePreview();
     render();
@@ -5077,7 +5079,7 @@ async function asWriteFile(){
   asDot('busy');
   try{
     const payload = JSON.stringify(
-      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),savedAt:new Date().toISOString()},
+      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),proxyUrl:localStorage.getItem(AI_PROXY_STORE)||'',savedAt:new Date().toISOString()},
       null, 2
     );
     const writable = await _asFileHandle.createWritable();
@@ -6052,7 +6054,7 @@ function verSnapshot(force){
       if(Date.now() - lastTs < VER_MIN_GAP) return;
     }
     const payload = JSON.stringify(
-      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),savedAt:new Date().toISOString()}
+      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),proxyUrl:localStorage.getItem(AI_PROXY_STORE)||'',savedAt:new Date().toISOString()}
     );
     // Store the current auto-save filename as the snapshot title
     const filename = localStorage.getItem(AS_FILE_KEY)||null;
@@ -6513,9 +6515,9 @@ async function aiFetchInsight(force){
     }catch(e){}
   }
   const key=aiGetKey();
-  const proxyUrl=aiGetProxy();
-  if(!proxyUrl && !key) return null;  // no proxy and no key — nothing to do
-  if(!proxyUrl && key && !key.startsWith('sk-ant-')) throw new Error('Invalid API key format — key should start with sk-ant-');
+  if(!key) return null;
+  if(!key.startsWith('sk-ant-')) throw new Error('Invalid API key format — key should start with sk-ant-');
+
   const context=aiFinancialContext();
   const prompt=`You are a proactive personal finance analyst. Analyse this user's LifeOS data and return 4-5 specific, actionable insights they can act on TODAY.
 
@@ -6538,6 +6540,7 @@ Rules:
 User data:
 ${context}`;
 
+  const proxyUrl = aiGetProxy();
   const endpoint = proxyUrl || 'https://api.anthropic.com/v1/messages';
   const headers = {'Content-Type':'application/json'};
   if(!proxyUrl){
@@ -6584,12 +6587,11 @@ function dbWidgetAIInsight(el){
   const body=document.getElementById('dbwb-aiinsight');
   if(!body)return;
   const key=aiGetKey();
-  const proxyUrl=aiGetProxy();
-  if(!key && !proxyUrl){
+  if(!key){
     body.innerHTML=
       '<div class="ai-insight-body">'+
         '<div style="font-size:12px;color:var(--text2);margin-bottom:8px">'+
-          'Enter your <a href="https://console.anthropic.com/settings/keys" style="color:var(--accent)">Anthropic API key</a> to get actionable daily insights, or set up a proxy in Settings.'+
+          'Enter your <a href="https://console.anthropic.com/settings/keys" style="color:var(--accent)">Anthropic API key</a> to get actionable daily insights.'+
         '</div>'+
         '<div class="ai-insight-key-row">'+
           '<input class="ai-insight-key-input" id="ai-key-input" type="password" placeholder="sk-ant-...">'+
@@ -7215,7 +7217,7 @@ function saveProxyUrl(){
   const inp = document.getElementById('ai-proxy-input');
   if(!inp) return;
   aiSetProxy(inp.value);
-  localStorage.removeItem(AI_INS_STORE); // clear cache so it re-fetches
+  localStorage.removeItem(AI_INS_STORE);
   toast('Proxy URL saved — click Refresh on AI Insights');
 }
 

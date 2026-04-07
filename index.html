@@ -87,6 +87,24 @@ body{
 .nav-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0;transition:color .18s}
 .sidebar-section{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;padding:0 10px;margin:1rem 0 4px}
 .sidebar-bottom{margin-top:auto;padding-top:1rem;border-top:0.5px solid var(--border)}
+/* ── Settings modal ── */
+.settings-modal-backdrop{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center}
+.settings-modal{background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius-lg);width:min(480px,92vw);max-height:85vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.4)}
+.settings-modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 14px;border-bottom:0.5px solid var(--border)}
+.settings-modal-title{font-size:15px;font-weight:600;color:var(--text)}
+.settings-section{padding:16px 20px;border-bottom:0.5px solid var(--border)}
+.settings-section:last-child{border-bottom:none}
+.settings-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:12px}
+.settings-row{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.settings-row:last-child{margin-bottom:0}
+.settings-label{font-size:12px;font-weight:500;color:var(--text2)}
+.settings-hint{font-size:10px;color:var(--text3)}
+.settings-field-row{display:flex;gap:6px;align-items:center}
+.settings-input{flex:1;height:30px;border-radius:6px;border:0.5px solid var(--border2);background:var(--surface3);color:var(--text);padding:0 9px;font-size:12px;font-family:var(--mono);outline:none;transition:border-color .15s}
+.settings-input:focus{border-color:var(--accent-border)}
+.settings-save-btn{height:30px;padding:0 12px;border-radius:6px;border:0.5px solid var(--accent-border);background:var(--accent-dim);color:var(--accent);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font);white-space:nowrap;transition:all .15s}
+.settings-save-btn:hover{background:var(--accent);color:#000}
+
 
 
 
@@ -1409,50 +1427,17 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
     <button class="nav-item" id="nav-dashboard" onclick="switchPage('dashboard')" style="margin-bottom:4px"><span class="nav-icon">&#9632;</span><span class="nav-label"> Dashboard</span></button>
     <div id="nav-sections-wrap"></div>
     <div class="sidebar-section">Settings</div>
-    <div id="ai-proxy-setting-wrap" style="padding:8px 0 4px">
-      <div style="font-size:10px;color:var(--text3);margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em">AI Proxy URL</div>
-      <div style="display:flex;gap:6px;align-items:center">
-        <input id="ai-proxy-input" type="text" placeholder="https://your-worker.workers.dev"
-          style="flex:1;height:26px;border-radius:5px;border:0.5px solid var(--border2);background:var(--surface3);color:var(--text);padding:0 7px;font-size:10px;font-family:var(--mono);outline:none"
-          value="">
-        <button onclick="saveProxyUrl()" style="height:26px;padding:0 8px;border-radius:5px;border:0.5px solid var(--accent-border);background:var(--accent-dim);color:var(--accent);font-size:11px;font-weight:500;cursor:pointer;font-family:var(--font);white-space:nowrap">Save</button>
-      </div>
-      <div style="font-size:9px;color:var(--text3);margin-top:4px">Required for GitHub Pages. <a href="https://github.com/ariestotele/lifeos" target="_blank" style="color:var(--accent)">Setup guide ↗</a></div>
+    <button class="nav-item" onclick="openSettingsModal()"><span class="nav-icon">&#9881;</span><span class="nav-label"> Settings</span></button>
+    <div style="display:none">
+      <div class="as-dot" id="as-dot"></div>
+      <span id="as-status-text">Not set up</span>
+      <div id="as-file-row"></div>
+      <div id="as-file-name"></div>
+      <button id="as-setup-btn" onclick="asSetup()"></button>
     </div>
-    <div style="padding:6px 10px 10px;background:var(--surface2);border-radius:8px;border:0.5px solid var(--border);margin-bottom:4px" id="cycle-setting-wrap">
-      <div style="font-size:10px;color:var(--text3);margin-bottom:6px;font-weight:500">Billing cycle starts on</div>
-      <div style="display:flex;align-items:center;gap:7px">
-        <input id="cycle-day-input" type="number" min="1" max="28" value="1"
-          style="width:52px;height:28px;border-radius:6px;border:0.5px solid var(--border2);background:var(--surface3);color:var(--text);padding:0 8px;font-size:13px;font-family:var(--mono);outline:none"
-          oninput="this.value=Math.min(28,Math.max(1,parseInt(this.value)||1))">
-        <span style="font-size:12px;color:var(--text3)">of each month</span>
-        <button onclick="saveCycleDay()" style="height:28px;padding:0 10px;border-radius:6px;border:0.5px solid var(--accent-border);background:var(--accent-dim);color:var(--accent);font-size:11px;font-weight:500;cursor:pointer;font-family:var(--font);transition:all .15s;margin-left:auto">Save</button>
-      </div>
-      <div id="cycle-label-preview" style="font-size:10px;color:var(--text3);margin-top:5px"></div>
-    </div>
-    <div class="app.collapsed #cycle-setting-wrap{display:none}"></div>
-    <div class="sidebar-section">Auto-save</div>
-    <div class="as-wrap">
-      <div class="as-status">
-        <div class="as-dot" id="as-dot"></div>
-        <span id="as-status-text">Not set up</span>
-      </div>
-      <button class="as-setup-btn" id="as-setup-btn" onclick="asSetup()">&#128194; Choose save file</button>
-      <div id="as-file-row" style="display:none;margin-top:6px">
-        <div id="as-file-name" style="font-size:9px;color:var(--text3);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px"></div>
-        <button class="as-setup-btn" style="opacity:.7" onclick="asSetup()">&#128194; Change file</button>
-      </div>
-      <button class="ver-btn" onclick="toggleVerPanel()" id="ver-toggle-btn">&#9719; Version history</button>
-      <button class="nav-edit-btn" id="nav-edit-btn" onclick="navToggleEditMode()">&#9998; Reorder tabs</button>
-    </div>
-    <!-- Version history panel — shown below auto-save widget -->
     <div id="ver-panel" style="display:none"></div>
-    <div class="sidebar-section">Actions</div>
-    <button class="nav-item" onclick="openModal()"><span class="nav-icon">&#65291;</span><span class="nav-label"> Add entry</span></button>
-    <button class="nav-item" onclick="exportJSON()"><span class="nav-icon">&#8595;</span><span class="nav-label"> Backup data</span></button>
-    <button class="nav-item" onclick="document.getElementById('import-input').click()"><span class="nav-icon">&#8593;</span><span class="nav-label"> Restore backup</span></button>
-    <button class="nav-item" onclick="exportCSV()"><span class="nav-icon">&#8599;</span><span class="nav-label"> Export CSV</span></button>
     <div class="sidebar-bottom">
+      <button id="nav-save-order-btn" onclick="navSaveOrder()" style="display:none;width:100%;height:30px;border-radius:7px;border:none;background:var(--positive);color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);margin-bottom:6px;transition:opacity .15s">&#10003; Save order</button>
       <div style="font-size:10px;color:var(--text3);text-align:center;padding:4px 0;font-family:var(--mono)" id="app-version-label">v<span id="app-ver-num"></span></div>
     </div>
   <div class="sidebar-resize-handle" id="sidebar-resize-handle"></div>
@@ -2079,7 +2064,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '2.8';
+const APP_VERSION = '3.5';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_TASKS='subtracker_tasks', KEY_LISTS='subtracker_lists', KEY_GOALS='subtracker_goals', KEY_NOTES='subtracker_notes', KEY_LOANS='subtracker_loans', KEY_ACCOUNTS='subtracker_accounts', KEY_NW='subtracker_networth', KEY_RECV='subtracker_receivables';
 
@@ -3794,7 +3779,7 @@ function renderCalcPage(){
   switchCalcTab(calcTab);
 }
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeModal();closeTkModal();closeListsModal();return;}
+  if(e.key==='Escape'){closeModal();closeTkModal();closeListsModal();closeSettingsModal();return;}
   const active=document.activeElement;
   const typing=active&&(active.tagName==='INPUT'||active.tagName==='TEXTAREA'||active.tagName==='SELECT');
   if(!typing&&e.key==='n'){e.preventDefault();openModal();}
@@ -5131,6 +5116,13 @@ function asRestoreStatus(){
   // Note: file handle does NOT persist across page loads in the browser.
   // User needs to click "Choose save file" once per session to reconnect.
   // This is a browser security requirement — we can't store the handle.
+  // Sync settings modal status indicators
+  const sDot = document.getElementById('settings-as-dot');
+  const sTxt = document.getElementById('settings-as-status-text');
+  const srcDot = document.getElementById('as-dot');
+  const srcTxt = document.getElementById('as-status-text');
+  if(sDot&&srcDot) sDot.className = srcDot.className;
+  if(sTxt&&srcTxt) sTxt.textContent = srcTxt.textContent;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -6100,7 +6092,7 @@ function toggleVerPanel(){
     renderVerPanel();
   } else {
     panel.style.display = 'none';
-    if(btn) btn.innerHTML = '&#9719; Version history';
+    if(btn) btn.innerHTML = '&#9719; Data versions';
   }
 }
 
@@ -6109,7 +6101,7 @@ function renderVerPanel(){
   if(!panel) return;
   const versions = getVersions();
   if(!versions.length){
-    panel.innerHTML = '<div class="ver-panel"><div class="ver-panel-title">Version history</div><div style="font-size:12px;color:var(--text3);text-align:center;padding:8px 0">No snapshots yet.<br>Saves are taken automatically<br>when you make changes.</div></div>';
+    panel.innerHTML = '<div class="ver-panel"><div class="ver-panel-title">Data versions</div><div style="font-size:12px;color:var(--text3);text-align:center;padding:8px 0">No snapshots yet.<br>Saves are taken automatically<br>when you make changes.</div></div>';
     return;
   }
   panel.innerHTML = '<div class="ver-panel">'+
@@ -6595,7 +6587,7 @@ function dbWidgetAIInsight(el){
           'Enter your <a href="https://console.anthropic.com/settings/keys" style="color:var(--accent)">Anthropic API key</a> to get actionable daily insights.'+
         '</div>'+
         '<div class="ai-insight-key-row">'+
-          '<input class="ai-insight-key-input" id="ai-key-input" type="password" placeholder="sk-ant-...">'+
+          '<input class="ai-insight-key-input" type="password" placeholder="sk-ant-...">'+
           '<button class="ai-insight-save-btn" onclick="aiSaveKeyAndRun()">Save &amp; run</button>'+
         '</div>'+
         '<div style="font-size:10px;color:var(--text3);margin-top:6px">Key stored only in your browser.</div>'+
@@ -6623,7 +6615,7 @@ function dbWidgetAIInsight(el){
       body.innerHTML='<div class="ai-insight-body">'+
         '<div style="font-size:12px;color:var(--red);margin-bottom:10px">'+esc(e.message)+'</div>'+
         '<div class="ai-insight-key-row">'+
-          '<input class="ai-insight-key-input" id="ai-key-input" type="password" placeholder="Paste API key (sk-ant-...)">'+
+          '<input class="ai-insight-key-input" type="password" placeholder="Paste API key (sk-ant-...)">'+
           '<button class="ai-insight-save-btn" onclick="aiSaveKeyAndRun()">Save key</button>'+
         '</div>'+
         '<div style="display:flex;gap:10px;margin-top:8px;align-items:center">'+
@@ -6685,7 +6677,7 @@ function aiShowKeyInput(){
   const cur=aiGetKey();
   body.innerHTML='<div class="ai-insight-body">'+
     '<div style="font-size:12px;color:var(--text2);margin-bottom:6px">'+(cur?'Current key: <span style="font-family:var(--mono);font-size:11px;color:var(--text3)">sk-ant-\u2026'+cur.slice(-6)+'</span>':'No key set')+'</div>'+
-    '<div class="ai-insight-key-row"><input class="ai-insight-key-input" id="ai-key-input" type="password" placeholder="Paste new key"><button class="ai-insight-save-btn" onclick="aiSaveKeyAndRun()">Save</button></div>'+
+    '<div class="ai-insight-key-row"><input class="ai-insight-key-input" type="password" placeholder="Paste new key"><button class="ai-insight-save-btn" onclick="aiSaveKeyAndRun()">Save</button></div>'+
     '<div style="display:flex;gap:8px;margin-top:8px">'+
       (cur?'<button class="ai-insight-refresh-btn" onclick="aiClearKey()" style="color:var(--red)">&#128465; Remove</button>':'')+
       '<button class="ai-insight-refresh-btn" onclick="aiRefreshInsight()">&#10005; Cancel</button>'+
@@ -6701,7 +6693,7 @@ function aiClearKey(){
 }
 
 function aiSaveKeyAndRun(){
-  const inp=document.getElementById('ai-key-input');
+  const inp=document.querySelector('.ai-insight-key-input');
   if(!inp||!inp.value.trim()){inp&&inp.focus();return;}
   aiSetKey(inp.value);
   localStorage.removeItem(AI_INS_STORE);
@@ -6996,13 +6988,39 @@ function renderNav(){
 /* ── Toggle edit mode ── */
 function navToggleEditMode(){
   _navEditing = !_navEditing;
-  const btn = document.getElementById('nav-edit-btn');
-  if(btn){
+  // Update all nav-edit-btn instances
+  document.querySelectorAll('#nav-edit-btn').forEach(btn=>{
     btn.classList.toggle('active', _navEditing);
-    btn.innerHTML = _navEditing ? '&#10003; Done reordering' : '&#9998; Reorder tabs';
-  }
+    btn.innerHTML = _navEditing ? '&#9998; Reorder tabs (active)' : '&#9998; Reorder tabs';
+  });
+  // Show/hide save order button
+  const saveBtn = document.getElementById('nav-save-order-btn');
+  if(saveBtn) saveBtn.style.display = _navEditing ? 'block' : 'none';
+  // Close settings modal when activating
+  if(_navEditing) closeSettingsModal();
   renderNav();
   if(!_navEditing) toast('\u2713 Sidebar layout saved');
+}
+
+function navSaveOrder(){
+  _navEditing = false;
+  document.querySelectorAll('#nav-edit-btn').forEach(btn=>{
+    btn.classList.remove('active');
+    btn.innerHTML = '&#9998; Reorder tabs';
+  });
+  const saveBtn = document.getElementById('nav-save-order-btn');
+  if(saveBtn) saveBtn.style.display = 'none';
+  // Persist current nav order from DOM
+  const wrap = document.getElementById('nav-sections-wrap');
+  if(wrap){
+    const order = Array.from(wrap.querySelectorAll('[data-nav-id]')).map(el=>({
+      id: el.dataset.navId,
+      visible: !el.classList.contains('nav-hidden')
+    }));
+    if(order.length) localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(order));
+  }
+  renderNav();
+  toast('✓ Sidebar order saved');
 }
 
 /* ── Toggle item visibility ── */
@@ -7226,10 +7244,100 @@ function saveProxyUrl(){
 }
 
 function loadProxyUrl(){
-  const inp = document.getElementById('ai-proxy-input');
-  if(inp) inp.value = aiGetProxy();
+  ['ai-proxy-input'].forEach(id=>{
+    const inp = document.getElementById(id);
+    if(inp) inp.value = aiGetProxy();
+  });
 }
 
+
+/* ── Settings modal ── */
+function toggleSettingsVerPanel(){
+  const panel = document.getElementById('settings-ver-panel');
+  const btn   = document.getElementById('settings-ver-btn');
+  if(!panel) return;
+  if(panel.style.display==='none'){
+    // Render versions inline
+    renderVerPanel(panel);
+    panel.style.display='block';
+    if(btn) btn.innerHTML='&#9719; Data versions &#9650;';
+  } else {
+    panel.style.display='none';
+    if(btn) btn.innerHTML='&#9719; Data versions';
+  }
+}
+
+function renderVerPanel(container){
+  if(!container) return;
+  // Read versions directly from localStorage
+  let versions = [];
+  try{ versions = JSON.parse(localStorage.getItem(KEY_VER)||'[]'); }catch(e){}
+  if(!versions.length){
+    container.innerHTML='<div style="font-size:11px;color:var(--text3);padding:8px 0">No snapshots yet.</div>';
+    return;
+  }
+  const current = versions[0];
+  container.onclick = function(e){
+    const btn = e.target.closest('.ver-restore-settings-btn');
+    if(btn) verRestoreFromSettings(btn.dataset.ts);
+  };
+  container.innerHTML = versions.map((v,i)=>{
+    const d = new Date(v.ts);
+    const dateStr = d.toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    const label = v.name||'';
+    const isCurrent = i===0;
+    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:0.5px solid var(--border)">'
+      + '<div style="width:8px;height:8px;border-radius:50%;background:'+(isCurrent?'var(--positive)':'var(--border2)')+';flex-shrink:0"></div>'
+      + '<div style="flex:1;min-width:0">'
+        + '<div style="font-size:11px;cursor:pointer;color:var(--text3)">'
+          + (label||'<span style="opacity:.4;font-style:italic">Add a label…</span>')+'</div>'
+        + '<div style="font-size:10px;color:var(--text3)">'
+          + dateStr + (v.meta?' · '+v.meta:'')
+          + (isCurrent?' <span style="color:var(--positive);font-weight:600">current</span>':'')
+        +'</div>'
+      +'</div>'
+      + (isCurrent?''
+        :'<button data-ts="'+v.ts+'" class="ver-restore-settings-btn" style="height:22px;padding:0 8px;border-radius:5px;border:0.5px solid var(--border2);background:var(--surface3);color:var(--text2);font-size:10px;cursor:pointer">Restore</button>')
+    +'</div>';
+  }).join('');
+}
+
+function verRestoreFromSettings(ts){
+  closeSettingsModal();
+  // Find and click the restore button in the main ver panel
+  const versions = JSON.parse(localStorage.getItem(KEY_VER)||'[]');
+  const v = versions.find(x=>x.ts===ts);
+  if(!v) return;
+  if(confirm('Restore to '+new Date(ts).toLocaleString()+'?')) verRestore(ts);
+}
+
+function openSettingsModal(){
+  updateCyclePreview();
+  loadProxyUrl();
+  document.getElementById('settings-modal').style.display='flex';
+  const keyInp = document.getElementById('ai-key-input-settings');
+  const cur = aiGetKey();
+  if(keyInp) keyInp.placeholder = cur ? 'sk-ant-…'+cur.slice(-6) : 'sk-ant-...';
+  // Sync auto-save status
+  const dot = document.getElementById('settings-as-dot');
+  const txt = document.getElementById('settings-as-status-text');
+  const srcDot = document.getElementById('as-dot');
+  const srcTxt = document.getElementById('as-status-text');
+  if(dot&&srcDot) dot.className = srcDot.className;
+  if(txt&&srcTxt) txt.textContent = srcTxt.textContent;
+}
+function closeSettingsModal(){
+  document.getElementById('settings-modal').style.display='none';
+}
+function aiSaveKeyFromSettings(){
+  const inp = document.getElementById('ai-key-input-settings');
+  if(!inp||!inp.value.trim()){inp&&inp.focus();return;}
+  aiSetKey(inp.value);
+  inp.value='';
+  inp.placeholder='sk-ant-…'+aiGetKey().slice(-6);
+  localStorage.removeItem(AI_INS_STORE);
+  toast('API key saved ✓');
+}
 function saveCycleDay(){
   const v = parseInt(document.getElementById('cycle-day-input').value)||1;
   const clamped = Math.min(28, Math.max(1, v));
@@ -7695,5 +7803,75 @@ updateCyclePreview();
   </div>
 </div>
 
+
+<!-- Settings modal -->
+<div class="settings-modal-backdrop" id="settings-modal" style="display:none" onclick="if(event.target===this)closeSettingsModal()">
+  <div class="settings-modal" onclick="event.stopPropagation()">
+    <div class="settings-modal-head">
+      <div class="settings-modal-title">&#9881; Settings</div>
+      <button class="modal-close-btn" onclick="closeSettingsModal()">&#10005;</button>
+    </div>
+
+    <!-- Billing cycle -->
+    <div class="settings-section">
+      <div class="settings-section-title">Billing cycle</div>
+      <div class="settings-row">
+        <div class="settings-label">Cycle start day</div>
+        <div class="settings-field-row">
+          <input id="cycle-day-input" type="number" min="1" max="28" value="1" class="settings-input" style="width:70px;flex:none"
+            oninput="this.value=Math.min(28,Math.max(1,parseInt(this.value)||1))">
+          <span style="font-size:12px;color:var(--text3)">of each month</span>
+          <button onclick="saveCycleDay()" class="settings-save-btn" style="margin-left:auto">Save</button>
+        </div>
+        <div id="cycle-label-preview" class="settings-hint"></div>
+      </div>
+    </div>
+
+    <!-- Auto-save & Backup -->
+    <div class="settings-section">
+      <div class="settings-section-title">Auto-save</div>
+      <div class="settings-row">
+        <div class="as-status" style="margin-bottom:6px">
+          <div class="as-dot" id="settings-as-dot"></div>
+          <span id="settings-as-status-text" style="font-size:12px;color:var(--text2)">Not set up</span>
+        </div>
+        <button class="as-setup-btn" onclick="asSetup();closeSettingsModal()" style="width:100%;justify-content:center">&#128194; Choose save file</button>
+      </div>
+      <div class="settings-section-title" style="margin-top:12px">Backup</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <button class="settings-save-btn" style="height:32px;background:var(--surface2);border-color:var(--border2);color:var(--text2);font-weight:400;font-size:12px" onclick="exportJSON();closeSettingsModal()">&#8595; Backup data</button>
+        <button class="settings-save-btn" style="height:32px;background:var(--surface2);border-color:var(--border2);color:var(--text2);font-weight:400;font-size:12px" onclick="closeSettingsModal();document.getElementById('import-input').click()">&#8593; Restore backup</button>
+        <button class="settings-save-btn" style="height:32px;background:var(--surface2);border-color:var(--border2);color:var(--text2);font-weight:400;font-size:12px" onclick="exportCSV();closeSettingsModal()">&#8599; Export CSV</button>
+      </div>
+      <div style="margin-top:10px">
+        <button class="ver-btn" style="width:100%;margin-bottom:6px" onclick="toggleSettingsVerPanel()" id="settings-ver-btn">&#9719; Data versions</button>
+        <div id="settings-ver-panel" style="display:none;margin-top:6px"></div>
+        <button class="nav-edit-btn" id="nav-edit-btn" style="width:100%;margin-top:6px" onclick="navToggleEditMode()">&#9998; Reorder tabs</button>
+      </div>
+    </div>
+
+    <!-- AI Proxy -->
+    <div class="settings-section">
+      <div class="settings-section-title">AI insights proxy</div>
+      <div class="settings-row">
+        <div class="settings-label">Proxy URL</div>
+        <div class="settings-field-row">
+          <input id="ai-proxy-input" type="text" placeholder="https://your-worker.workers.dev" class="settings-input">
+          <button onclick="saveProxyUrl()" class="settings-save-btn">Save</button>
+        </div>
+        <div class="settings-hint">Required for GitHub Pages. Handles Anthropic API calls server-side.</div>
+      </div>
+      <div class="settings-row">
+        <div class="settings-label">API key <span style="font-size:10px;color:var(--text3)">(direct mode only)</span></div>
+        <div class="settings-field-row">
+          <input id="ai-key-input-settings" type="password" placeholder="sk-ant-..." class="settings-input">
+          <button onclick="aiSaveKeyFromSettings()" class="settings-save-btn">Save</button>
+        </div>
+        <div class="settings-hint">Only needed if not using a proxy. Stored locally in your browser.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
 </body>
 </html>

@@ -113,9 +113,9 @@ body{
 .settings-save-btn{height:32px;padding:0 14px;border-radius:7px;border:0.5px solid var(--accent-border);background:var(--accent-dim);color:var(--accent);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font);white-space:nowrap;transition:all .15s;flex-shrink:0}
 .settings-save-btn:hover{background:var(--accent);color:#000}
 /* Settings action buttons (backup/restore/export) */
-.settings-action-btn{display:flex;align-items:center;gap:9px;width:100%;height:38px;padding:0 14px;border-radius:8px;border:0.5px solid var(--border);background:var(--surface2);color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font);transition:all .15s;text-align:left}
+.settings-action-btn{display:flex;align-items:center;gap:10px;width:100%;height:44px;padding:0 12px;border-radius:8px;border:0.5px solid var(--border);background:var(--surface2);color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font);transition:all .15s;text-align:left}
 .settings-action-btn:hover{background:var(--surface3);color:var(--text);border-color:var(--border2)}
-.settings-action-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.settings-action-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
 /* Version list */
 .ver-list-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)}
 .ver-list-item:last-child{border-bottom:none}
@@ -199,7 +199,7 @@ body{
 .tabby-inst-date{font-size:10px;color:var(--text3);margin-top:3px}
 .tabby-inst-icon{font-size:11px;margin-top:2px;color:var(--accent);min-height:14px}
 .tabby-inst.paid:hover .tabby-inst-icon{color:var(--red)}
-.badge-tabby{background:rgba(201,138,26,.12);color:#C98A1A;border:0.5px solid rgba(201,138,26,.3);font-size:10px;padding:2px 6px;border-radius:4px;font-weight:500}
+.badge-tabby{background:rgba(201,138,26,.12);color:var(--amber);border:0.5px solid rgba(201,138,26,.3);font-size:10px;padding:2px 6px;border-radius:4px;font-weight:500}
 .tabby-modal-section{border:0.5px solid rgba(201,138,26,.3);border-radius:10px;padding:12px;background:rgba(201,138,26,.06);margin-bottom:1rem}
 .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.75rem;gap:16px;flex-wrap:wrap}
 .page-title{font-size:23px;font-weight:600;letter-spacing:-.03em}
@@ -361,7 +361,7 @@ body{
 }
 .logo-text-wrap{display:flex;flex-direction:column;gap:0;line-height:1}
 .logo-text{font-size:14px;font-weight:700;letter-spacing:-.04em;color:var(--text)}
-.logo-sub{font-size:9px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;font-weight:500;margin-top:1px}
+.logo-sub{font-size:10px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;font-weight:500;margin-top:1px}
 .sidebar-header{
   display:flex;align-items:center;justify-content:space-between;
   margin-bottom:1.25rem;gap:8px;
@@ -544,8 +544,8 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
   display:flex;align-items:center;gap:3px;
 }
-.cal-dot-bill{background:rgba(201,138,26,.18);color:#C98A1A}
-.cal-dot-task{background:rgba(155,127,232,.18);color:#9B7FE8}
+.cal-dot-bill{background:rgba(201,138,26,.18);color:var(--amber)}
+.cal-dot-task{background:rgba(155,127,232,.18);color:var(--purple)}
 .cal-dot-goal{background:rgba(31,170,126,.16);color:var(--accent)}
 .cal-dot-overdue{background:rgba(224,82,82,.16);color:var(--red)}
 .cal-more{font-size:10px;color:var(--text3);margin-top:2px;padding-left:2px}
@@ -576,7 +576,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 .cal-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
 .cal-legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
 
-@media(max-width:640px){.cal-cell{min-height:60px;padding:5px 4px 4px}.cal-dot{font-size:9px}}
+@media(max-width:640px){.cal-cell{min-height:60px;padding:5px 4px 4px}.cal-dot{font-size:10px}}
 @media(max-width:640px){
   /* ── Layout ── */
   .app{grid-template-columns:1fr}
@@ -709,6 +709,20 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
     grid-template-columns:auto auto 1fr auto;
     gap:8px;
   }
+  /* ── Task workspace tabs ── */
+  .tk-workspace-tabs{overflow-x:auto}
+  .tk-workspace-tab{padding:8px 12px;font-size:12px;white-space:nowrap}
+  /* ── Settings modal — slide up from bottom ── */
+  .settings-modal{width:100%;border-radius:18px 18px 0 0;margin-top:auto;max-height:92vh}
+  .settings-modal-backdrop{align-items:flex-end;padding:0}
+  /* ── Goals grid ── */
+  #goals-list{grid-template-columns:1fr!important}
+  /* ── Task metrics ── */
+  #tk-metrics{grid-template-columns:repeat(2,1fr)}
+  /* ── Loans grid ── */
+  .emi-grid{grid-template-columns:1fr!important}
+  /* ── AI insight cards ── */
+  .ai-cards{grid-template-columns:1fr}
 }
 
 /* ── Mobile nav hidden on desktop ── */
@@ -763,8 +777,14 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
   overflow:hidden;
 }
 .tk-item:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:var(--shadow-md)}
-.tk-item.tk-done{opacity:.45}
+.tk-item.tk-done{opacity:.5}
 .tk-item.tk-done .tk-title{text-decoration:line-through;color:var(--text3)}
+.tk-basement-toggle{display:flex;align-items:center;gap:8px;padding:10px 4px;cursor:pointer;color:var(--text3);font-size:12px;font-weight:500;border:none;background:none;font-family:var(--font);width:100%;margin-top:8px;border-top:0.5px solid var(--border)}
+.tk-basement-toggle:hover{color:var(--text)}
+.tk-basement-toggle .tk-basement-chevron{font-size:10px;transition:transform .2s}
+.tk-basement-toggle.open .tk-basement-chevron{transform:rotate(180deg)}
+.tk-basement-list{display:none;flex-direction:column;gap:7px;margin-top:6px}
+.tk-basement-list.open{display:flex}
 .tk-pri-bar{width:4px;border-radius:0;flex-shrink:0;align-self:stretch}
 .tk-item-inner{display:contents}
 .tk-check{
@@ -814,7 +834,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 .pay-ac-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .pay-ac-name{font-size:13px;font-weight:500;color:var(--text);flex:1}
 .pay-ac-bal{font-size:12px;color:var(--text3);font-family:var(--mono)}
-.pay-ac-check{width:16px;height:16px;border-radius:50%;border:0.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;transition:all .15s}
+.pay-ac-check{width:16px;height:16px;border-radius:50%;border:0.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .15s}
 .pay-ac-row.selected .pay-ac-check{background:var(--accent);border-color:var(--accent);color:#fff}
 .pay-after{font-size:11px;color:var(--text3);padding:6px 0 10px;display:flex;justify-content:space-between;align-items:center}
 .pay-after-val{font-size:12px;font-weight:500;color:var(--text);font-family:var(--mono)}
@@ -1258,7 +1278,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
   width:15px;height:15px;border-radius:4px;flex-shrink:0;
   border:1.5px solid var(--border2);background:transparent;
   cursor:pointer;display:flex;align-items:center;justify-content:center;
-  font-size:9px;font-weight:700;transition:all .15s;margin-top:2px;
+  font-size:10px;font-weight:700;transition:all .15s;margin-top:2px;
 }
 .db-task-check:hover{border-color:var(--accent);background:var(--accent-dim)}
 .db-task-body{min-width:0;flex:1}
@@ -1272,14 +1292,14 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 .db-day{background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius);padding:7px 5px;min-height:68px;cursor:pointer;transition:border-color .15s}
 .db-day:hover{border-color:var(--border2)}
 .db-day.db-day-today{border-color:var(--accent-border);background:var(--accent-dim)}
-.db-day-name{font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.db-day-name{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
 .db-day-num{font-size:14px;font-weight:600;color:var(--text2);margin-bottom:5px}
 .db-day.db-day-today .db-day-num{color:var(--accent)}
 .db-day-dots{display:flex;flex-direction:column;gap:2px}
 .db-day-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.db-day-ev{font-size:9px;padding:1px 4px;border-radius:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.4}
-.db-day-ev-bill{background:rgba(201,138,26,.2);color:#C98A1A}
-.db-day-ev-task{background:rgba(155,127,232,.2);color:#9B7FE8}
+.db-day-ev{font-size:10px;padding:1px 4px;border-radius:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.4}
+.db-day-ev-bill{background:rgba(201,138,26,.2);color:var(--amber)}
+.db-day-ev-task{background:rgba(155,127,232,.2);color:var(--purple)}
 .db-day-ev-goal{background:rgba(31,170,126,.18);color:var(--accent)}
 .db-day-ev-over{background:var(--red-dim);color:var(--red)}
 /* Empty state */
@@ -1444,6 +1464,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
     <div id="nav-sections-wrap"></div>
     <div class="sidebar-section">Settings</div>
     <button class="nav-item" onclick="openSettingsModal()"><span class="nav-icon">&#9881;</span><span class="nav-label"> Settings</span></button>
+    <button class="nav-item" onclick="asSetup()" title="Quick save to file"><span class="nav-icon">&#128190;</span><span class="nav-label"> Quick save</span></button>
     <div style="display:none">
       <div class="as-dot" id="as-dot"></div>
       <span id="as-status-text">Not set up</span>
@@ -1496,11 +1517,11 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
           <input id="search" type="text" placeholder="Search&#8230; (press N to add)" oninput="render()">
         </div>
         <select class="sort-select" id="sort" onchange="render()">
-          <option value="default">Sort: Default</option>
-          <option value="name">Sort: Name</option>
+          <option value="due">Sort: Due date</option>
           <option value="amount-desc">Sort: Highest</option>
           <option value="amount-asc">Sort: Lowest</option>
-          <option value="due">Sort: Due date</option>
+          <option value="name">Sort: Name</option>
+          <option value="default">Sort: Added</option>
         </select>
       </div>
       <div class="filter-row" id="filters"></div>
@@ -1701,6 +1722,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
               <option value="starred">Sort: Starred</option>
             </select>
           </div>
+          <div id="tk-metrics" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:1rem"></div>
           <div class="filter-row" id="tk-filters" style="flex-wrap:wrap;gap:6px;align-items:center"></div>
           <div id="tk-list" style="display:flex;flex-direction:column;gap:7px;margin-top:4px"></div>
         </div>
@@ -1709,7 +1731,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
           <div class="tk-panel-inner">
             <div class="tk-panel-header">
               <div class="tk-panel-title" id="tk-modal-title">Add task</div>
-              <button class="icon-btn del" onclick="closeTkModal()" title="Close">&#10005;</button>
+              <button class="modal-close-btn" onclick="closeTkModal()">&#10005;</button>
             </div>
             <div class="field"><label>Title</label><input id="tk-title" type="text" placeholder="What needs to be done?" autocomplete="off" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();saveTask();}"></div>
             <div class="field"><label>Notes</label><textarea id="tk-notes" placeholder="Details, links, context&#8230;" style="height:72px"></textarea></div>
@@ -1778,8 +1800,8 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
       </div>
       <!-- Legend -->
       <div class="cal-legend">
-        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#C98A1A"></div>Bill due</div>
-        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#9B7FE8"></div>Task deadline</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--amber)"></div>Bill due</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--purple)"></div>Task deadline</div>
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#1faa7e"></div>Goal deadline</div>
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#E05252"></div>Overdue</div>
       </div>
@@ -1857,11 +1879,11 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
       <div class="metrics" id="emi-metrics"></div>
       <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
         <select class="sort-select" id="ln-sort" onchange="renderLoans()" style="flex:1;min-width:160px">
-          <option value="balance">Sort: Remaining balance</option>
-          <option value="urgency">Sort: Most urgent</option>
-          <option value="emi">Sort: Monthly EMI</option>
+          <option value="urgency">Sort: Urgency</option>
+          <option value="balance">Sort: Balance</option>
+          <option value="emi">Sort: EMI</option>
           <option value="name">Sort: Name</option>
-          <option value="added">Sort: Recently added</option>
+          <option value="added">Sort: Added</option>
         </select>
         <select class="sort-select" id="ln-filter" onchange="renderLoans()">
           <option value="all">All loans</option>
@@ -1873,6 +1895,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
           <option value="friendly">Friendly debt</option>
         </select>
       </div>
+      <div id="emi-upcoming" style="margin-bottom:1rem"></div>
       <div id="emi-list"></div>
     </div>
 
@@ -1890,10 +1913,10 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
       <div class="metrics" id="recv-metrics"></div>
       <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
         <select class="sort-select" id="recv-sort" onchange="renderReceivables()" style="flex:1;min-width:160px">
+          <option value="urgency">Sort: Urgency</option>
           <option value="amount">Sort: Amount</option>
-          <option value="urgency">Sort: Most overdue</option>
           <option value="name">Sort: Name</option>
-          <option value="added">Sort: Recently added</option>
+          <option value="added">Sort: Added</option>
         </select>
         <select class="sort-select" id="recv-filter" onchange="renderReceivables()">
           <option value="all">All</option>
@@ -1926,7 +1949,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
         <select class="sort-select" id="ac-sort" onchange="renderAccounts()">
           <option value="balance">Sort: Balance</option>
           <option value="name">Sort: Name</option>
-          <option value="updated">Sort: Recently updated</option>
+          <option value="updated">Sort: Updated</option>
         </select>
       </div>
       <div id="ac-groups"></div>
@@ -1972,7 +1995,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-title" id="tabby-modal-title">Add Tabby purchase</div>
     <div class="tabby-modal-section">
-      <div style="font-size:11px;color:#C98A1A;margin-bottom:10px;letter-spacing:.02em">Tabby splits the total into 4 equal monthly instalments</div>
+      <div style="font-size:11px;color:var(--amber);margin-bottom:10px;letter-spacing:.02em">Tabby splits the total into 4 equal monthly instalments</div>
       <div class="field"><label>Item / purchase name</label><input id="t-name" type="text" placeholder="e.g. iPhone 16, Sony headphones" autocomplete="off"></div>
       <div class="fields-row">
         <div class="field"><label>Total amount (AED)</label><input id="t-total" type="number" min="0" step="0.01" placeholder="0.00" oninput="previewInstalments()"></div>
@@ -2080,15 +2103,16 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '4.1';
+const APP_VERSION = '4.3';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
-const KEY_TASKS='subtracker_tasks', KEY_LISTS='subtracker_lists', KEY_GOALS='subtracker_goals', KEY_NOTES='subtracker_notes', KEY_LOANS='subtracker_loans', KEY_ACCOUNTS='subtracker_accounts', KEY_NW='subtracker_networth', KEY_RECV='subtracker_receivables';
+const KEY_TASKS='subtracker_tasks', KEY_TASK_HIST='subtracker_task_history', KEY_LISTS='subtracker_lists', KEY_GOALS='subtracker_goals', KEY_NOTES='subtracker_notes', KEY_LOANS='subtracker_loans', KEY_ACCOUNTS='subtracker_accounts', KEY_NW='subtracker_networth', KEY_RECV='subtracker_receivables';
 
 let items=[], payments=[], tabbyItems=[], editId=null, tabbyEditId=null, tabbyColor=COLORS[4];
 let filterCat='All', selectedColor=COLORS[0];
 let currentPage='active', toastTimer=null, deletedItem=null, deletedPayments=[];
 let tasks=[], lists=[], tkEditId=null, deletedTask=null, tkSelectedColor=COLORS[0];
 let tkFilterStatus='all', tkFilterPriority='all', tkFilterList='all', tkWorkspace='personal';
+let taskHistory=[];
 let modalSubtasks=[];
 let goals=[], glEditId=null, glLogId=null, glFilterCat='all', glSelectedEmoji='🎯', glMsInputs=[];
 let notes=[], qnEditId=null, qnFilterTag='all', qnSelectedColor='none', qnModalTags=[];
@@ -2125,6 +2149,7 @@ function loadData(){
   try{const d=localStorage.getItem(KEY_PAY);if(d)payments=JSON.parse(d);}catch(e){payments=[];}
   try{const d=localStorage.getItem(KEY_TABBY);if(d)tabbyItems=JSON.parse(d);}catch(e){tabbyItems=[];}
   try{const d=localStorage.getItem(KEY_TASKS);if(d)tasks=JSON.parse(d);}catch(e){tasks=[];}
+  try{const d=localStorage.getItem(KEY_TASK_HIST);if(d)taskHistory=JSON.parse(d);}catch(e){taskHistory=[];}
   try{const d=localStorage.getItem(KEY_LISTS);if(d)lists=JSON.parse(d);}catch(e){lists=[];}
   try{const d=localStorage.getItem(KEY_GOALS);if(d)goals=JSON.parse(d);}catch(e){goals=[];}
   try{const d=localStorage.getItem(KEY_NOTES);if(d)notes=JSON.parse(d);}catch(e){notes=[];}
@@ -2572,7 +2597,7 @@ function renderTabbyActiveItem(item){
   const pct=Math.round(paidCount/4*100);
   const nextDateStr=next?formatShortDate(next.date):'';
   const daysToNext=next?Math.ceil((new Date(next.date)-new Date())/(1000*60*60*24)):null;
-  const nextLabel=daysToNext===null?'':daysToNext<0?`<span class="item-due due-overdue">Overdue</span>`:daysToNext===0?`<span class="item-due due-soon">Due today</span>`:daysToNext<=5?`<span class="item-due due-soon">In ${daysToNext}d</span>`:`<span style="color:#4A8ECC;font-size:11px">${nextDateStr}</span>`;
+  const nextLabel=daysToNext===null?'':daysToNext<0?`<span class="item-due due-overdue">Overdue</span>`:daysToNext===0?`<span class="item-due due-soon">Due today</span>`:daysToNext<=5?`<span class="item-due due-soon">In ${daysToNext}d</span>`:`<span style="color:var(--accent);font-size:11px">${nextDateStr}</span>`;
   return `<div class="item${complete?' paused':''}" style="border-color:rgba(201,138,26,.25)">
     <div class="item-dot" style="background:${color}"></div>
     <div style="min-width:0">
@@ -2588,7 +2613,7 @@ function renderTabbyActiveItem(item){
         ${t.notes?`<span class="sep">&#183;</span><span style="font-style:italic;font-size:11px;color:var(--text3)">${esc(t.notes)}</span>`:''}
       </div>
       <div style="height:3px;background:var(--surface3);border-radius:99px;margin-top:6px;overflow:hidden;max-width:200px">
-        <div style="height:100%;border-radius:99px;background:#C98A1A;width:${pct}%;transition:width .4s ease"></div>
+        <div style="height:100%;border-radius:99px;background:var(--amber);width:${pct}%;transition:width .4s ease"></div>
       </div>
     </div>
     <div>
@@ -2640,33 +2665,95 @@ function renderTrials(){
 
 /* &#9472;&#9472; History &#9472;&#9472; */
 function renderHistory(){
-  if(!payments.length){document.getElementById('history-list').innerHTML=`<div class="empty">No payments recorded yet.</div>`;return;}
-  const sorted=[...payments].sort((a,b)=>new Date(b.date)-new Date(a.date));
-  const groups={};
-  sorted.forEach(p=>{
-    const d=new Date(p.date);
-    const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-    const label=`${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
-    if(!groups[key])groups[key]={label,list:[],total:0};
-    groups[key].list.push(p);groups[key].total+=p.amount;
-  });
-  document.getElementById('history-list').innerHTML=Object.keys(groups).sort((a,b)=>b.localeCompare(a)).map(key=>{
-    const g=groups[key];
-    return `<div class="history-group">
-      <div class="history-month-row"><div class="history-month">${g.label}</div><div class="month-total">AED ${fmt(g.total)}</div></div>
-      ${g.list.map(p=>{
-        const item=items.find(i=>i.id===p.itemId);
-        const color=item?(item.color||CATCOLORS[item.cat]||'#888'):'#888';
+  // Build unified history: payments + completed tasks (current + archived)
+  const allDoneTasks = [
+    ...tasks.filter(t=>t.done&&t.doneAt),
+    ...(taskHistory||[])
+  ];
+
+  if(!payments.length && !allDoneTasks.length){
+    document.getElementById('history-list').innerHTML='<div class="empty">No history yet.</div>';
+    return;
+  }
+
+  // Tabs
+  const activeTab = localStorage.getItem('history-tab')||'bills';
+  const tabBar = '<div style="display:flex;gap:0;margin-bottom:1.25rem;border-bottom:0.5px solid var(--border)">'
+    + ['bills','tasks'].map(t=>`<button onclick="switchHistoryTab('${t}')" style="padding:8px 18px;font-size:13px;font-weight:500;cursor:pointer;color:${t===activeTab?'var(--text)':'var(--text3)'};border:none;border-bottom:2px solid ${t===activeTab?'var(--accent)':'transparent'};margin-bottom:-0.5px;background:transparent;font-family:var(--font);transition:all .18s">${t==='bills'?'&#9672; Bills & Payments':'&#9635; Completed Tasks'}</button>`).join('')
+    +'</div>';
+
+  let content = '';
+
+  if(activeTab==='bills'){
+    if(!payments.length){ content='<div class="empty">No payments recorded yet.</div>'; }
+    else {
+      const sorted=[...payments].sort((a,b)=>new Date(b.date)-new Date(a.date));
+      const groups={};
+      sorted.forEach(p=>{
         const d=new Date(p.date);
-        return `<div class="history-item">
-          <div class="item-dot" style="background:${color}"></div>
-          <div><div class="history-name">${esc(p.name)}</div><div class="history-meta">${p.cat||''}${p.note?` &#183; ${esc(p.note)}`:''}</div></div>
-          <div><div class="history-amount">AED ${fmt(p.amount)}</div><div class="history-date">${d.getDate()} ${MONTHS[d.getMonth()]}</div></div>
-          <button class="icon-btn del" onclick="deletePayment('${p.id}')">&#10005;</button>
-        </div>`;
-      }).join('')}
-    </div>`;
-  }).join('');
+        const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+        const label=MONTHS[d.getMonth()]+' '+d.getFullYear();
+        if(!groups[key])groups[key]={label,list:[],total:0};
+        groups[key].list.push(p);groups[key].total+=p.amount;
+      });
+      content=Object.keys(groups).sort((a,b)=>b.localeCompare(a)).map(key=>{
+        const g=groups[key];
+        return '<div class="history-group">'
+          +'<div class="history-month-row"><div class="history-month">'+g.label+'</div><div class="month-total">AED '+fmt(g.total)+'</div></div>'
+          +g.list.map(p=>{
+            const item=items.find(i=>i.id===p.itemId);
+            const color=item?(item.color||CATCOLORS[item.cat]||'#888'):'#888';
+            const d=new Date(p.date);
+            return '<div class="history-item">'
+              +'<div class="item-dot" style="background:'+color+'"></div>'
+              +'<div><div class="history-name">'+esc(p.name)+'</div><div class="history-meta">'+(p.cat||'')+(p.note?' · '+esc(p.note):'')+'</div></div>'
+              +'<div><div class="history-amount">AED '+fmt(p.amount)+'</div><div class="history-date">'+d.getDate()+' '+MONTHS[d.getMonth()]+'</div></div>'
+              +'<button class="icon-btn del" onclick="deletePayment(\''+ p.id +'\')" title="Delete payment">&#10005;</button>'
+              +'</div>';
+          }).join('')
+          +'</div>';
+      }).join('');
+    }
+  } else {
+    // Tasks tab
+    if(!allDoneTasks.length){ content='<div class="empty">No completed tasks yet.</div>'; }
+    else {
+      const sorted=[...allDoneTasks].sort((a,b)=>new Date(b.doneAt)-new Date(a.doneAt));
+      const groups={};
+      sorted.forEach(t=>{
+        const d=new Date(t.doneAt);
+        const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+        const label=MONTHS[d.getMonth()]+' '+d.getFullYear();
+        if(!groups[key])groups[key]={label,list:[]};
+        groups[key].list.push(t);
+      });
+      const PRI_COLOR={urgent:'var(--red)',high:'var(--amber)',medium:'var(--purple)',low:'var(--accent)',none:'var(--border2)'};
+      content=Object.keys(groups).sort((a,b)=>b.localeCompare(a)).map(key=>{
+        const g=groups[key];
+        return '<div class="history-group">'
+          +'<div class="history-month-row"><div class="history-month">'+g.label+'</div><div class="month-total">'+g.list.length+' tasks</div></div>'
+          +g.list.map(t=>{
+            const d=new Date(t.doneAt);
+            const ws=t.workspace||'personal';
+            return '<div class="history-item">'
+              +'<div class="item-dot" style="background:'+(PRI_COLOR[t.priority||'none'])+'"></div>'
+              +'<div><div class="history-name">'+esc(t.title)+'</div>'
+                +'<div class="history-meta">'+(ws==='work'?'&#128188; Work':'&#128100; Personal')+(t.priority&&t.priority!=='none'?' · '+t.priority:'')+'</div>'
+              +'</div>'
+              +'<div class="history-date" style="text-align:right">'+d.getDate()+' '+MONTHS[d.getMonth()]+'</div>'
+              +'</div>';
+          }).join('')
+          +'</div>';
+      }).join('');
+    }
+  }
+
+  document.getElementById('history-list').innerHTML = tabBar + content;
+}
+
+function switchHistoryTab(tab){
+  localStorage.setItem('history-tab', tab);
+  renderHistory();
 }
 
 /* &#9472;&#9472; Insights &#9472;&#9472; */
@@ -3360,7 +3447,7 @@ document.getElementById('tabby-modal').addEventListener('click',e=>{if(e.target=
 
 function exportJSON(){
   if(!items.length&&!payments.length&&!tabbyItems.length&&!tasks.length){toast('Nothing to back up yet');return;}
-  const data=JSON.stringify({items,payments,tabbyItems,tasks,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),proxyUrl:localStorage.getItem(AI_PROXY_STORE)||'',exportedAt:new Date().toISOString()},null,2);
+  const data=JSON.stringify({items,payments,tabbyItems,tasks,taskHistory,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),proxyUrl:localStorage.getItem(AI_PROXY_STORE)||'',exportedAt:new Date().toISOString()},null,2);
   const d=new Date();
   const filename='bills-backup-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'.json';
   verSnapshot(true);
@@ -3807,6 +3894,21 @@ document.getElementById('modal').addEventListener('click',e=>{if(e.target===docu
 
 /* ━━ Task Manager ━━ */
 function saveTasks(){try{localStorage.setItem(KEY_TASKS,JSON.stringify(tasks));}catch(e){}asAutoSave();}
+function saveTaskHistory(){try{localStorage.setItem(KEY_TASK_HIST,JSON.stringify(taskHistory));}catch(e){}}
+
+function archiveDoneTasks(){
+  // Move tasks done before start of this week to taskHistory
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay());
+  startOfWeek.setHours(0,0,0,0);
+  const toArchive = tasks.filter(t=>t.done && t.doneAt && new Date(t.doneAt) < startOfWeek);
+  if(!toArchive.length) return;
+  taskHistory = [...toArchive, ...taskHistory].slice(0, 500); // keep up to 500
+  tasks = tasks.filter(t=>!toArchive.find(a=>a.id===t.id));
+  saveTasks();
+  saveTaskHistory();
+}
 function saveLists(){try{localStorage.setItem(KEY_LISTS,JSON.stringify(lists));}catch(e){}asAutoSave();}
 
 function taskDueLabel(dateStr){
@@ -3831,6 +3933,26 @@ function switchWorkspace(ws){
   renderTasks();
 }
 
+
+function renderTaskMetrics(){
+  const el = document.getElementById('tk-metrics');
+  if(!el) return;
+  const wsTasks = tasks.filter(t=>(t.workspace||'personal')===tkWorkspace);
+  const active  = wsTasks.filter(t=>!t.done);
+  const overdue = active.filter(t=>t.dueDate&&t.dueDate<todayStr());
+  const urgent  = active.filter(t=>t.priority==='urgent'||t.priority==='high');
+  const dueToday= active.filter(t=>t.dueDate===todayStr());
+  const metricStyle = 'background:var(--surface2);border:0.5px solid var(--border);border-radius:8px;padding:.7rem 1rem';
+  el.innerHTML = [
+    {label:'Active', value:active.length, color:'var(--text)'},
+    {label:'Overdue', value:overdue.length, color:overdue.length?'var(--red)':'var(--text3)'},
+    {label:'Due today', value:dueToday.length, color:dueToday.length?'var(--amber)':'var(--text3)'},
+    {label:'Urgent/High', value:urgent.length, color:urgent.length?'var(--purple)':'var(--text3)'},
+  ].map(m=>`<div style="${metricStyle}">
+    <div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">${m.label}</div>
+    <div style="font-size:22px;font-weight:600;font-family:var(--mono);color:${m.color};letter-spacing:-.02em">${m.value}</div>
+  </div>`).join('');
+}
 function renderTasks(){
   if(!document.getElementById('tk-search'))return;
   const todayIso=todayStr();
@@ -3859,9 +3981,9 @@ function renderTasks(){
     <div class="tk-filter-sep"></div>
     <button class="pill${tkFilterPriority==='all'?' active':''}" onclick="setTkFilter('priority','all')">Any priority</button>
     <button class="pill${tkFilterPriority==='urgent'?' active':''}" onclick="setTkFilter('priority','urgent')" style="color:var(--red)">Urgent</button>
-    <button class="pill${tkFilterPriority==='high'?' active':''}" onclick="setTkFilter('priority','high')" style="color:#E07040">High</button>
+    <button class="pill${tkFilterPriority==='high'?' active':''}" onclick="setTkFilter('priority','high')" style="color:var(--amber)">High</button>
     <button class="pill${tkFilterPriority==='medium'?' active':''}" onclick="setTkFilter('priority','medium')" style="color:var(--amber)">Medium</button>
-    <button class="pill${tkFilterPriority==='low'?' active':''}" onclick="setTkFilter('priority','low')" style="color:#4A8ECC">Low</button>
+    <button class="pill${tkFilterPriority==='low'?' active':''}" onclick="setTkFilter('priority','low')" style="color:var(--accent)">Low</button>
     ${listPillsHtml}
     <button class="icon-btn" onclick="openListsModal()" title="Manage lists" style="margin-left:4px;font-size:12px">&#9998; Lists</button>`;
 
@@ -3894,7 +4016,11 @@ function renderTasks(){
       }
       return score;
     };
-    vis.sort((a,b)=>urgencyScore(b)-urgencyScore(a));
+    vis.sort((a,b)=>{
+      const diff=urgencyScore(b)-urgencyScore(a);
+      if(diff!==0)return diff;
+      return (b.createdAt||0)-(a.createdAt||0); // tie-break: newer first
+    });
   }
   else if(sort==='due')vis.sort((a,b)=>{if(!a.dueDate&&!b.dueDate)return 0;if(!a.dueDate)return 1;if(!b.dueDate)return -1;return a.dueDate.localeCompare(b.dueDate);});
   else if(sort==='priority')vis.sort((a,b)=>(priOrder[b.priority]||0)-(priOrder[a.priority]||0));
@@ -3907,7 +4033,34 @@ function renderTasks(){
     container.innerHTML=`<div class="empty">${wsTasks.length?'No tasks match your filter':'Add your first ${tkWorkspace} task<br><span class="kbd-hint">Press <kbd>T</kbd> anywhere to add a task</span>'}</div>`;
     return;
   }
-  container.innerHTML=vis.map(renderTaskItem).join('');
+  // Split into active and done
+  const activeTasks = vis.filter(t=>!t.done);
+  const doneTasks   = vis.filter(t=>t.done);
+
+  let html = activeTasks.map(renderTaskItem).join('');
+
+  if(doneTasks.length){
+    const basementId = 'tk-basement-'+tkWorkspace;
+    const isOpen = localStorage.getItem(basementId)==='1';
+    html += '<button class="tk-basement-toggle'+(isOpen?' open':'')+'" onclick="toggleBasement(\''+ basementId +'\')">'  
+      + '<span class="tk-basement-chevron">&#9660;</span>'
+      + '<span>Completed &mdash; '+doneTasks.length+' task'+(doneTasks.length!==1?'s':'')+'</span>'
+      + '</button>'
+      + '<div class="tk-basement-list'+(isOpen?' open':'')+'" id="'+basementId+'-list">'
+      + doneTasks.map(renderTaskItem).join('')
+      + '</div>';
+  }
+
+  container.innerHTML = html;
+}
+
+function toggleBasement(id){
+  const isOpen = localStorage.getItem(id)==='1';
+  localStorage.setItem(id, isOpen?'0':'1');
+  const btn  = document.querySelector('.tk-basement-toggle');
+  const list = document.getElementById(id+'-list');
+  if(btn)  btn.classList.toggle('open', !isOpen);
+  if(list) list.classList.toggle('open', !isOpen);
 }
 
 function renderTaskItem(t){
@@ -3953,6 +4106,8 @@ function setTkFilter(type,val){
 function toggleTaskDone(id){
   const t=tasks.find(t=>t.id===id);if(!t)return;
   t.done=!t.done;
+  if(t.done) t.doneAt=new Date().toISOString();
+  else delete t.doneAt;
   saveTasks();renderTasks();
   toast(t.done?`&#10003; Done: ${t.title}`:`&#8617; Reopened: ${t.title}`);
 }
@@ -4112,7 +4267,7 @@ function renderListsModal(){
       <div class="tk-list-color-dot" style="background:${l.color}"></div>
       <div style="flex:1;font-size:13px;color:var(--text)">${esc(l.name)}</div>
       <span style="font-size:11px;color:var(--text3);margin-right:8px">${tasks.filter(t=>t.listId===l.id).length} tasks</span>
-      <button class="icon-btn del" onclick="deleteList('${l.id}')">&#10005;</button>
+      <button class="icon-btn del" onclick="deleteList('${l.id}')" title="Delete list">&#10005;</button>
     </div>`).join('');
 }
 function addList(){
@@ -4338,7 +4493,7 @@ function renderMsInputs(){
     <div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">
       <input type="text" value="${esc(m.label)}" placeholder="Milestone ${i+1}&#8230;" oninput="glMsInputs[${i}].label=this.value"
         style="flex:1;height:34px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface3);color:var(--text);padding:0 10px;font-size:13px;font-family:var(--font);outline:none">
-      <button class="icon-btn del" onclick="removeMsInput(${i})">&#10005;</button>
+      <button class="icon-btn del" onclick="removeMsInput(${i})" title="Remove">&#10005;</button>
     </div>`).join('');
 }
 function buildEmojiGrid(selected){
@@ -5081,7 +5236,7 @@ async function asWriteFile(){
   asDot('busy');
   try{
     const payload = JSON.stringify(
-      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),proxyUrl:localStorage.getItem(AI_PROXY_STORE)||'',savedAt:new Date().toISOString()},
+      {items,payments,tabbyItems,tasks,taskHistory,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),proxyUrl:localStorage.getItem(AI_PROXY_STORE)||'',savedAt:new Date().toISOString()},
       null, 2
     );
     const writable = await _asFileHandle.createWritable();
@@ -5339,6 +5494,15 @@ function lnMonthsRemaining(loan){
   return Math.ceil(remaining / emi);
 }
 
+function lnNextPaymentDate(loan){
+  // Returns the next EMI due date (approx monthly from now)
+  if(!loan || loan.paidOff) return null;
+  const now = new Date();
+  const next = new Date(now.getFullYear(), now.getMonth(), loan.startDay||1);
+  if(next <= now) next.setMonth(next.getMonth()+1);
+  return next;
+}
+
 function lnPayoffDate(loan){
   const months = lnMonthsRemaining(loan);
   if(months <= 0) return null;
@@ -5377,7 +5541,7 @@ function renderLoans(){
     cont.innerHTML = '<div class="emi-empty"><div style="font-size:32px;margin-bottom:10px;opacity:.4">&#127968;</div><div style="font-size:15px;font-weight:500;color:var(--text2);margin-bottom:6px">No loans added yet</div><div style="font-size:13px">Add your first loan to track EMI and payoff progress</div></div>';
     return;
   }
-  const sortBy   = (document.getElementById('ln-sort')||{}).value || 'balance';
+  const sortBy   = (document.getElementById('ln-sort')||{}).value || 'urgency';
   const filterBy = (document.getElementById('ln-filter')||{}).value || 'all';
 
   // Filter
@@ -5406,6 +5570,35 @@ function renderLoans(){
     if(sortBy==='added') return (b.createdAt||0)-(a.createdAt||0);
     return 0;
   });
+
+  // Upcoming EMI strip — next 30 days
+  const upcomingEl = document.getElementById('emi-upcoming');
+  if(upcomingEl){
+    const upcomingEMI = visible.filter(l=>!l.paidOff).map(l=>{
+      const payDate = lnNextPaymentDate(l);
+      if(!payDate) return null;
+      const diff = Math.ceil((payDate - new Date())/(1000*60*60*24));
+      if(diff < 0 || diff > 30) return null;
+      const emi = Math.round(l.emiOverride || lnCalcMonthlyEMI(l.principal, l.rate, l.tenure));
+      return {l, diff, emi};
+    }).filter(Boolean).sort((a,b)=>a.diff-b.diff);
+
+    if(upcomingEMI.length){
+      upcomingEl.innerHTML = '<div style="margin-bottom:8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3)">Upcoming — next 30 days</div>'
+        + '<div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:6px">'
+        + upcomingEMI.map(({l,diff,emi})=>{
+            const c = LN_COLORS[l.type]||'#888';
+            return '<div style="flex-shrink:0;background:var(--surface2);border:0.5px solid var(--border);border-radius:9px;padding:9px 13px;min-width:140px;border-left:3px solid '+c+'">'
+              +'<div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px">'+esc(l.name)+'</div>'
+              +'<div style="font-size:11px;color:var(--text3);margin-bottom:5px">'+(diff===0?'Due today':diff===1?'Tomorrow':'In '+diff+'d')+'</div>'
+              +'<div style="font-size:14px;font-weight:600;font-family:var(--mono);color:'+c+'">AED '+fmt(emi)+'</div>'
+              +'</div>';
+          }).join('')
+        +'</div>';
+    } else {
+      upcomingEl.innerHTML = '';
+    }
+  }
 
   cont.innerHTML = visible.length
     ? '<div class="emi-grid">' + visible.map(l=>lnCardHTML(l)).join('') + '</div>'
@@ -6097,7 +6290,7 @@ function verSnapshot(force, autoLabel){
     if(!force && versions.length && versions[0].hash === hash) return;
 
     const payload = JSON.stringify(
-      {items,payments,tabbyItems,tasks,lists,goals,notes,loans,receivables,accounts,nwHistory,
+      {items,payments,tabbyItems,tasks,taskHistory,lists,goals,notes,loans,receivables,accounts,nwHistory,
        dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),
        navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),
        cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),
@@ -7175,7 +7368,7 @@ function showPaidBreakdown(){
       <div class="paid-breakdown-box">
         <div class="paid-breakdown-head">
           <div class="paid-breakdown-title">Paid in ${monthLabel}</div>
-          <button class="icon-btn del" onclick="closePaidBreakdown()">&#10005;</button>
+          <button class="modal-close-btn" onclick="closePaidBreakdown()">&#10005;</button>
         </div>
         <div class="paid-breakdown-body">
           ${rows||'<div style="text-align:center;padding:2rem;color:var(--text3);font-size:13px">No payments recorded this month yet.</div>'}
@@ -7535,7 +7728,7 @@ function renderReceivables(){
     return;
   }
 
-  const sortBy   = (document.getElementById('recv-sort')||{}).value||'amount';
+  const sortBy   = (document.getElementById('recv-sort')||{}).value||'urgency';
   const filterBy = (document.getElementById('recv-filter')||{}).value||'all';
 
   let vis = receivables.filter(r=>{
@@ -7604,6 +7797,7 @@ function renderReceivables(){
 
 loadData();
 asRestoreStatus();
+archiveDoneTasks();
 const _vn=document.getElementById('app-ver-num');if(_vn)_vn.textContent=APP_VERSION;
 checkReminders();
 renderNav();
@@ -7647,7 +7841,7 @@ updateCyclePreview();
         <span id="qn-modal-color-preview" style="display:inline-block;width:12px;height:12px;border-radius:50%;flex-shrink:0"></span>
         <span style="font-size:11px;color:var(--text3)">Note</span>
       </div>
-      <button class="icon-btn del" onclick="closeNoteModal()" title="Close">&#10005;</button>
+      <button class="modal-close-btn" onclick="closeNoteModal()">&#10005;</button>
     </div>
     <input id="qn-modal-title" class="qn-modal-title-input" type="text" placeholder="Title&#8230;" autocomplete="off">
     <div class="qn-modal-divider"></div>
@@ -7779,7 +7973,7 @@ updateCyclePreview();
   <div class="modal" onclick="event.stopPropagation()" style="max-width:380px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
       <div class="modal-title" id="ac-history-title" style="margin-bottom:0">Balance history</div>
-      <button class="icon-btn del" onclick="closeAcHistoryModal()">&#10005;</button>
+      <button class="modal-close-btn" onclick="closeAcHistoryModal()">&#10005;</button>
     </div>
     <div id="ac-history-content"></div>
   </div>
@@ -7933,18 +8127,18 @@ updateCyclePreview();
     <!-- Backup & versions -->
     <div class="settings-section">
       <div class="settings-section-title">Backup</div>
-      <div style="display:flex;flex-direction:column;gap:7px">
+      <div style="display:flex;flex-direction:column;gap:6px">
         <button class="settings-action-btn" onclick="exportJSON();closeSettingsModal()">
           <div class="settings-action-icon" style="background:rgba(31,170,126,.15)">&#8595;</div>
-          <div><div style="font-size:13px">Backup data</div><div style="font-size:10px;color:var(--text3)">Download full .json backup</div></div>
+          <div><div>Backup data</div><div style="font-size:10px;color:var(--text3);margin-top:1px">Download full .json backup</div></div>
         </button>
         <button class="settings-action-btn" onclick="closeSettingsModal();document.getElementById('import-input').click()">
           <div class="settings-action-icon" style="background:rgba(201,138,26,.15)">&#8593;</div>
-          <div><div style="font-size:13px">Restore backup</div><div style="font-size:10px;color:var(--text3)">Import from a .json file</div></div>
+          <div><div>Restore backup</div><div style="font-size:10px;color:var(--text3);margin-top:1px">Import from a .json file</div></div>
         </button>
         <button class="settings-action-btn" onclick="exportCSV();closeSettingsModal()">
           <div class="settings-action-icon" style="background:rgba(155,127,232,.15)">&#8599;</div>
-          <div><div style="font-size:13px">Export CSV</div><div style="font-size:10px;color:var(--text3)">Bills &amp; payments spreadsheet</div></div>
+          <div><div>Export CSV</div><div style="font-size:10px;color:var(--text3);margin-top:1px">Bills &amp; payments spreadsheet</div></div>
         </button>
       </div>
     </div>

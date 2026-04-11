@@ -843,6 +843,26 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 .pay-confirm-btn:hover{opacity:.88}
 .pay-skip-btn{height:30px;border-radius:8px;border:0.5px solid var(--border2);background:transparent;color:var(--text3);font-size:12px;cursor:pointer;font-family:var(--font);transition:all .15s}
 .pay-skip-btn:hover{color:var(--text);border-color:var(--border3)}
+
+/* ── Shopping list ── */
+.shop-item{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;display:flex;gap:12px;align-items:flex-start;transition:border-color .15s;cursor:default}.shop-item:hover{border-color:var(--border2)}
+.shop-item.bought{opacity:.5}
+.shop-item.bought .shop-name{text-decoration:line-through;color:var(--text3)}
+.shop-check{width:20px;height:20px;border-radius:5px;border:0.5px solid var(--border2);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .15s;margin-top:2px;background:transparent}
+.shop-check.checked{background:var(--positive);border-color:var(--positive);color:#fff}
+.shop-body{flex:1;min-width:0}
+.shop-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px;line-height:1.3}
+.shop-desc{font-size:12px;color:var(--text3);margin-bottom:6px;line-height:1.5}
+.shop-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.shop-cat{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);background:var(--surface2);border:0.5px solid var(--border);border-radius:4px;padding:2px 7px}
+.shop-price{font-size:12px;font-weight:600;font-family:var(--mono);color:var(--positive)}
+.shop-link{font-size:11px;color:var(--accent);text-decoration:none;display:flex;align-items:center;gap:3px}
+.shop-link:hover{text-decoration:underline}
+.shop-extract-btn{height:30px;padding:0 12px;border-radius:6px;border:0.5px solid var(--accent-border);background:var(--accent-dim);color:var(--accent);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font);transition:all .15s;white-space:nowrap}
+.shop-extract-btn:hover{background:var(--accent);color:#000}
+.shop-extract-btn:disabled{opacity:.5;cursor:not-allowed}
+.shop-grid{display:flex;flex-direction:column;gap:8px}
+@media(max-width:640px){.shop-item{flex-wrap:wrap}}
 /* ── AI Insight widget ── */
 .ai-insight-body{padding:6px 0 2px}
 .ai-insight-text{font-size:13px;color:var(--text);line-height:1.65;font-style:italic}
@@ -1956,6 +1976,21 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
     </div>
 
     <!-- Net Worth page -->
+    <div id="page-shopping" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Shopping</div>
+          <div class="page-sub" id="shop-sub">Your wishlist & shopping items</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn primary" onclick="openShopModal()">+ Add item</button>
+        </div>
+      </div>
+      <div id="shop-metrics" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:1.25rem"></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem" id="shop-filters"></div>
+      <div id="shop-list" class="shop-grid"></div>
+    </div>
+
     <div id="page-networth" style="display:none">
       <div class="page-header">
         <div>
@@ -2104,15 +2139,17 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '4.7';
+const APP_VERSION = '4.8';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
-const KEY_TASKS='subtracker_tasks', KEY_TASK_HIST='subtracker_task_history', KEY_LISTS='subtracker_lists', KEY_GOALS='subtracker_goals', KEY_NOTES='subtracker_notes', KEY_LOANS='subtracker_loans', KEY_ACCOUNTS='subtracker_accounts', KEY_NW='subtracker_networth', KEY_RECV='subtracker_receivables';
+const KEY_TASKS='subtracker_tasks', KEY_TASK_HIST='subtracker_task_history', KEY_SHOPPING='lifeos_shopping', KEY_LISTS='subtracker_lists', KEY_GOALS='subtracker_goals', KEY_NOTES='subtracker_notes', KEY_LOANS='subtracker_loans', KEY_ACCOUNTS='subtracker_accounts', KEY_NW='subtracker_networth', KEY_RECV='subtracker_receivables';
 
 let items=[], payments=[], tabbyItems=[], editId=null, tabbyEditId=null, tabbyColor=COLORS[4];
 let filterCat='All', selectedColor=COLORS[0];
 let currentPage='active', toastTimer=null, deletedItem=null, deletedPayments=[];
 let tasks=[], lists=[], tkEditId=null, deletedTask=null, tkSelectedColor=COLORS[0];
 let tkFilterStatus='all', tkFilterPriority='all', tkFilterList='all', tkWorkspace='personal';
+let shopping=[];
+let shoppingFilter='all';
 let taskHistory=[];
 let modalSubtasks=[];
 let goals=[], glEditId=null, glLogId=null, glFilterCat='all', glSelectedEmoji='🎯', glMsInputs=[];
@@ -2151,6 +2188,7 @@ function loadData(){
   try{const d=localStorage.getItem(KEY_TABBY);if(d)tabbyItems=JSON.parse(d);}catch(e){tabbyItems=[];}
   try{const d=localStorage.getItem(KEY_TASKS);if(d)tasks=JSON.parse(d);}catch(e){tasks=[];}
   try{const d=localStorage.getItem(KEY_TASK_HIST);if(d)taskHistory=JSON.parse(d);}catch(e){taskHistory=[];}
+  try{const d=localStorage.getItem(KEY_SHOPPING);if(d)shopping=JSON.parse(d);}catch(e){shopping=[];}
   try{const d=localStorage.getItem(KEY_LISTS);if(d)lists=JSON.parse(d);}catch(e){lists=[];}
   try{const d=localStorage.getItem(KEY_GOALS);if(d)goals=JSON.parse(d);}catch(e){goals=[];}
   try{const d=localStorage.getItem(KEY_NOTES);if(d)notes=JSON.parse(d);}catch(e){notes=[];}
@@ -2365,7 +2403,7 @@ function undoDelete(){
 /* &#9472;&#9472; Navigation &#9472;&#9472; */
 function switchPage(p){
   currentPage=p;
-  ['dashboard','active','tabby','trials','history','insights','calc','tasks','goals','calendar','notes','loans','receivables','accounts','networth'].forEach(x=>{
+  ['dashboard','active','tabby','trials','history','insights','calc','tasks','goals','calendar','notes','loans','receivables','accounts','networth','shopping'].forEach(x=>{
     document.getElementById('page-'+x).style.display=x===p?'':'none';
     const n=document.getElementById('nav-'+x);
     if(n)n.className='nav-item'+(x===p?' active':'');
@@ -2389,6 +2427,7 @@ function switchPage(p){
   if(p==='receivables')renderReceivables();
   if(p==='accounts')renderAccounts();
   if(p==='networth')renderNetWorth();
+  if(p==='shopping')renderShopping();
   closeMobileSidebar();
   if(!_navEditing) renderNav();
 }
@@ -3488,7 +3527,7 @@ document.getElementById('tabby-modal').addEventListener('click',e=>{if(e.target=
 
 function exportJSON(){
   if(!items.length&&!payments.length&&!tabbyItems.length&&!tasks.length){toast('Nothing to back up yet');return;}
-  const data=JSON.stringify({items,payments,tabbyItems,tasks,taskHistory,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),proxyUrl:localStorage.getItem(AI_PROXY_STORE)||'',exportedAt:new Date().toISOString()},null,2);
+  const data=JSON.stringify({items,payments,tabbyItems,tasks,taskHistory,shopping,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),proxyUrl:localStorage.getItem(AI_PROXY_STORE)||'',exportedAt:new Date().toISOString()},null,2);
   const d=new Date();
   const filename='bills-backup-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'.json';
   verSnapshot(true);
@@ -3935,6 +3974,7 @@ document.getElementById('modal').addEventListener('click',e=>{if(e.target===docu
 
 /* ━━ Task Manager ━━ */
 function saveTasks(){try{localStorage.setItem(KEY_TASKS,JSON.stringify(tasks));}catch(e){}asAutoSave();}
+function saveShopping(){try{localStorage.setItem(KEY_SHOPPING,JSON.stringify(shopping));}catch(e){}asAutoSave();}
 function saveTaskHistory(){try{localStorage.setItem(KEY_TASK_HIST,JSON.stringify(taskHistory));}catch(e){}}
 
 function archiveDoneTasks(){
@@ -4873,6 +4913,7 @@ const DB_WIDGETS = [
   { id:'tasks',       cols:1, render: dbWidgetTasks       },
   { id:'bills7',      cols:1, render: dbWidgetBills7      },
   { id:'goals',       cols:1, render: dbWidgetGoals       },
+  { id:'shopping',    cols:1, render: dbWidgetShopping    },
   { id:'week',        cols:3, render: dbWidgetWeek        },
   { id:'networth',  cols:1, render: dbWidgetNetWorth    },
   { id:'aiinsight', cols:3, render: dbWidgetAIInsight   },
@@ -5051,6 +5092,41 @@ function dbWidgetAlerts(el){
 }
 
 /* ── Widget: Tasks due today ─────────────────────────── */
+function dbWidgetShopping(el){
+  const header=el.querySelector('.dbw-header');
+  if(header)header.textContent='Shopping';
+  const body=el.querySelector('.dbw-body');
+  if(!body)return;
+  const toBuy=shopping.filter(x=>!x.bought);
+  const urgent=toBuy.filter(x=>x.priority==='high');
+  if(!shopping.length){
+    body.innerHTML='<div style="color:var(--text3);font-size:12px;padding:8px 0">No shopping items yet.</div>';
+    return;
+  }
+  const totalVal=toBuy.reduce((s,x)=>s+(x.price||0),0);
+  const show=toBuy.slice(0,4);
+  let out='<div style="margin-bottom:8px;display:flex;gap:10px">'
+    +'<span style="font-size:11px;color:var(--text3)">'+toBuy.length+' to buy'+(totalVal?' · AED '+fmt(totalVal):'')+'</span>'
+    +(urgent.length?'<span style="font-size:11px;color:var(--red);font-weight:600">'+urgent.length+' urgent</span>':'')
+    +'</div>';
+  show.forEach(function(s){
+    out+='<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--border)">';
+    if(s.imageUrl){
+      out+='<img src="'+esc(s.imageUrl)+'" style="width:32px;height:32px;border-radius:5px;object-fit:cover;flex-shrink:0" onerror="this.remove()">';
+    } else {
+      out+='<div style="width:32px;height:32px;border-radius:5px;background:var(--surface2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px">&#128722;</div>';
+    }
+    out+='<div style="flex:1;min-width:0">'
+      +'<div style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(s.name)+'</div>'
+      +(s.price?'<div style="font-size:10px;color:var(--accent);font-family:var(--mono)">AED '+fmt(s.price)+'</div>':'<div style="font-size:10px;color:var(--text3)">'+esc(s.cat||'')+'</div>')
+      +'</div>'
+      +'</div>';
+  });
+  if(toBuy.length>4){
+    out+='<div style="font-size:11px;color:var(--text3);padding-top:6px;cursor:pointer" onclick="switchPage(&quot;shopping&quot;)">+ '+(toBuy.length-4)+' more →</div>';
+  }
+  body.innerHTML=out;
+}
 function dbWidgetTasks(el){
   const today=todayStr();
   const PRI_ORDER={urgent:0,high:1,medium:2,low:3,none:4};
@@ -5277,7 +5353,7 @@ async function asWriteFile(){
   asDot('busy');
   try{
     const payload = JSON.stringify(
-      {items,payments,tabbyItems,tasks,taskHistory,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),proxyUrl:localStorage.getItem(AI_PROXY_STORE)||'',savedAt:new Date().toISOString()},
+      {items,payments,tabbyItems,tasks,taskHistory,shopping,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),proxyUrl:localStorage.getItem(AI_PROXY_STORE)||'',savedAt:new Date().toISOString()},
       null, 2
     );
     const writable = await _asFileHandle.createWritable();
@@ -6331,7 +6407,7 @@ function verSnapshot(force, autoLabel){
     if(!force && versions.length && versions[0].hash === hash) return;
 
     const payload = JSON.stringify(
-      {items,payments,tabbyItems,tasks,taskHistory,lists,goals,notes,loans,receivables,accounts,nwHistory,
+      {items,payments,tabbyItems,tasks,taskHistory,shopping,lists,goals,notes,loans,receivables,accounts,nwHistory,
        dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),
        navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),
        cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),
@@ -7186,6 +7262,7 @@ let _navDragSrc = null;
 
 // Master nav definition — ground truth for all pages
 const NAV_ITEMS = [
+  {id:'shopping', icon:'&#128722;', label:'Shopping',         section:'Productivity'},
   {id:'tasks',    icon:'&#9635;',  label:'Tasks',            section:'Productivity'},
   {id:'goals',    icon:'&#9651;',  label:'Goals',            section:'Productivity'},
   {id:'active',   icon:'&#9672;',  label:'Monthly Expenses', section:'Finances'},
@@ -7836,401 +7913,357 @@ function renderReceivables(){
 }
 
 
+/* ═══════════════════════════════════════════════════════
+   Shopping list
+   ═══════════════════════════════════════════════════════ */
+let shEditId = null;
+
+function openShopModal(id){
+  shEditId = id || null;
+  const s = id ? shopping.find(x=>x.id===id) : null;
+  document.getElementById('shop-modal-title').textContent = s ? 'Edit item' : 'Add item';
+  document.getElementById('sh-url').value    = s ? (s.url||'') : '';
+  document.getElementById('sh-name').value   = s ? (s.name||'') : '';
+  document.getElementById('sh-desc').value   = s ? (s.desc||'') : '';
+  document.getElementById('sh-price').value  = s ? (s.price||'') : '';
+  document.getElementById('sh-cat').value    = s ? (s.cat||'Electronics') : 'Electronics';
+  document.getElementById('sh-priority').value = s ? (s.priority||'normal') : 'normal';
+  const btn = document.getElementById('sh-extract-btn');
+  if(btn) btn.disabled = !document.getElementById('sh-url').value.trim();
+  // Restore store
+  const storeEl = document.getElementById('sh-store');
+  if(storeEl) storeEl.value = s ? (s.store||'') : '';
+  // Restore image
+  const imgEl = document.getElementById('sh-image');
+  const thumbEl = document.getElementById('sh-image-thumb');
+  const previewEl = document.getElementById('sh-image-preview');
+  if(imgEl) imgEl.value = s ? (s.imageUrl||'') : '';
+  if(thumbEl && previewEl){
+    if(s && s.imageUrl){
+      thumbEl.src = s.imageUrl;
+      previewEl.style.display = 'block';
+    } else {
+      previewEl.style.display = 'none';
+    }
+  }
+  const statusEl = document.getElementById('sh-extract-status');
+  if(statusEl) statusEl.textContent = '';
+  shSwitchTab('url');
+  document.getElementById('shop-modal').style.display = 'flex';
+  setTimeout(()=>document.getElementById(document.getElementById('sh-url').value?'sh-name':'sh-url').focus(), 50);
+}
+
+function closeShopModal(){
+  document.getElementById('shop-modal').style.display = 'none';
+  shEditId = null;
+}
+
+function shUrlChanged(){
+  const url = document.getElementById('sh-url').value.trim();
+  const btn = document.getElementById('sh-extract-btn');
+  if(btn) btn.disabled = !url;
+}
+
+async function shExtractFromUrl(){
+  const url=document.getElementById('sh-url').value.trim();
+  if(!url)return;
+  const btn=document.getElementById('sh-extract-btn');
+  const status=document.getElementById('sh-extract-status');
+  const proxyUrl=aiGetProxy();
+  if(!proxyUrl){
+    if(status)status.textContent='URL extraction needs a proxy — use Paste text instead';
+    btn.disabled=false;
+    return;
+  }
+  btn.disabled=true;
+  if(status)status.textContent='Fetching page via proxy...';
+  try{
+    // Use worker /fetch-url endpoint
+    const fetchEndpoint=proxyUrl.replace(/\/+$/,'')+'/fetch-url?url='+encodeURIComponent(url);
+    const r=await fetch(fetchEndpoint,{signal:AbortSignal.timeout(8000)});
+    if(!r.ok)throw new Error('Proxy fetch failed: '+r.status);
+    const meta=await r.json();
+    if(meta.error)throw new Error(meta.error);
+    const pageText=['URL: '+url,
+      meta.title?'Title: '+meta.title:'',
+      meta.desc?'Description: '+meta.desc:'',
+      meta.siteName?'Site: '+meta.siteName:'',
+    ].filter(Boolean).join('\n');
+    if(meta.image){
+      const imgEl=document.getElementById('sh-image');
+      const thumbEl=document.getElementById('sh-image-thumb');
+      const previewEl=document.getElementById('sh-image-preview');
+      if(imgEl)imgEl.value=meta.image;
+      if(thumbEl&&previewEl){
+        thumbEl.src=meta.image;
+        thumbEl.onerror=function(){previewEl.style.display='none';};
+        previewEl.style.display='block';
+      }
+    }
+    if(status)status.textContent='Analysing with AI...';
+    await shCallClaudeExtract(pageText,status);
+  }catch(e){
+    if(status)status.textContent='URL fetch failed — try Paste text instead';
+    toast('URL extract failed: '+e.message);
+  }
+  btn.disabled=false;
+}
+
+
+async function shCallClaudeExtract(pageText,statusEl){
+  const key=aiGetKey(),proxyUrl=aiGetProxy();
+  if(!key&&!proxyUrl){toast('Set up API key or proxy in Settings');return;}
+  const endpoint=proxyUrl||'https://api.anthropic.com/v1/messages';
+  const headers={'Content-Type':'application/json'};
+  if(!proxyUrl){headers['x-api-key']=key;headers['anthropic-version']='2023-06-01';headers['anthropic-dangerous-allow-browser']='true';}
+  const resp=await fetch(endpoint,{method:'POST',headers,body:JSON.stringify({
+    model:'claude-haiku-4-5-20251001',max_tokens:400,
+    messages:[{role:'user',content:'From this product page info, return ONLY valid JSON (no markdown) with keys: name, desc (1-2 sentences), cat (Electronics|Fashion|Home|Health|Food|Books|Sports|Other), price (number or null), store (string or null).\n\n'+pageText}]
+  })});
+  if(!resp.ok){const e=await resp.json().catch(function(){return {};});throw new Error(e&&e.error?e.error.message:'API '+resp.status);}
+  const data=await resp.json();
+  const raw=(data.content||[]).map(function(b){return b.text||'';}).join('').trim();
+  const clean=raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+  const info=JSON.parse(clean);
+  if(info.name)document.getElementById('sh-name').value=info.name;
+  if(info.desc)document.getElementById('sh-desc').value=info.desc;
+  if(info.cat)document.getElementById('sh-cat').value=info.cat;
+  if(info.price)document.getElementById('sh-price').value=info.price;
+  const storeEl=document.getElementById('sh-store');
+  if(storeEl&&info.store)storeEl.value=info.store;
+  if(statusEl)statusEl.textContent='Extracted successfully';
+  toast('Product info extracted');
+}
+
+async function shExtractFromPaste(){
+  const text=(document.getElementById('sh-paste-text')||{value:''}).value.trim();
+  if(!text){toast('Paste some product text first');return;}
+  const btn=document.getElementById('sh-paste-extract-btn');
+  const status=document.getElementById('sh-extract-status');
+  btn.disabled=true;
+  btn.textContent='Extracting...';
+  if(status)status.textContent='Analysing pasted text...';
+  try{
+    await shCallClaudeExtract(text.slice(0,4000),status);
+    // close paste area on success
+    const area=document.getElementById('sh-paste-area');
+    const tb=document.getElementById('sh-paste-toggle');
+    if(area)area.style.display='none';
+    if(tb)tb.innerHTML='&#128196; Paste text';
+    document.getElementById('sh-paste-text').value='';
+  }catch(e){
+    if(status)status.textContent='Failed: '+e.message;
+    toast('Extract error: '+e.message);
+  }
+  btn.disabled=false;
+  btn.innerHTML='&#10024; Extract from text';
+}
+function shSwitchTab(tab){
+  const urlMode   = document.getElementById('sh-mode-url');
+  const pasteMode = document.getElementById('sh-mode-paste');
+  const tabUrl    = document.getElementById('sh-tab-url');
+  const tabPaste  = document.getElementById('sh-tab-paste');
+  if(!urlMode||!pasteMode) return;
+  const isUrl = (tab==='url');
+  urlMode.style.display   = isUrl ? 'block' : 'none';
+  pasteMode.style.display = isUrl ? 'none'  : 'block';
+  if(tabUrl)  { tabUrl.style.background  = isUrl?'var(--surface)':'transparent'; tabUrl.style.color  = isUrl?'var(--text)':'var(--text3)'; }
+  if(tabPaste){ tabPaste.style.background= isUrl?'transparent':'var(--surface)'; tabPaste.style.color= isUrl?'var(--text3)':'var(--text)'; }
+  if(!isUrl) setTimeout(function(){ var t=document.getElementById('sh-paste-text'); if(t)t.focus(); }, 50);
+}
+
+function saveShopItem(){
+  const name=document.getElementById('sh-name').value.trim();
+  if(!name){document.getElementById('sh-name').focus();return;}
+  const existing=shEditId?shopping.find(function(x){return x.id===shEditId;}):null;
+  const obj={
+    id:shEditId||String(Date.now()),
+    name:name,
+    url:(document.getElementById('sh-url')||{value:''}).value.trim(),
+    desc:document.getElementById('sh-desc').value.trim(),
+    price:parseFloat(document.getElementById('sh-price').value)||null,
+    cat:document.getElementById('sh-cat').value,
+    store:(document.getElementById('sh-store')||{value:''}).value.trim()||null,
+    imageUrl:(document.getElementById('sh-image')||{value:''}).value.trim()||null,
+    priority:document.getElementById('sh-priority').value,
+    bought:existing?existing.bought:false,
+    addedAt:existing?existing.addedAt:Date.now(),
+  };
+  if(shEditId){var idx=shopping.findIndex(function(x){return x.id===shEditId;});if(idx>-1)shopping[idx]=obj;}
+  else shopping.unshift(obj);
+  saveShopping();closeShopModal();renderShopping();
+  toast(shEditId?'Updated '+obj.name:'Added '+obj.name);
+}
+
+function toggleShopBought(id){
+  var s=shopping.find(function(x){return x.id===id;});
+  if(!s)return;
+  s.bought=!s.bought;
+  s.boughtAt=s.bought?new Date().toISOString():null;
+  saveShopping();renderShopping();
+}
+
+function deleteShopItem(id){
+  shopping=shopping.filter(function(x){return x.id!==id;});
+  saveShopping();renderShopping();
+  toast('Item removed');
+}
+
+function shSetFilter(f){shoppingFilter=f;renderShopping();}
+
+function renderShopping(){
+  var total=shopping.length;
+  var toBuy=shopping.filter(function(x){return !x.bought;});
+  var bought=shopping.filter(function(x){return x.bought;});
+  var totalVal=toBuy.reduce(function(s,x){return s+(x.price||0);},0);
+  var sub=document.getElementById('shop-sub');
+  if(sub)sub.textContent=total+' item'+(total!==1?'s':'')+' \u00b7 '+toBuy.length+' to buy';
+  var metrics=document.getElementById('shop-metrics');
+  if(metrics){
+    metrics.innerHTML=[
+      {label:'To buy',value:toBuy.length,color:'var(--text)',sub:'items'},
+      {label:'Bought',value:bought.length,color:'var(--positive)',sub:'completed'},
+      totalVal>0?{label:'Estimated',value:'AED '+fmt(totalVal),color:'var(--accent)',sub:'to spend'}:null,
+    ].filter(Boolean).map(function(m){
+      return '<div style="background:var(--surface2);border:0.5px solid var(--border);border-radius:8px;padding:.75rem 1rem">'
+        +'<div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">'+m.label+'</div>'
+        +'<div style="font-size:20px;font-weight:600;font-family:var(--mono);color:'+m.color+'">'+m.value+'</div>'
+        +'<div style="font-size:11px;color:var(--text3);margin-top:1px">'+m.sub+'</div>'
+        +'</div>';
+    }).join('');
+  }
+  var filtersEl=document.getElementById('shop-filters');
+  if(filtersEl){
+    filtersEl.innerHTML=[
+      {f:'all',label:'All ('+total+')'},
+      {f:'tobuy',label:'To buy ('+toBuy.length+')'},
+      {f:'bought',label:'Bought ('+bought.length+')'},
+    ].map(function(t){return '<button class="pill'+(shoppingFilter===t.f?' active':'')+'" onclick="shSetFilter(\''+t.f+'\')">'+t.label+'</button>';}).join('');
+  }
+  var vis=shopping.slice();
+  if(shoppingFilter==='tobuy')vis=vis.filter(function(x){return !x.bought;});
+  if(shoppingFilter==='bought')vis=vis.filter(function(x){return x.bought;});
+  var priW={high:2,normal:1,low:0};
+  vis.sort(function(a,b){
+    if(a.bought!==b.bought)return a.bought?1:-1;
+    var pw=(priW[b.priority||'normal']||1)-(priW[a.priority||'normal']||1);
+    if(pw!==0)return pw;
+    return (b.addedAt||0)-(a.addedAt||0);
+  });
+  var el=document.getElementById('shop-list');
+  if(!el)return;
+  if(!vis.length){
+    el.innerHTML='<div class="empty">'+(shopping.length?'No items match this filter.':'Add items to your shopping list<br><span class="kbd-hint">Paste a product URL or text to auto-extract details</span>')+'</div>';
+    return;
+  }
+  el.innerHTML=vis.map(function(s){
+    var priLabel={high:'<span style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;margin-left:6px;background:rgba(224,82,82,.15);color:var(--red)">High</span>',low:'<span style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;margin-left:6px;background:rgba(140,140,140,.12);color:var(--text3)">Someday</span>',normal:''}[s.priority||'normal']||'';
+    var imgHtml=s.imageUrl?'<div style="flex-shrink:0;width:72px;height:72px;border-radius:8px;overflow:hidden;background:var(--surface2);border:0.5px solid var(--border)"><img src="'+esc(s.imageUrl)+'" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.style.display=\'none\'"></div>':'';
+    return '<div class="shop-item'+(s.bought?' bought':'')+'" id="shop-'+s.id+'">'
+      +imgHtml
+      +'<div class="shop-check'+(s.bought?' checked':'')+'" onclick="toggleShopBought(\''+s.id+'\')">'+(s.bought?'&#10003;':'')+'</div>'
+      +'<div class="shop-body">'
+        +'<div class="shop-name">'+esc(s.name)+priLabel+'</div>'
+        +(s.desc?'<div class="shop-desc">'+esc(s.desc)+'</div>':'')
+        +'<div class="shop-meta">'
+          +'<span class="shop-cat">'+esc(s.cat||'Other')+'</span>'
+          +(s.store?'<span style="font-size:11px;color:var(--text3)">'+esc(s.store)+'</span>':'')
+          +(s.price?'<span class="shop-price">AED '+fmt(s.price)+'</span>':'')
+          +(s.url?'<a class="shop-link" href="'+esc(s.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">&#128279; Open</a>':'')
+        +'</div>'
+      +'</div>'
+      +'<div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">'
+        +'<button class="icon-btn" onclick="openShopModal(\''+s.id+'\')" title="Edit">&#9998;</button>'
+        +'<button class="icon-btn del" onclick="deleteShopItem(\''+s.id+'\')" title="Remove">&#10005;</button>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+/* ── App boot ── */
 loadData();
 asRestoreStatus();
 archiveDoneTasks();
-const _vn=document.getElementById('app-ver-num');if(_vn)_vn.textContent=APP_VERSION;
-checkReminders();
 renderNav();
-updateCyclePreview();
+switchPage('active');
+checkReminders();
+const _vn = document.getElementById('app-ver-num');
+if(_vn) _vn.textContent = APP_VERSION;
 
 </script>
-<!-- Mobile bottom nav -->
-<!-- Restore modal -->
-<div class="modal-backdrop" id="restore-modal" style="display:none" onclick="if(event.target===this)closeRestoreModal()">
-  <div class="modal" onclick="event.stopPropagation()" style="max-width:420px">
-    <div class="modal-title">Restore backup</div>
-    <div class="restore-info">
-      <div class="restore-info-date" id="restore-modal-meta"></div>
-      <div class="restore-info-counts" id="restore-modal-counts"></div>
-    </div>
-    <div style="font-size:12px;color:var(--text2);margin-bottom:10px">How do you want to restore?</div>
-    <div class="restore-mode-btns">
-      <button class="restore-mode-btn danger" onclick="applyRestore('replace')">
-        <div class="restore-mode-title">&#8635; Replace all</div>
-        <div class="restore-mode-desc">Wipes current data and loads the backup exactly as saved. Use this to fully restore a previous state.</div>
-      </button>
-      <button class="restore-mode-btn" onclick="applyRestore('merge')">
-        <div class="restore-mode-title">&#43; Merge</div>
-        <div class="restore-mode-desc">Keeps your current data and adds anything from the backup that isn\'t already here. No duplicates.</div>
-      </button>
-    </div>
-    <div style="font-size:11px;color:var(--text3);margin-bottom:1rem;padding:8px 10px;border-radius:8px;background:var(--red-dim);border:0.5px solid var(--red-border)">
-      &#9888; Replace will overwrite all current data. Make sure you have a fresh backup first.
-    </div>
-    <div style="display:flex;justify-content:flex-end">
-      <button class="btn" onclick="closeRestoreModal()">Cancel</button>
-    </div>
-  </div>
-</div>
 
-<!-- Notes modal -->
-<div class="modal-backdrop" id="note-modal" style="display:none" onclick="if(event.target===this)closeNoteModal()">
-  <div class="modal" onclick="event.stopPropagation()" style="max-width:520px;max-height:90vh">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-      <div style="display:flex;gap:6px;align-items:center">
-        <span id="qn-modal-color-preview" style="display:inline-block;width:12px;height:12px;border-radius:50%;flex-shrink:0"></span>
-        <span style="font-size:11px;color:var(--text3)">Note</span>
-      </div>
-      <button class="modal-close-btn" onclick="closeNoteModal()">&#10005;</button>
+<!-- Shopping modal -->
+<div class="modal-backdrop" id="shop-modal" style="display:none" onclick="if(event.target===this)closeShopModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:520px">
+    <div class="modal-header">
+      <div class="modal-title" id="shop-modal-title">Add item</div>
+      <button class="modal-close-btn" onclick="closeShopModal()">&#10005;</button>
     </div>
-    <input id="qn-modal-title" class="qn-modal-title-input" type="text" placeholder="Title&#8230;" autocomplete="off">
-    <div class="qn-modal-divider"></div>
-    <textarea id="qn-modal-body" class="qn-modal-body-input" placeholder="Write anything&#8230;"></textarea>
-    <div class="qn-modal-divider"></div>
-    <!-- Tags -->
-    <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Tags</div>
-    <div class="qn-tag-input-wrap" id="qn-modal-tags-wrap">
-      <input id="qn-tag-input" class="qn-tag-input" type="text" placeholder="Add tag, press Enter&#8230;" autocomplete="off">
-    </div>
-    <!-- Colour -->
-    <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-top:12px;margin-bottom:6px">Colour</div>
-    <div class="qn-color-picker" id="qn-color-picker"></div>
-    <div class="modal-actions" style="margin-top:1.25rem">
-      <button class="btn" onclick="closeNoteModal()">Cancel</button>
-      <button class="btn primary" onclick="saveNote()">Save note</button>
-    </div>
-  </div>
-</div>
 
-<!-- Loans modal -->
-<div class="modal-backdrop" id="loan-modal" style="display:none" onclick="if(event.target===this)closeLoanModal()">
-  <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
-    <div class="modal-title" id="loan-modal-title">Add loan</div>
-    <div class="field"><label>Loan name</label><input id="ln-name" type="text" placeholder="e.g. Car loan, Personal loan&#8230;" autocomplete="off"></div>
-    <div class="fields-row">
-      <div class="field"><label>Loan type</label>
-        <select id="ln-type" onchange="lnTypeChange()">
-          <option value="personal">Personal loan</option>
-          <option value="car">Car loan</option>
-          <option value="mortgage">Mortgage</option>
-          <option value="education">Education loan</option>
-          <option value="business">Business loan</option>
-          <option value="friendly">&#129309; Friendly debt</option>
-          <option value="other">Other</option>
-        </select>
+    <!-- Extract panel -->
+    <div style="background:var(--surface2);border:0.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:10px">&#10024; Auto-extract product info</div>
+      <!-- Tab switcher -->
+      <div style="display:flex;gap:0;background:var(--surface3);border-radius:7px;padding:2px;margin-bottom:10px">
+        <button id="sh-tab-url"   onclick="shSwitchTab('url')"   style="flex:1;height:28px;border:none;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font);background:var(--surface);color:var(--text);transition:all .15s">&#128279; From URL</button>
+        <button id="sh-tab-paste" onclick="shSwitchTab('paste')" style="flex:1;height:28px;border:none;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font);background:transparent;color:var(--text3);transition:all .15s">&#128196; Paste text</button>
       </div>
-      <div class="field"><label>Lender</label><input id="ln-lender" type="text" placeholder="e.g. Emirates NBD"></div>
-    </div>
-    <div class="fields-row">
-      <div class="field"><label>Principal amount (AED)</label><input id="ln-principal" type="number" min="0" step="1" placeholder="100000" oninput="lnCalcEMI()"></div>
-      <div class="field" id="ln-rate-field"><label>Annual interest rate (%)</label><input id="ln-rate" type="number" min="0" step="0.01" placeholder="5.5" oninput="lnCalcEMI()"></div>
-    </div>
-    <div class="fields-row" id="ln-tenure-row">
-      <div class="field"><label>Tenure (months)</label><input id="ln-tenure" type="number" min="1" step="1" placeholder="60" oninput="lnCalcEMI()"></div>
-      <div class="field"><label>Start date</label><input id="ln-start" type="date" oninput="lnCalcEMI()"></div>
-    </div>
-    <div class="fields-row" id="ln-duedate-row" style="display:none">
-      <div class="field"><label>Due date (when to repay by)</label><input id="ln-duedate" type="date"></div>
-      <div class="field"><label>Start date</label><input id="ln-start-friendly" type="date"></div>
-    </div>
-    <!-- EMI Preview -->
-    <div id="ln-preview" style="background:var(--surface2);border-radius:var(--radius);padding:12px;margin-bottom:1rem;display:none">
-      <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">EMI Preview</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
-        <div style="text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:3px">Monthly EMI</div><div id="ln-prev-emi" style="font-size:15px;font-weight:600;font-family:var(--mono);color:var(--accent)"></div></div>
-        <div style="text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:3px">Total interest</div><div id="ln-prev-int" style="font-size:15px;font-weight:600;font-family:var(--mono);color:var(--amber)"></div></div>
-        <div style="text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:3px">Total payable</div><div id="ln-prev-tot" style="font-size:15px;font-weight:600;font-family:var(--mono);color:var(--text)"></div></div>
+      <!-- URL mode -->
+      <div id="sh-mode-url">
+        <div style="display:flex;gap:7px">
+          <input id="sh-url" type="url" placeholder="https://amazon.com/..." style="flex:1" oninput="shUrlChanged()">
+          <button class="shop-extract-btn" id="sh-extract-btn" onclick="shExtractFromUrl()" disabled>Extract</button>
+        </div>
+        <div style="font-size:10px;color:var(--text3);margin-top:5px">Requires Cloudflare proxy set up in Settings.</div>
       </div>
+      <!-- Paste text mode -->
+      <div id="sh-mode-paste" style="display:none">
+        <textarea id="sh-paste-text" placeholder="Open product page &#8594; Ctrl+A &#8594; Ctrl+C &#8594; paste here" style="height:80px;font-size:11px;width:100%;box-sizing:border-box;resize:vertical"></textarea>
+        <button class="shop-extract-btn" id="sh-paste-extract-btn" onclick="shExtractFromPaste()" style="margin-top:6px;width:100%">&#10024; Extract from pasted text</button>
+      </div>
+      <div id="sh-extract-status" style="font-size:10px;color:var(--text3);margin-top:6px;min-height:14px"></div>
     </div>
-    <div class="fields-row">
-      <div class="field"><label>Override EMI (optional)</label><input id="ln-emi-override" type="number" min="0" step="1" placeholder="Auto-calculated"></div>
-      <div class="field"><label>Amount paid so far (AED)</label><input id="ln-paid" type="number" min="0" step="1" placeholder="0"></div>
-    </div>
-    <div class="field"><label>Notes</label><textarea id="ln-notes" placeholder="Details, account number&#8230;" style="height:54px"></textarea></div>
-    <div class="modal-actions">
-      <button class="btn" onclick="closeLoanModal()">Cancel</button>
-      <button class="btn primary" onclick="saveLoan()">Save loan</button>
-    </div>
-  </div>
-</div>
 
-<!-- Accounts modal -->
-<div class="modal-backdrop" id="account-modal" style="display:none" onclick="if(event.target===this)closeAccountModal()">
-  <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
-    <div class="modal-title" id="account-modal-title">Add account</div>
-    <div class="field"><label>Account name</label><input id="ac-name" type="text" placeholder="e.g. Emirates NBD Savings, Cash in hand&#8230;" autocomplete="off"></div>
+    <!-- Image preview -->
+    <div id="sh-image-preview" style="display:none;margin-bottom:12px">
+      <img id="sh-image-thumb" src="" alt="" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;border:0.5px solid var(--border)">
+      <input id="sh-image" type="hidden" value="">
+    </div>
+
+    <!-- Item details -->
+    <div class="field"><label>Item name *</label><input id="sh-name" type="text" placeholder="e.g. Sony WH-1000XM5 Headphones" autocomplete="off"></div>
+    <div class="field"><label>Description</label><textarea id="sh-desc" placeholder="Features, specs, notes..." style="height:55px"></textarea></div>
     <div class="fields-row">
-      <div class="field"><label>Account type</label>
-        <select id="ac-type" onchange="acTypeChange()">
-          <option value="savings">&#128176; Savings</option>
-          <option value="current">&#128179; Current / Chequing</option>
-          <option value="investment">&#128200; Investment</option>
-          <option value="crypto">&#128142; Crypto</option>
-          <option value="gold">&#127947; Gold / Commodities</option>
-          <option value="fixeddeposit">&#128274; Fixed Deposit</option>
-          <option value="cash">&#128181; Cash</option>
-          <option value="other">&#127991; Other</option>
-        </select>
-      </div>
-      <div class="field"><label>Institution / Bank</label><input id="ac-bank" type="text" placeholder="e.g. Emirates NBD"></div>
+      <div class="field"><label>Price (AED)</label><input id="sh-price" type="number" min="0" step="0.01" placeholder="0.00"></div>
+      <div class="field"><label>Store</label><input id="sh-store" type="text" placeholder="Amazon, Noon, IKEA..."></div>
     </div>
     <div class="fields-row">
-      <div class="field"><label>Current balance (AED)</label><input id="ac-balance" type="number" min="0" step="0.01" placeholder="0.00"></div>
-      <div class="field"><label>Currency</label>
-        <select id="ac-currency">
-          <option value="AED">AED</option>
-          <option value="USD">USD</option>
-          <option value="EUR">EUR</option>
-          <option value="GBP">GBP</option>
-          <option value="SAR">SAR</option>
-          <option value="INR">INR</option>
-          <option value="BTC">BTC</option>
-          <option value="ETH">ETH</option>
+      <div class="field"><label>Category</label>
+        <select id="sh-cat">
+          <option value="Electronics">Electronics</option>
+          <option value="Fashion">Fashion</option>
+          <option value="Home">Home</option>
+          <option value="Health">Health &amp; Beauty</option>
+          <option value="Food">Food &amp; Grocery</option>
+          <option value="Books">Books &amp; Media</option>
+          <option value="Sports">Sports &amp; Outdoors</option>
           <option value="Other">Other</option>
         </select>
       </div>
-    </div>
-    <div id="ac-rate-field" class="fields-row">
-      <div class="field"><label>Interest / Return rate (% p.a.)</label><input id="ac-rate" type="number" min="0" step="0.01" placeholder="e.g. 2.5"></div>
-      <div class="field"><label>Maturity date (optional)</label><input id="ac-maturity" type="date"></div>
-    </div>
-    <div class="field"><label>Account number (last 4 digits, optional)</label><input id="ac-acnum" type="text" maxlength="4" placeholder="e.g. 4521"></div>
-    <div class="field"><label>Notes</label><textarea id="ac-notes" placeholder="Details, account purpose&#8230;" style="height:54px"></textarea></div>
-    <!-- Color -->
-    <div class="field">
-      <label>Colour</label>
-      <div style="display:flex;gap:7px;flex-wrap:wrap" id="ac-color-picker"></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn" onclick="closeAccountModal()">Cancel</button>
-      <button class="btn primary" onclick="saveAccount()">Save account</button>
-    </div>
-  </div>
-</div>
-
-<!-- Account history modal -->
-<div class="modal-backdrop" id="ac-history-modal" style="display:none" onclick="if(event.target===this)closeAcHistoryModal()">
-  <div class="modal" onclick="event.stopPropagation()" style="max-width:380px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-      <div class="modal-title" id="ac-history-title" style="margin-bottom:0">Balance history</div>
-      <button class="modal-close-btn" onclick="closeAcHistoryModal()">&#10005;</button>
-    </div>
-    <div id="ac-history-content"></div>
-  </div>
-</div>
-
-<!-- Goals modal -->
-<div class="modal-backdrop" id="goal-modal" style="display:none" onclick="closeGoalModal()">
-  <div class="modal" onclick="event.stopPropagation()" style="max-width:480px">
-    <div class="modal-title" id="goal-modal-title">Add goal</div>
-    <div class="field"><label>Goal title</label><input id="gl-title" type="text" placeholder="e.g. Emergency fund, Trip to Japan&#8230;" autocomplete="off"></div>
-    <div class="fields-row">
-      <div class="field"><label>Category</label>
-        <select id="gl-cat" onchange="glCatChange()">
-          <option value="financial">&#128176; Financial</option>
-          <option value="personal">&#127775; Personal</option>
-        </select>
-      </div>
-      <div class="field"><label>Subcategory</label>
-        <select id="gl-subcat"></select>
-      </div>
-    </div>
-    <div class="field"><label>Type</label>
-      <select id="gl-type" onchange="glTypeChange()">
-        <option value="amount">Amount target (AED)</option>
-        <option value="milestone">Milestone checklist</option>
-      </select>
-    </div>
-    <!-- Amount fields -->
-    <div id="gl-amount-fields">
-      <div class="fields-row">
-        <div class="field"><label>Target (AED)</label><input id="gl-target" type="number" min="0" step="1" placeholder="50000"></div>
-        <div class="field"><label>Current saved (AED)</label><input id="gl-current" type="number" min="0" step="1" placeholder="0"></div>
-      </div>
-    </div>
-    <!-- Milestone fields -->
-    <div id="gl-milestone-fields" style="display:none">
-      <div class="field">
-        <label>Milestones</label>
-        <div id="gl-ms-inputs"></div>
-        <button type="button" class="btn" style="font-size:12px;height:30px;width:100%;justify-content:center;margin-top:6px" onclick="addMsInput()">&#65291; Add milestone</button>
-      </div>
-    </div>
-    <div class="field"><label>Deadline</label><input id="gl-deadline" type="date"></div>
-    <div class="field"><label>Notes</label><textarea id="gl-notes" placeholder="Details, motivation, strategy&#8230;" style="height:62px"></textarea></div>
-    <div class="field">
-      <label>Emoji / icon</label>
-      <div class="gl-emoji-grid" id="gl-emoji-grid"></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn" onclick="closeGoalModal()">Cancel</button>
-      <button class="btn primary" onclick="saveGoal()">Save goal</button>
-    </div>
-  </div>
-</div>
-
-<!-- Goal log-progress modal -->
-<div class="modal-backdrop" id="goal-log-modal" style="display:none" onclick="closeGoalLogModal()">
-  <div class="modal" onclick="event.stopPropagation()" style="max-width:380px">
-    <div class="modal-title" id="goal-log-title">Update progress</div>
-    <div id="goal-log-body"></div>
-    <div class="modal-actions" style="margin-top:1rem">
-      <button class="btn" onclick="closeGoalLogModal()">Cancel</button>
-      <button class="btn primary" onclick="saveGoalLog()">Update</button>
-    </div>
-  </div>
-</div>
-
-<nav class="mobile-nav" id="mobile-nav">
-  <button class="mobile-nav-btn active" id="mnav-active" onclick="switchPage('active')">
-    <span class="mnav-icon">&#9672;</span>Active
-  </button>
-  <button class="mobile-nav-btn" id="mnav-tabby" onclick="switchPage('tabby')">
-    <span class="mnav-icon">&#9681;</span>Tabby
-  </button>
-  <button class="mobile-nav-add" onclick="handleMobileAdd()" id="mnav-add" title="Add">&#65291;</button>
-  <button class="mobile-nav-btn" id="mnav-tasks" onclick="switchPage('tasks')">
-    <span class="mnav-icon">&#9635;</span>Tasks
-  </button>
-  <button class="mobile-nav-btn" id="mnav-menu" onclick="openMobileSidebar()">
-    <span class="mnav-icon">&#9776;</span>Menu
-  </button>
-</nav>
-
-
-<!-- Receivables modal -->
-<div class="modal-backdrop" id="recv-modal" style="display:none" onclick="if(event.target===this)closeRecvModal()">
-  <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
-    <div class="modal-title" id="recv-modal-title">Add receivable</div>
-    <div class="field"><label>Description</label><input id="rv-name" type="text" placeholder="e.g. Salary advance, Split dinner, Project payment…" autocomplete="off"></div>
-    <div class="fields-row">
-      <div class="field"><label>Amount (AED)</label><input id="rv-amount" type="number" min="0" step="0.01" placeholder="0.00"></div>
-      <div class="field"><label>Type</label>
-        <select id="rv-type">
-          <option value="person">&#129309; Person</option>
-          <option value="work">&#127970; Work / Company</option>
-          <option value="other">&#9679; Other</option>
+      <div class="field"><label>Priority</label>
+        <select id="sh-priority">
+          <option value="normal">Normal</option>
+          <option value="high">High priority</option>
+          <option value="low">Someday</option>
         </select>
       </div>
     </div>
-    <div class="fields-row">
-      <div class="field"><label>From (name)</label><input id="rv-from" type="text" placeholder="e.g. Ahmed, Acme Corp…"></div>
-      <div class="field"><label>Date lent</label><input id="rv-date" type="date"></div>
-    </div>
-    <div class="field"><label>Expected by (optional)</label><input id="rv-due" type="date"></div>
-    <div class="field"><label>Notes (optional)</label><textarea id="rv-notes" placeholder="Context, reference, agreement…" style="height:54px"></textarea></div>
     <div class="modal-actions">
-      <button class="btn" onclick="closeRecvModal()">Cancel</button>
-      <button class="btn primary" onclick="saveRecv()">Save</button>
+      <button class="btn" onclick="closeShopModal()">Cancel</button>
+      <button class="btn primary" onclick="saveShopItem()">Save item</button>
     </div>
   </div>
 </div>
 
-
-<!-- Settings modal -->
-<div class="settings-modal-backdrop" id="settings-modal" style="display:none" onclick="if(event.target===this)closeSettingsModal()">
-  <div class="settings-modal" onclick="event.stopPropagation()">
-
-    <div class="settings-modal-head">
-      <div class="settings-modal-title">&#9881; Settings</div>
-      <button class="modal-close-btn" onclick="closeSettingsModal()">&#10005;</button>
-    </div>
-
-    <!-- Billing cycle -->
-    <div class="settings-section">
-      <div class="settings-section-title">Billing cycle</div>
-      <div class="settings-row">
-        <div class="settings-label">Cycle starts on day</div>
-        <div class="settings-field-row" style="margin-top:4px">
-          <input id="cycle-day-input" type="number" min="1" max="28" value="1" class="settings-input" style="width:72px;flex:none"
-            oninput="this.value=Math.min(28,Math.max(1,parseInt(this.value)||1))">
-          <span style="font-size:12px;color:var(--text3)">of each month</span>
-          <button onclick="saveCycleDay()" class="settings-save-btn">Save</button>
-        </div>
-        <div id="cycle-label-preview" class="settings-hint" style="margin-top:4px"></div>
-      </div>
-    </div>
-
-    <!-- Auto-save -->
-    <div class="settings-section">
-      <div class="settings-section-title">Auto-save</div>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-        <div class="as-dot" id="settings-as-dot"></div>
-        <span id="settings-as-status-text" style="font-size:12px;color:var(--text2);flex:1">Not set up</span>
-      </div>
-      <button class="settings-action-btn" onclick="asSetup();closeSettingsModal()">
-        <div class="settings-action-icon" style="background:rgba(74,142,204,.15)">&#128194;</div>
-        <span>Choose save file</span>
-      </button>
-    </div>
-
-    <!-- Backup & versions -->
-    <div class="settings-section">
-      <div class="settings-section-title">Backup</div>
-      <div style="display:flex;flex-direction:column;gap:6px">
-        <button class="settings-action-btn" onclick="exportJSON();closeSettingsModal()">
-          <div class="settings-action-icon" style="background:rgba(31,170,126,.15)">&#8595;</div>
-          <div><div>Backup data</div><div style="font-size:10px;color:var(--text3);margin-top:1px">Download full .json backup</div></div>
-        </button>
-        <button class="settings-action-btn" onclick="closeSettingsModal();document.getElementById('import-input').click()">
-          <div class="settings-action-icon" style="background:rgba(201,138,26,.15)">&#8593;</div>
-          <div><div>Restore backup</div><div style="font-size:10px;color:var(--text3);margin-top:1px">Import from a .json file</div></div>
-        </button>
-        <button class="settings-action-btn" onclick="exportCSV();closeSettingsModal()">
-          <div class="settings-action-icon" style="background:rgba(155,127,232,.15)">&#8599;</div>
-          <div><div>Export CSV</div><div style="font-size:10px;color:var(--text3);margin-top:1px">Bills &amp; payments spreadsheet</div></div>
-        </button>
-      </div>
-    </div>
-
-    <!-- Data versions -->
-    <div class="settings-section">
-      <div class="settings-section-title">Data versions</div>
-      <div style="display:flex;gap:7px;margin-bottom:10px">
-        <button class="settings-action-btn" style="flex:1;height:34px" onclick="toggleSettingsVerPanel()" id="settings-ver-btn">
-          <div class="settings-action-icon" style="background:rgba(74,142,204,.12);width:24px;height:24px;border-radius:6px;font-size:11px">&#9719;</div>
-          <span style="font-size:12px">View snapshots</span>
-        </button>
-        <button class="settings-action-btn" style="flex:1;height:34px" onclick="verManualCheckpoint()">
-          <div class="settings-action-icon" style="background:rgba(224,82,82,.12);width:24px;height:24px;border-radius:6px;font-size:11px">&#128204;</div>
-          <span style="font-size:12px">Save checkpoint</span>
-        </button>
-      </div>
-      <div id="settings-ver-panel" style="display:none"></div>
-    </div>
-
-    <!-- Layout -->
-    <div class="settings-section">
-      <div class="settings-section-title">Layout</div>
-      <button class="settings-action-btn" onclick="navToggleEditMode()" id="nav-edit-btn">
-        <div class="settings-action-icon" style="background:rgba(201,138,26,.15)">&#9998;</div>
-        <div><div style="font-size:13px">Reorder tabs</div><div style="font-size:10px;color:var(--text3)">Drag to rearrange the sidebar</div></div>
-      </button>
-    </div>
-
-    <!-- AI insights -->
-    <div class="settings-section">
-      <div class="settings-section-title">AI insights</div>
-      <div class="settings-row">
-        <div class="settings-label">Proxy URL</div>
-        <div class="settings-field-row" style="margin-top:4px">
-          <input id="ai-proxy-input" type="text" placeholder="https://your-worker.workers.dev" class="settings-input">
-          <button onclick="saveProxyUrl()" class="settings-save-btn">Save</button>
-        </div>
-        <div class="settings-hint" style="margin-top:4px">Required for GitHub Pages — handles API calls server-side.</div>
-      </div>
-      <div class="settings-row" style="margin-top:10px">
-        <div class="settings-label">API key <span style="font-size:10px;color:var(--text3);font-weight:400">(direct mode only)</span></div>
-        <div class="settings-field-row" style="margin-top:4px">
-          <input id="ai-key-input-settings" type="password" placeholder="sk-ant-..." class="settings-input">
-          <button onclick="aiSaveKeyFromSettings()" class="settings-save-btn">Save</button>
-        </div>
-        <div class="settings-hint" style="margin-top:4px">Only needed without a proxy. Stored in your browser only.</div>
-      </div>
-    </div>
-
-  </div>
-</div>
 </body>
 </html>

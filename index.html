@@ -8023,8 +8023,11 @@ async function shCallClaudeExtract(pageText,statusEl){
   if(!resp.ok){const e=await resp.json().catch(function(){return {};});throw new Error(e&&e.error?e.error.message:'API '+resp.status);}
   const data=await resp.json();
   const raw=(data.content||[]).map(function(b){return b.text||'';}).join('').trim();
-  const clean=raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
-  const info=JSON.parse(clean);
+  // Robustly extract the JSON object - find first { and last } regardless of surrounding text
+  const jsonStart=raw.indexOf('{');
+  const jsonEnd=raw.lastIndexOf('}');
+  if(jsonStart<0||jsonEnd<0)throw new Error('No JSON object in response');
+  const info=JSON.parse(raw.slice(jsonStart,jsonEnd+1));
   if(info.name)document.getElementById('sh-name').value=info.name;
   if(info.desc)document.getElementById('sh-desc').value=info.desc;
   if(info.cat)document.getElementById('sh-cat').value=info.cat;

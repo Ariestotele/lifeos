@@ -328,7 +328,8 @@ body{
   padding:1.5rem;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;
   box-shadow:var(--shadow-md),0 0 0 0.5px rgba(255,255,255,.04) inset;
 }
-.modal-title{font-size:16px;font-weight:600;margin-bottom:1.25rem;letter-spacing:-.01em}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.modal-title{font-size:16px;font-weight:600;letter-spacing:-.01em}
 .field{margin-bottom:1rem}
 .field label{display:block;font-size:10px;color:var(--text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:.08em;font-weight:500}
 .field input,.field select,.field textarea{width:100%;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface3);color:var(--text);padding:0 10px;font-size:14px;font-family:var(--font);outline:none;transition:border-color .18s,box-shadow .18s}
@@ -2139,7 +2140,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '4.8';
+const APP_VERSION = '4.9';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_TASKS='subtracker_tasks', KEY_TASK_HIST='subtracker_task_history', KEY_SHOPPING='lifeos_shopping', KEY_LISTS='subtracker_lists', KEY_GOALS='subtracker_goals', KEY_NOTES='subtracker_notes', KEY_LOANS='subtracker_loans', KEY_ACCOUNTS='subtracker_accounts', KEY_NW='subtracker_networth', KEY_RECV='subtracker_receivables';
 
@@ -3555,6 +3556,7 @@ function importJSON(e){
         (data.tabbyItems||[]).length+' Tabby',
         (data.tasks||[]).length+' tasks',
         (data.goals||[]).length+' goals',
+        (data.shopping||[]).length+' shopping',
       ].join(' · ');
       document.getElementById('restore-modal-meta').textContent='Backed up: '+dateStr;
       document.getElementById('restore-modal-counts').textContent=counts;
@@ -3580,6 +3582,8 @@ function applyRestore(mode){
     payments=data.payments||[];
     tabbyItems=data.tabbyItems||[];
     tasks=data.tasks||[];
+    taskHistory=data.taskHistory||[];
+    shopping=data.shopping||[];
     lists=data.lists||[];
     goals=data.goals||[];
     notes=data.notes||[];
@@ -3587,7 +3591,7 @@ function applyRestore(mode){
     accounts=data.accounts||[];
     nwHistory=data.nwHistory||[];
     receivables=data.receivables||[];
-    saveData();saveTasks();saveLists();saveGoals();saveNotes();saveLoans();saveReceivables();saveAccounts();saveNetWorth();
+    saveData();saveTasks();saveTaskHistory();saveShopping();saveLists();saveGoals();saveNotes();saveLoans();saveReceivables();saveAccounts();saveNetWorth();
     if(data.dbLayout)  localStorage.setItem(DB_LAYOUT_KEY,  JSON.stringify(data.dbLayout));
     if(data.navLayout) localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(data.navLayout));
     if(data.cycleStart) localStorage.setItem(CYCLE_KEY, data.cycleStart);
@@ -3629,7 +3633,13 @@ loadProxyUrl();
     goals=[...(data.goals||[]),...goals.filter(g=>!bkIds.goals.has(g.id))];
     const rvIds=new Set((data.receivables||[]).map(r=>r.id));
     receivables=[...(data.receivables||[]),...receivables.filter(r=>!rvIds.has(r.id))];
-    saveData();saveTasks();saveLists();saveGoals();saveNotes();saveLoans();saveReceivables();saveAccounts();saveNetWorth();
+    // Merge shopping
+    const shIds=new Set((data.shopping||[]).map(s=>s.id));
+    shopping=[...(data.shopping||[]),...shopping.filter(s=>!shIds.has(s.id))];
+    // Merge taskHistory
+    const thIds=new Set((data.taskHistory||[]).map(t=>t.id));
+    taskHistory=[...(data.taskHistory||[]),...taskHistory.filter(t=>!thIds.has(t.id))];
+    saveData();saveTasks();saveTaskHistory();saveShopping();saveLists();saveGoals();saveNotes();saveLoans();saveReceivables();saveAccounts();saveNetWorth();
     // Merge layouts: only apply from backup if local layout is empty
     if(data.dbLayout  && !localStorage.getItem(DB_LAYOUT_KEY))  localStorage.setItem(DB_LAYOUT_KEY,  JSON.stringify(data.dbLayout));
     if(data.navLayout && !localStorage.getItem(NAV_LAYOUT_KEY)) localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(data.navLayout));
@@ -6548,25 +6558,33 @@ function verRestore(idx){
     // Take a snapshot of current state before overwriting (safety net — always force)
     verSnapshot(true);
     const data = JSON.parse(snap.data);
-    items      = data.items      || [];
-    payments   = data.payments   || [];
-    tabbyItems = data.tabbyItems || [];
-    tasks      = data.tasks      || [];
-    lists      = data.lists      || [];
-    goals      = data.goals      || [];
-    notes      = data.notes      || [];
-    loans      = data.loans      || [];
-    accounts   = data.accounts   || [];
+    items       = data.items       || [];
+    payments    = data.payments    || [];
+    tabbyItems  = data.tabbyItems  || [];
+    tasks       = data.tasks       || [];
+    taskHistory = data.taskHistory || [];
+    shopping    = data.shopping    || [];
+    lists       = data.lists       || [];
+    goals       = data.goals       || [];
+    notes       = data.notes       || [];
+    loans       = data.loans       || [];
+    accounts    = data.accounts    || [];
+    receivables = data.receivables || [];
+    nwHistory   = data.nwHistory   || [];
     // Write to localStorage directly (skip asAutoSave to avoid creating a snapshot mid-restore)
     try{localStorage.setItem(KEY_ITEMS,JSON.stringify(items));}catch(e){}
     try{localStorage.setItem(KEY_PAY,JSON.stringify(payments));}catch(e){}
     try{localStorage.setItem(KEY_TABBY,JSON.stringify(tabbyItems));}catch(e){}
     try{localStorage.setItem(KEY_TASKS,JSON.stringify(tasks));}catch(e){}
+    try{localStorage.setItem(KEY_TASK_HIST,JSON.stringify(taskHistory));}catch(e){}
+    try{localStorage.setItem(KEY_SHOPPING,JSON.stringify(shopping));}catch(e){}
     try{localStorage.setItem(KEY_LISTS,JSON.stringify(lists));}catch(e){}
     try{localStorage.setItem(KEY_GOALS,JSON.stringify(goals));}catch(e){}
     try{localStorage.setItem(KEY_NOTES,JSON.stringify(notes));}catch(e){}
     try{localStorage.setItem(KEY_LOANS,JSON.stringify(loans));}catch(e){}
     try{localStorage.setItem(KEY_ACCOUNTS,JSON.stringify(accounts));}catch(e){}
+    try{localStorage.setItem(KEY_RECV,JSON.stringify(receivables));}catch(e){}
+    try{localStorage.setItem(KEY_NW,JSON.stringify(nwHistory));}catch(e){}
     // Re-render everything
     render();
     if(currentPage==='tasks')    renderTasks();
@@ -6574,6 +6592,7 @@ function verRestore(idx){
     if(currentPage==='notes')    renderNotes();
     if(currentPage==='loans')    renderLoans();
     if(currentPage==='accounts') renderAccounts();
+    if(currentPage==='shopping')  renderShopping();
     if(currentPage==='dashboard')renderDashboard();
     renderVerPanel();
     toast('\u21a9 Restored to '+label);
@@ -8034,8 +8053,10 @@ async function shCallClaudeExtract(pageText,statusEl){
   if(info.price)document.getElementById('sh-price').value=info.price;
   const storeEl=document.getElementById('sh-store');
   if(storeEl&&info.store)storeEl.value=info.store;
-  if(statusEl)statusEl.textContent='Extracted successfully';
-  toast('Product info extracted');
+  const filled=[info.name,info.desc,info.price].filter(Boolean).length;
+  const msg=filled===0?'Store & category detected — enter name manually':filled<2?'Partial info extracted — fill in the rest':'Extracted successfully';
+  if(statusEl){statusEl.textContent=msg;statusEl.style.color=filled===0?'var(--amber)':'var(--positive)';}
+  toast(msg);
 }
 
 async function shExtractFromPaste(){
@@ -8197,45 +8218,48 @@ if(_vn) _vn.textContent = APP_VERSION;
 
 <!-- Shopping modal -->
 <div class="modal-backdrop" id="shop-modal" style="display:none" onclick="if(event.target===this)closeShopModal()">
-  <div class="modal" onclick="event.stopPropagation()" style="max-width:520px">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:500px">
+
     <div class="modal-header">
       <div class="modal-title" id="shop-modal-title">Add item</div>
       <button class="modal-close-btn" onclick="closeShopModal()">&#10005;</button>
     </div>
 
     <!-- Extract panel -->
-    <div style="background:var(--surface2);border:0.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px">
-      <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:10px">&#10024; Auto-extract product info</div>
-      <!-- Tab switcher -->
-      <div style="display:flex;gap:0;background:var(--surface3);border-radius:7px;padding:2px;margin-bottom:10px">
-        <button id="sh-tab-url"   onclick="shSwitchTab('url')"   style="flex:1;height:28px;border:none;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font);background:var(--surface);color:var(--text);transition:all .15s">&#128279; From URL</button>
-        <button id="sh-tab-paste" onclick="shSwitchTab('paste')" style="flex:1;height:28px;border:none;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font);background:transparent;color:var(--text3);transition:all .15s">&#128196; Paste text</button>
+    <div style="background:var(--surface2);border:0.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">&#10024; Auto-fill from product page</div>
+      <div style="display:flex;background:var(--surface3);border-radius:8px;padding:2px;margin-bottom:10px">
+        <button id="sh-tab-url"   onclick="shSwitchTab('url')"   style="flex:1;height:30px;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.15);transition:all .15s">&#128279; From URL</button>
+        <button id="sh-tab-paste" onclick="shSwitchTab('paste')" style="flex:1;height:30px;border:none;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);background:transparent;color:var(--text3);transition:all .15s">&#128196; Paste text</button>
       </div>
-      <!-- URL mode -->
       <div id="sh-mode-url">
-        <div style="display:flex;gap:7px">
-          <input id="sh-url" type="url" placeholder="https://amazon.com/..." style="flex:1" oninput="shUrlChanged()">
-          <button class="shop-extract-btn" id="sh-extract-btn" onclick="shExtractFromUrl()" disabled>Extract</button>
+        <div style="display:flex;gap:6px">
+          <input id="sh-url" type="url" placeholder="https://..." style="flex:1;font-size:12px" oninput="shUrlChanged()">
+          <button class="shop-extract-btn" id="sh-extract-btn" onclick="shExtractFromUrl()" disabled style="flex-shrink:0">&#10024; Extract</button>
         </div>
-        <div style="font-size:10px;color:var(--text3);margin-top:5px">Requires Cloudflare proxy set up in Settings.</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:5px;line-height:1.4">Needs Cloudflare proxy in Settings &mdash; or switch to Paste text (works on any site).</div>
       </div>
-      <!-- Paste text mode -->
       <div id="sh-mode-paste" style="display:none">
-        <textarea id="sh-paste-text" placeholder="Open product page &#8594; Ctrl+A &#8594; Ctrl+C &#8594; paste here" style="height:80px;font-size:11px;width:100%;box-sizing:border-box;resize:vertical"></textarea>
-        <button class="shop-extract-btn" id="sh-paste-extract-btn" onclick="shExtractFromPaste()" style="margin-top:6px;width:100%">&#10024; Extract from pasted text</button>
+        <textarea id="sh-paste-text" placeholder="Go to the product page &#8594; Ctrl+A, Ctrl+C &#8594; paste here" style="height:80px;font-size:12px;width:100%;box-sizing:border-box;resize:vertical;line-height:1.5"></textarea>
+        <button class="shop-extract-btn" id="sh-paste-extract-btn" onclick="shExtractFromPaste()" style="margin-top:7px;width:100%;height:34px">&#10024; Extract product info</button>
       </div>
-      <div id="sh-extract-status" style="font-size:10px;color:var(--text3);margin-top:6px;min-height:14px"></div>
+      <div id="sh-extract-status" style="font-size:11px;color:var(--positive);margin-top:7px;min-height:16px;font-weight:500"></div>
     </div>
 
-    <!-- Image preview -->
-    <div id="sh-image-preview" style="display:none;margin-bottom:12px">
-      <img id="sh-image-thumb" src="" alt="" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;border:0.5px solid var(--border)">
+    <!-- Image preview (shown after successful extraction) -->
+    <div id="sh-image-preview" style="display:none;margin-bottom:14px;border-radius:10px;overflow:hidden;border:0.5px solid var(--border)">
+      <img id="sh-image-thumb" src="" alt="" style="width:100%;max-height:180px;object-fit:cover;display:block">
       <input id="sh-image" type="hidden" value="">
     </div>
 
-    <!-- Item details -->
-    <div class="field"><label>Item name *</label><input id="sh-name" type="text" placeholder="e.g. Sony WH-1000XM5 Headphones" autocomplete="off"></div>
-    <div class="field"><label>Description</label><textarea id="sh-desc" placeholder="Features, specs, notes..." style="height:55px"></textarea></div>
+    <div class="field">
+      <label>Item name</label>
+      <input id="sh-name" type="text" placeholder="e.g. Dresser with mirror, Sony WH-1000XM5" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Description <span style="font-weight:400;color:var(--text3)">(optional)</span></label>
+      <textarea id="sh-desc" placeholder="Key features, colour, dimensions, why you want it..." style="height:56px"></textarea>
+    </div>
     <div class="fields-row">
       <div class="field"><label>Price (AED)</label><input id="sh-price" type="number" min="0" step="0.01" placeholder="0.00"></div>
       <div class="field"><label>Store</label><input id="sh-store" type="text" placeholder="Amazon, Noon, IKEA..."></div>
@@ -8268,5 +8292,110 @@ if(_vn) _vn.textContent = APP_VERSION;
   </div>
 </div>
 
+
+<!-- Settings modal -->
+<div class="settings-modal-backdrop" id="settings-modal" style="display:none" onclick="if(event.target===this)closeSettingsModal()">
+  <div class="settings-modal" onclick="event.stopPropagation()">
+
+    <div class="settings-modal-head">
+      <div class="settings-modal-title">&#9881; Settings</div>
+      <button class="modal-close-btn" onclick="closeSettingsModal()">&#10005;</button>
+    </div>
+
+    <!-- Billing cycle -->
+    <div class="settings-section">
+      <div class="settings-section-title">Billing cycle</div>
+      <div class="settings-row">
+        <div class="settings-label">Cycle starts on day</div>
+        <div class="settings-field-row" style="margin-top:4px">
+          <input id="cycle-day-input" type="number" min="1" max="28" value="1" class="settings-input" style="width:72px;flex:none"
+            oninput="this.value=Math.min(28,Math.max(1,parseInt(this.value)||1))">
+          <span style="font-size:12px;color:var(--text3)">of each month</span>
+          <button onclick="saveCycleDay()" class="settings-save-btn">Save</button>
+        </div>
+        <div id="cycle-label-preview" class="settings-hint" style="margin-top:4px"></div>
+      </div>
+    </div>
+
+    <!-- Auto-save -->
+    <div class="settings-section">
+      <div class="settings-section-title">Auto-save</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div class="as-dot" id="settings-as-dot"></div>
+        <span id="settings-as-status-text" style="font-size:12px;color:var(--text2);flex:1">Not set up</span>
+      </div>
+      <button class="settings-action-btn" onclick="asSetup();closeSettingsModal()">
+        <div class="settings-action-icon" style="background:rgba(74,142,204,.15)">&#128194;</div>
+        <span>Choose save file</span>
+      </button>
+    </div>
+
+    <!-- Backup -->
+    <div class="settings-section">
+      <div class="settings-section-title">Backup</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <button class="settings-action-btn" onclick="exportJSON();closeSettingsModal()">
+          <div class="settings-action-icon" style="background:rgba(31,170,126,.15)">&#8595;</div>
+          <div><div>Backup data</div><div style="font-size:10px;color:var(--text3);margin-top:1px">Download full .json backup</div></div>
+        </button>
+        <button class="settings-action-btn" onclick="closeSettingsModal();document.getElementById('import-input').click()">
+          <div class="settings-action-icon" style="background:rgba(201,138,26,.15)">&#8593;</div>
+          <div><div>Restore backup</div><div style="font-size:10px;color:var(--text3);margin-top:1px">Import from a .json file</div></div>
+        </button>
+        <button class="settings-action-btn" onclick="exportCSV();closeSettingsModal()">
+          <div class="settings-action-icon" style="background:rgba(155,127,232,.15)">&#8599;</div>
+          <div><div>Export CSV</div><div style="font-size:10px;color:var(--text3);margin-top:1px">Bills &amp; payments spreadsheet</div></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Data versions -->
+    <div class="settings-section">
+      <div class="settings-section-title">Data versions</div>
+      <div style="display:flex;gap:7px;margin-bottom:10px">
+        <button class="settings-action-btn" style="flex:1;height:34px" onclick="toggleSettingsVerPanel()" id="settings-ver-btn">
+          <div class="settings-action-icon" style="background:rgba(74,142,204,.12);width:24px;height:24px;border-radius:6px;font-size:11px">&#9719;</div>
+          <span style="font-size:12px">View snapshots</span>
+        </button>
+        <button class="settings-action-btn" style="flex:1;height:34px" onclick="verManualCheckpoint()">
+          <div class="settings-action-icon" style="background:rgba(224,82,82,.12);width:24px;height:24px;border-radius:6px;font-size:11px">&#128204;</div>
+          <span style="font-size:12px">Save checkpoint</span>
+        </button>
+      </div>
+      <div id="settings-ver-panel" style="display:none"></div>
+    </div>
+
+    <!-- Layout -->
+    <div class="settings-section">
+      <div class="settings-section-title">Layout</div>
+      <button class="settings-action-btn" onclick="navToggleEditMode()" id="nav-edit-btn">
+        <div class="settings-action-icon" style="background:rgba(201,138,26,.15)">&#9998;</div>
+        <div><div>Reorder tabs</div><div style="font-size:10px;color:var(--text3)">Drag to rearrange the sidebar</div></div>
+      </button>
+    </div>
+
+    <!-- AI insights -->
+    <div class="settings-section">
+      <div class="settings-section-title">AI insights</div>
+      <div class="settings-row">
+        <div class="settings-label">Proxy URL</div>
+        <div class="settings-field-row" style="margin-top:4px">
+          <input id="ai-proxy-input" type="text" placeholder="https://your-worker.workers.dev" class="settings-input">
+          <button onclick="saveProxyUrl()" class="settings-save-btn">Save</button>
+        </div>
+        <div class="settings-hint" style="margin-top:4px">Required for GitHub Pages — handles API calls server-side.</div>
+      </div>
+      <div class="settings-row" style="margin-top:10px">
+        <div class="settings-label">API key <span style="font-size:10px;color:var(--text3);font-weight:400">(direct mode only)</span></div>
+        <div class="settings-field-row" style="margin-top:4px">
+          <input id="ai-key-input-settings" type="password" placeholder="sk-ant-..." class="settings-input">
+          <button onclick="aiSaveKeyFromSettings()" class="settings-save-btn">Save</button>
+        </div>
+        <div class="settings-hint" style="margin-top:4px">Only needed without a proxy. Stored in your browser only.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
 </body>
 </html>

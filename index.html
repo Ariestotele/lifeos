@@ -8023,8 +8023,11 @@ async function shExtractFromUrl(){
     if(meta.price && !isNaN(meta.price)){
       document.getElementById('sh-price').value = meta.price;
     }
+    // Add price hint to page text so Claude can also try to find price
+    var priceHintLine = meta.priceHint ? 'Price hint: '+meta.priceHint : '';
+    var fullPageText = [pageText, priceHintLine].filter(Boolean).join('\n');
     if(status)status.textContent='Analysing with AI...';
-    await shCallClaudeExtract(pageText,status);
+    await shCallClaudeExtract(fullPageText, status, !meta.price);
   }catch(e){
     if(status)status.textContent='URL fetch failed — try Paste text instead';
     toast('URL extract failed: '+e.message);
@@ -8033,7 +8036,7 @@ async function shExtractFromUrl(){
 }
 
 
-async function shCallClaudeExtract(pageText,statusEl){
+async function shCallClaudeExtract(pageText,statusEl,extractPrice){
   const key=aiGetKey(),proxyUrl=aiGetProxy();
   if(!key&&!proxyUrl){toast('Set up API key or proxy in Settings');return;}
   const endpoint=proxyUrl||'https://api.anthropic.com/v1/messages';
@@ -8054,7 +8057,7 @@ async function shCallClaudeExtract(pageText,statusEl){
   if(info.name)document.getElementById('sh-name').value=info.name;
   if(info.desc)document.getElementById('sh-desc').value=info.desc;
   if(info.cat)document.getElementById('sh-cat').value=info.cat;
-  if(info.price)document.getElementById('sh-price').value=info.price;
+  if(info.price&&extractPrice!==false)document.getElementById('sh-price').value=info.price;
   const storeEl=document.getElementById('sh-store');
   if(storeEl&&info.store)storeEl.value=info.store;
   const filled=[info.name,info.desc,info.price].filter(Boolean).length;

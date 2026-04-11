@@ -8019,6 +8019,10 @@ async function shExtractFromUrl(){
         previewEl.style.display='block';
       }
     }
+    // Set price from worker if available (more reliable than Claude parsing)
+    if(meta.price && !isNaN(meta.price)){
+      document.getElementById('sh-price').value = meta.price;
+    }
     if(status)status.textContent='Analysing with AI...';
     await shCallClaudeExtract(pageText,status);
   }catch(e){
@@ -8193,7 +8197,7 @@ function renderShopping(){
           +'<span class="shop-cat">'+esc(s.cat||'Other')+'</span>'
           +(s.store?'<span style="font-size:11px;color:var(--text3)">'+esc(s.store)+'</span>':'')
           +(s.price?'<span class="shop-price">AED '+fmt(s.price)+'</span>':'')
-          +(s.url?'<a class="shop-link" href="'+esc(s.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">&#128279; Open</a>':'')
+          +(s.url?'<a class="shop-link" href="'+esc(s.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="padding:2px 8px;border:0.5px solid var(--accent-border);border-radius:5px;background:var(--accent-dim)">&#128279; Open link</a>':'')
         +'</div>'
       +'</div>'
       +'<div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">'

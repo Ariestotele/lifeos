@@ -2018,6 +2018,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
       <div class="field"><label>Color</label><div class="color-dots" id="tabby-color-picker" style="margin-top:10px"></div></div>
     </div>
     <div class="field"><label>Notes (optional)</label><textarea id="t-notes" placeholder="e.g. order number, store, delivery date&#8230;"></textarea></div>
+    <div class="field"><label>Pay from account (optional)</label><select id="t-pay-account"><option value="">-- No account --</option></select></div>
     <div class="modal-actions">
       <button class="btn" onclick="closeTabbyModal()">Cancel</button>
       <button class="btn primary" onclick="saveTabbyItem()">Save</button>
@@ -2103,7 +2104,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '4.3';
+const APP_VERSION = '4.7';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_TASKS='subtracker_tasks', KEY_TASK_HIST='subtracker_task_history', KEY_LISTS='subtracker_lists', KEY_GOALS='subtracker_goals', KEY_NOTES='subtracker_notes', KEY_LOANS='subtracker_loans', KEY_ACCOUNTS='subtracker_accounts', KEY_NW='subtracker_networth', KEY_RECV='subtracker_receivables';
 
@@ -2252,17 +2253,17 @@ function inCycle(dateStr, refDate){
 
 // What actual date does a dueDay fall on in the current cycle?
 function dueDateInCycle(dueDay, refDate){
-  const s   = cycleStart(refDate);
-  const day = getCycleDay();
-  if(day <= 1){
-    return new Date(s.getFullYear(), s.getMonth(), dueDay);
-  }
-  // Days >= cycleDay fall in start month; days < cycleDay fall in next month
-  if(dueDay >= day){
-    return new Date(s.getFullYear(), s.getMonth(), dueDay);
-  } else {
-    return new Date(s.getFullYear(), s.getMonth()+1, dueDay);
-  }
+  // Returns this calendar month's occurrence of dueDay (may be past or future)
+  const d = refDate || new Date();
+  return new Date(d.getFullYear(), d.getMonth(), dueDay);
+}
+
+// Returns the NEXT upcoming occurrence of dueDay (always in the future or today)
+function nextDueDate(dueDay){
+  const now = new Date();
+  const thisMonth = new Date(now.getFullYear(), now.getMonth(), dueDay);
+  if(thisMonth >= now) return thisMonth;
+  return new Date(now.getFullYear(), now.getMonth()+1, dueDay);
 }
 
 function isOverdueCycle(item){
@@ -2285,7 +2286,12 @@ function isPaidThisCycle(item){
   if(!itemPayments.length)return false;
   const now=new Date();
   const c=item.cycle;
-  if(c==='monthly'||c==='once'){
+  if(c==='monthly'){
+    // Use calendar month: paid if there's a payment in the current calendar month
+    const ym=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+    return itemPayments.some(p=>p.date&&p.date.slice(0,7)===ym);
+  }
+  if(c==='once'){
     return itemPayments.some(p=>inCycle(p.date));
   }
   if(c==='quarterly'){
@@ -2297,12 +2303,10 @@ function isPaidThisCycle(item){
     return itemPayments.some(p=>new Date(p.date)>=cutoff);
   }
   if(c==='weekly'){
-    // Start of current week (Monday)
-    const day=now.getDay()||7; // Sun=7
+    const day=now.getDay()||7;
     const mon=new Date(now);mon.setDate(now.getDate()-day+1);mon.setHours(0,0,0,0);
     return itemPayments.some(p=>new Date(p.date)>=mon);
   }
-  // fallback: monthly
   return itemPayments.some(p=>inCycle(p.date));
 }
 
@@ -2539,20 +2543,16 @@ function renderItem(item,ym){
   // Days until paid state resets &#8212; use dueDay if set, else first of next month
   const now=new Date();
   let daysUntilReset;
+  let resetDate;
   if(item.dueDay){
-    // Next occurrence of dueDay
-    const thisMonthDue=new Date(now.getFullYear(),now.getMonth(),item.dueDay);
-    const nextDue=thisMonthDue>now
-      ? thisMonthDue
-      : new Date(now.getFullYear(),now.getMonth()+1,item.dueDay);
+    const nextDue=nextDueDate(item.dueDay);
     daysUntilReset=Math.ceil((nextDue-now)/(1000*60*60*24));
+    resetDate=nextDue;
   } else {
     const nextMonth=new Date(now.getFullYear(),now.getMonth()+1,1);
     daysUntilReset=Math.ceil((nextMonth-now)/(1000*60*60*24));
+    resetDate=nextMonth;
   }
-  const resetDate=item.dueDay
-    ? (()=>{const now2=new Date();const t=new Date(now2.getFullYear(),now2.getMonth(),item.dueDay);return t>now2?t:new Date(now2.getFullYear(),now2.getMonth()+1,item.dueDay);})()
-    : new Date(now.getFullYear(),now.getMonth()+1,1);
   const resetDateStr=`${resetDate.getDate()} ${MONTHS[resetDate.getMonth()]}`;
   const resetLabel=daysUntilReset===0?`resets today (${resetDateStr})`:daysUntilReset===1?`resets tomorrow (${resetDateStr})`:`resets in ${daysUntilReset}d &#183; ${resetDateStr}`;
   const paidMeta=paidNow
@@ -2566,7 +2566,7 @@ function renderItem(item,ym){
     <div>
       <div class="item-name">
         <span>${esc(item.name)}</span>
-        ${item.dueDay&&!item.isTrial?`<span style="font-size:11px;font-weight:400;color:var(--text3)">${item.dueDay} ${MONTHS[dueDateInCycle(item.dueDay).getMonth()]}</span>`:''}
+        ${item.dueDay&&!item.isTrial?`<span style="font-size:11px;font-weight:400;color:var(--text3)">${(()=>{const nd=nextDueDate(item.dueDay);return nd.getDate()+' '+MONTHS[nd.getMonth()];})()} </span>`:''}
         ${isP?'<span class="badge badge-paused">paused</span>':''}
         ${paidNow?'<span class="badge badge-paid">paid</span>':''}
         ${item.isTrial?`<span class="badge ${trialDaysLeft(item.trialEnd)<0?'badge-trial-expired':trialDaysLeft(item.trialEnd)<=3?'badge-trial-urgent':'badge-trial'}">${trialBadgeLabel(item.trialEnd)}</span>`:''}
@@ -2632,17 +2632,45 @@ function markNextInstalment(id){
   const t=tabbyItems.find(t=>t.id===id);if(!t)return;
   const idx=t.instalments.findIndex(i=>!i.paid);
   if(idx===-1)return;
-  const inst=t.instalments[idx];
-  inst.paid=true;
-  const payId='tabby_'+id+'_'+idx;
-  const instDate=inst.date||todayStr();
-  payments.unshift({id:payId,itemId:'tabby_'+id,name:t.name+' (Tabby '+(idx+1)+')',
-    cat:t.cat||'Other',amount:t.total/4,date:instDate,note:'Tabby instalment '+(idx+1)});
-  saveData();render();renderTabby();
-  const allPaid=t.instalments.every(i=>i.paid);
-  toast(allPaid?`&#127881; ${t.name} fully paid off!`:`Instalment ${idx+1} of ${t.name} paid`);
+  const synth={
+    id:'tabby__'+id+'__'+idx,
+    name:t.name+' (Instalment '+(idx+1)+'/4)',
+    amount:parseFloat((t.total/4).toFixed(2)),
+    payAccountId:t.payAccountId||null,
+  };
+  showPayFromPopup(synth);
 }
 
+function doConfirmTabby(tabbyId,tabbyIdx,acId){
+  const t=tabbyItems.find(t=>t.id===tabbyId);if(!t)return;
+  const inst=t.instalments[tabbyIdx];if(!inst||inst.paid)return;
+  inst.paid=true;
+  const payId='tabby_'+tabbyId+'_'+tabbyIdx;
+  const instDate=inst.date||todayStr();
+  payments.unshift({
+    id:payId,itemId:'tabby_'+tabbyId,
+    name:t.name+' (Tabby '+(tabbyIdx+1)+')',
+    cat:t.cat||'Other',amount:t.total/4,date:instDate,
+    note:'Tabby instalment '+(tabbyIdx+1),
+    deductedAccountId:acId||null
+  });
+  if(acId){
+    const ac=accounts.find(a=>a.id===acId);
+    if(ac){
+      ac.balance=parseFloat((parseFloat(ac.balance)-(t.total/4)).toFixed(2));
+      ac.updatedAt=Date.now();
+      ac.history=ac.history||[];
+      ac.history.push({balance:ac.balance,date:todayStr(),note:'Tabby: '+t.name+' inst '+(tabbyIdx+1)});
+      if(ac.history.length>24)ac.history=ac.history.slice(-24);
+      saveAccounts();
+      if(currentPage==='accounts')renderAccounts();
+      if(currentPage==='networth')renderNetWorth();
+    }
+  }
+  saveData();render();renderTabby();
+  const allPaid=t.instalments.every(i=>i.paid);
+  toast(allPaid?t.name+' fully paid off!':'Instalment '+(tabbyIdx+1)+' paid'+(acId?' - deducted':''));
+}
 function trialBadgeLabel(endDate){
   const d=trialDaysLeft(endDate);
   if(d===null)return 'trial';
@@ -3206,6 +3234,12 @@ function selectPayAc(acId){
 
 function confirmPayFrom(itemId,skipDeduction){
   const popup=document.getElementById('pay-popup-wrap');
+  if(itemId.startsWith('tabby__')){
+    const parts=itemId.split('__');
+    doConfirmTabby(parts[1],parseInt(parts[2]),skipDeduction?null:window._paySelectedAcId);
+    if(popup)popup.remove();
+    return;
+  }
   const item=items.find(i=>i.id===itemId);if(!item)return;
   const acId=skipDeduction?null:window._paySelectedAcId;
   payments.unshift({id:String(Date.now()),itemId:item.id,name:item.name,cat:item.cat,amount:item.amount,date:todayStr(),note:'',deductedAccountId:acId||null});
@@ -3405,6 +3439,11 @@ function openTabbyModal(id){
   tabbySelectedColor=t?.color||COLORS[5];
   renderTabbyColorPicker();
   previewInstalments();
+  const tPay=document.getElementById('t-pay-account');
+  if(tPay){
+    tPay.innerHTML='<option value="">-- No account --</option>'+accounts.filter(a=>!a.archived).map(a=>'<option value="'+a.id+'">'+esc(a.name)+' - AED '+fmt(a.balance)+'</option>').join('');
+    tPay.value=t?(t.payAccountId||''):'';
+  }
   document.getElementById('tabby-modal').style.display='flex';
   setTimeout(()=>document.getElementById('t-name').focus(),50);
 }
@@ -3423,6 +3462,7 @@ function saveTabbyItem(){
     if(t){
       t.name=name;t.total=total;t.cat=document.getElementById('t-cat').value;
       t.notes=document.getElementById('t-notes').value.trim();t.color=tabbySelectedColor;
+      t.payAccountId=document.getElementById('t-pay-account').value||null;
       // Recalculate instalment dates if start changed
       if(t.startDate!==startDate){
         t.startDate=startDate;
@@ -3435,7 +3475,8 @@ function saveTabbyItem(){
       id:String(Date.now()),name,total,startDate,
       cat:document.getElementById('t-cat').value,
       notes:document.getElementById('t-notes').value.trim(),
-      color:tabbySelectedColor,instalments
+      color:tabbySelectedColor,instalments,
+      payAccountId:document.getElementById('t-pay-account').value||null
     });
   }
   const wasEditing=!!tabbyEditId;
@@ -6109,7 +6150,7 @@ function getUpcomingReminders(){
   const results = [];
   active.forEach(i=>{
     if(isPaidThisCycle(i)) return;
-    const dueDate = dueDateInCycle(i.dueDay);
+    const dueDate = nextDueDate(i.dueDay);
     const diff = Math.ceil((dueDate - now)/(1000*60*60*24));
     if(diff <= REM_DAYS && diff >= -1){
       results.push({item:i, diff:Math.max(0,diff), overdue: dueDate < now});
@@ -6837,7 +6878,7 @@ ${context}`;
   const raw=(data.content||[]).map(b=>b.text||'').join('').trim();
   const clean=raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim();
   const insights=JSON.parse(clean);
-  localStorage.setItem(AI_INS_STORE,JSON.stringify({date:today,insights}));
+  localStorage.setItem(AI_INS_STORE,JSON.stringify({date:today,insights,savedAt:new Date().toISOString()}));
   return insights;
 }
 
@@ -6919,7 +6960,7 @@ function aiShowInsights(body,insights,fresh){
     '<div class="ai-insight-body">'+
       '<div class="ai-cards">'+cards+'</div>'+
       '<div class="ai-insight-meta">'+
-        '<span>'+(fresh?'Just generated':'Updated today')+' \u00b7 '+insights.length+' insights</span>'+
+        '<span>'+(fresh?'Just generated · '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}):(()=>{try{const c=JSON.parse(localStorage.getItem(AI_INS_STORE)||'{}');const d=c.savedAt?new Date(c.savedAt):null;return d?'Updated '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}):'Updated today';}catch(e){return 'Updated today';}})())+' · '+insights.length+' insights</span>'+
         '<div style="display:flex;gap:8px">'+
           '<button class="ai-insight-refresh-btn" onclick="aiRefreshInsight()">&#8635; Refresh</button>'+
           '<button class="ai-insight-refresh-btn" onclick="aiShowKeyInput()">&#128273; Key</button>'+

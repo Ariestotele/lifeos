@@ -3708,7 +3708,12 @@ loadProxyUrl();
     if(currentPage==='goals')renderGoals();
     if(currentPage==='notes')renderNotes();
     if(currentPage==='loans')renderLoans();
-    toast('✓ Data replaced — '+items.length+' bills, '+(goals||[]).length+' goals restored');
+    if(currentPage==='shopping')renderShopping();
+    if(currentPage==='links')renderLinks();
+    if(currentPage==='receivables')renderReceivables();
+    if(currentPage==='accounts')renderAccounts();
+    if(currentPage==='dashboard')renderDashboard();
+    toast('✓ Data replaced — '+items.length+' bills, '+(shopping||[]).length+' shopping, '+(links||[]).length+' links restored');
   } else {
     // Merge: backup entries win on conflict, local-only entries kept
     const noteIds=new Set((data.notes||[]).map(n=>n.id));
@@ -3763,6 +3768,11 @@ loadProxyUrl();
     if(currentPage==='goals')renderGoals();
     if(currentPage==='notes')renderNotes();
     if(currentPage==='loans')renderLoans();
+    if(currentPage==='shopping')renderShopping();
+    if(currentPage==='links')renderLinks();
+    if(currentPage==='receivables')renderReceivables();
+    if(currentPage==='accounts')renderAccounts();
+    if(currentPage==='dashboard')renderDashboard();
     if(currentPage==='accounts')renderAccounts();
     if(currentPage==='networth')renderNetWorth();
     toast('✓ Backup merged — no duplicates created');
@@ -8968,6 +8978,29 @@ if(_vn) _vn.textContent = APP_VERSION;
       <button class="modal-close-btn" onclick="closeLinkViewer()">&#10005;</button>
     </div>
     <iframe class="link-viewer-iframe" id="lv-iframe" src="" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy"></iframe>
+  </div>
+</div>
+
+<!-- Restore modal -->
+<div class="modal-backdrop" id="restore-modal" style="display:none" onclick="if(event.target===this)closeRestoreModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
+    <div class="modal-header">
+      <div class="modal-title">Restore backup</div>
+      <button class="modal-close-btn" onclick="closeRestoreModal()">&#10005;</button>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:6px" id="restore-modal-meta"></div>
+      <div style="font-size:12px;color:var(--text3)" id="restore-modal-counts"></div>
+    </div>
+    <div style="background:var(--amber-dim);border:0.5px solid var(--amber-border);border-radius:8px;padding:10px 14px;margin-bottom:16px">
+      <div style="font-size:12px;color:var(--amber);font-weight:600;margin-bottom:4px">&#9888; How do you want to restore?</div>
+      <div style="font-size:11px;color:var(--text3)"><strong style="color:var(--text2)">Replace</strong> — overwrites all current data with the backup.<br><strong style="color:var(--text2)">Merge</strong> — adds backup items without removing your existing data.</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeRestoreModal()">Cancel</button>
+      <button class="btn" onclick="applyRestore('merge')" style="border-color:var(--accent-border);color:var(--accent)">Merge</button>
+      <button class="btn primary" onclick="applyRestore('replace')">Replace all</button>
+    </div>
   </div>
 </div>
 

@@ -8771,19 +8771,9 @@ function openLink(id){
   saveLinks();
   renderLinks();
   var url=l.url||'';
-  // Local files, app:// or non-http schemes — open directly in browser tab
-  var isLocal = /^file:\/\/\//i.test(url) || /^[a-z]:\\/i.test(url) || !/^https?:\/\//i.test(url);
-  if(isLocal){
-    window.open(url,'_blank');
-    return;
-  }
-  // Web URLs — open in iframe viewer
-  document.getElementById('lv-emoji').textContent=l.emoji||'🔗';
-  document.getElementById('lv-title').textContent=l.title;
-  document.getElementById('lv-url').textContent=url;
-  document.getElementById('lv-open-tab').href=url;
-  document.getElementById('lv-iframe').src=url;
-  document.getElementById('link-viewer').style.display='flex';
+  if(!url)return;
+  // Always open directly in browser — works for file:// and https://
+  window.open(url,'_blank','noopener');
 }
 
 function closeLinkViewer(){

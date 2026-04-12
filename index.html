@@ -860,6 +860,30 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 .pay-skip-btn{height:30px;border-radius:8px;border:0.5px solid var(--border2);background:transparent;color:var(--text3);font-size:12px;cursor:pointer;font-family:var(--font);transition:all .15s}
 .pay-skip-btn:hover{color:var(--text);border-color:var(--border3)}
 
+/* ── Link viewer modal ── */
+.link-viewer-backdrop{position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.link-viewer-modal{width:100%;max-width:1100px;height:85vh;background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius-lg);overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,.6)}
+.link-viewer-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface2);border-bottom:0.5px solid var(--border);flex-shrink:0}
+.link-viewer-emoji{font-size:18px;flex-shrink:0}
+.link-viewer-title{font-size:13px;font-weight:600;color:var(--text);flex-shrink:0}
+.link-viewer-url{font-size:11px;color:var(--text3);font-family:var(--mono);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:4px 8px;background:var(--surface3);border-radius:5px;border:0.5px solid var(--border)}
+.link-viewer-iframe{flex:1;width:100%;border:none;background:#fff}
+/* ── Links dashboard ── */
+.links-group{margin-bottom:2rem}
+.links-group-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:8px;border-bottom:0.5px solid var(--border)}
+.links-group-name{font-size:13px;font-weight:600;color:var(--text)}
+.links-group-desc{font-size:11px;color:var(--text3);flex:1}
+.links-grid-inner{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.link-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:14px;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;gap:8px;text-decoration:none;position:relative}
+.link-card:hover{border-color:var(--border2);background:var(--surface2);transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.35)}
+.link-card-icon{font-size:26px;line-height:1}
+.link-card-title{font-size:13px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.link-card-desc{font-size:11px;color:var(--text3);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.link-card-url{font-size:10px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--mono)}
+.link-card-actions{position:absolute;top:8px;right:8px;display:none;gap:3px}
+.link-card:hover .link-card-actions{display:flex}
+.link-card-badge{font-size:9px;color:var(--text3);font-family:var(--mono);padding:1px 5px;background:var(--surface3);border-radius:3px}
+@media(max-width:640px){.links-grid-inner{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}}
 /* ── Shopping collections ── */
 .sh-coll-btn{width:100%;text-align:left;padding:7px 10px;border-radius:7px;border:0.5px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);margin-bottom:4px;display:flex;align-items:center;gap:7px;transition:all .15s}
 .sh-coll-btn:hover{background:var(--surface3);color:var(--text)}
@@ -2037,6 +2061,23 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
       </div>
     </div>
 
+    <div id="page-links" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Links</div>
+          <div class="page-sub" id="links-sub">Your quick-access dashboard</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn" onclick="openLinkGroupModal()">&#128193; New group</button>
+          <button class="btn primary" onclick="openLinkModal()">+ Add link</button>
+        </div>
+      </div>
+      <div id="links-search-row" style="margin-bottom:1rem">
+        <input id="links-search" type="text" placeholder="Search links..." class="modal-input" style="width:100%;max-width:360px" oninput="renderLinks()">
+      </div>
+      <div id="links-grid"></div>
+    </div>
+
     <div id="page-networth" style="display:none">
       <div class="page-header">
         <div>
@@ -2185,8 +2226,9 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.2';
+const APP_VERSION = '5.3';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
+const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_TASKS='subtracker_tasks', KEY_TASK_HIST='subtracker_task_history', KEY_SHOPPING='lifeos_shopping', KEY_SH_LISTS='lifeos_sh_lists', KEY_LISTS='subtracker_lists', KEY_GOALS='subtracker_goals', KEY_NOTES='subtracker_notes', KEY_LOANS='subtracker_loans', KEY_ACCOUNTS='subtracker_accounts', KEY_NW='subtracker_networth', KEY_RECV='subtracker_receivables';
 
 let items=[], payments=[], tabbyItems=[], editId=null, tabbyEditId=null, tabbyColor=COLORS[4];
@@ -2194,6 +2236,7 @@ let filterCat='All', selectedColor=COLORS[0];
 let currentPage='active', toastTimer=null, deletedItem=null, deletedPayments=[];
 let tasks=[], lists=[], tkEditId=null, deletedTask=null, tkSelectedColor=COLORS[0];
 let tkFilterStatus='all', tkFilterPriority='all', tkFilterList='all', tkWorkspace='personal';
+let links=[], linkGroups=[];
 let shopping=[];
 let shCollections=[];
 let shoppingFilter='all';
@@ -2236,6 +2279,8 @@ function loadData(){
   try{const d=localStorage.getItem(KEY_TABBY);if(d)tabbyItems=JSON.parse(d);}catch(e){tabbyItems=[];}
   try{const d=localStorage.getItem(KEY_TASKS);if(d)tasks=JSON.parse(d);}catch(e){tasks=[];}
   try{const d=localStorage.getItem(KEY_TASK_HIST);if(d)taskHistory=JSON.parse(d);}catch(e){taskHistory=[];}
+  try{const d=localStorage.getItem(KEY_LINKS);if(d)links=JSON.parse(d);}catch(e){links=[];}
+  try{const d=localStorage.getItem(KEY_LINK_GROUPS);if(d)linkGroups=JSON.parse(d);}catch(e){linkGroups=[];}
   try{const d=localStorage.getItem(KEY_SHOPPING);if(d)shopping=JSON.parse(d);}catch(e){shopping=[];}
   try{const d=localStorage.getItem(KEY_SH_LISTS);if(d)shCollections=JSON.parse(d);}catch(e){shCollections=[];}
   try{const d=localStorage.getItem(KEY_LISTS);if(d)lists=JSON.parse(d);}catch(e){lists=[];}
@@ -2452,7 +2497,7 @@ function undoDelete(){
 /* &#9472;&#9472; Navigation &#9472;&#9472; */
 function switchPage(p){
   currentPage=p;
-  ['dashboard','active','tabby','trials','history','insights','calc','tasks','goals','calendar','notes','loans','receivables','accounts','networth','shopping'].forEach(x=>{
+  ['dashboard','active','tabby','trials','history','insights','calc','tasks','goals','calendar','notes','loans','receivables','accounts','networth','shopping','links'].forEach(x=>{
     document.getElementById('page-'+x).style.display=x===p?'':'none';
     const n=document.getElementById('nav-'+x);
     if(n)n.className='nav-item'+(x===p?' active':'');
@@ -2477,6 +2522,7 @@ function switchPage(p){
   if(p==='accounts')renderAccounts();
   if(p==='networth')renderNetWorth();
   if(p==='shopping')renderShopping();
+  if(p==='links')renderLinks();
   closeMobileSidebar();
   if(!_navEditing) renderNav();
 }
@@ -3576,7 +3622,7 @@ document.getElementById('tabby-modal').addEventListener('click',e=>{if(e.target=
 
 function exportJSON(){
   if(!items.length&&!payments.length&&!tabbyItems.length&&!tasks.length){toast('Nothing to back up yet');return;}
-  const data=JSON.stringify({items,payments,tabbyItems,tasks,taskHistory,shopping,shCollections,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),dbCollapsed:JSON.parse(localStorage.getItem('lifeos_db_collapsed')||'{}'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),proxyUrl:localStorage.getItem(AI_PROXY_STORE)||'',exportedAt:new Date().toISOString()},null,2);
+  const data=JSON.stringify({items,payments,tabbyItems,tasks,taskHistory,shopping,shCollections,links,linkGroups,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),dbCollapsed:JSON.parse(localStorage.getItem('lifeos_db_collapsed')||'{}'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),proxyUrl:localStorage.getItem(AI_PROXY_STORE)||'',exportedAt:new Date().toISOString()},null,2);
   const d=new Date();
   const filename='bills-backup-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'.json';
   verSnapshot(true);
@@ -3594,7 +3640,13 @@ function importJSON(e){
   reader.onload=ev=>{
     try{
       const data=JSON.parse(ev.target.result);
-      if(!Array.isArray(data.items)||!Array.isArray(data.payments))throw new Error('Invalid format');
+      // Accept any backup that has at least one known key
+      const knownKeys=['items','payments','tasks','goals','loans','accounts','shopping','links','notes','receivables'];
+      const hasData=knownKeys.some(function(k){return Array.isArray(data[k]);});
+      if(!hasData)throw new Error('Invalid format');
+      // Normalise missing arrays to empty
+      knownKeys.forEach(function(k){if(!Array.isArray(data[k]))data[k]=[];});
+      if(!Array.isArray(data.tabbyItems))data.tabbyItems=[];
       _pendingRestore=data;
       const d=new Date(data.exportedAt||0);
       const dateStr=data.exportedAt?d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'Unknown date';
@@ -3633,6 +3685,8 @@ function applyRestore(mode){
     taskHistory=data.taskHistory||[];
     shopping=data.shopping||[];
     shCollections=data.shCollections||[];
+    links=data.links||[];
+    linkGroups=data.linkGroups||[];
     lists=data.lists||[];
     goals=data.goals||[];
     notes=data.notes||[];
@@ -3640,7 +3694,7 @@ function applyRestore(mode){
     accounts=data.accounts||[];
     nwHistory=data.nwHistory||[];
     receivables=data.receivables||[];
-    saveData();saveTasks();saveTaskHistory();saveShopping();saveShCollections();saveLists();saveGoals();saveNotes();saveLoans();saveReceivables();saveAccounts();saveNetWorth();
+    saveData();saveTasks();saveTaskHistory();saveShopping();saveShCollections();saveLinks();saveLinkGroups();saveLists();saveGoals();saveNotes();saveLoans();saveReceivables();saveAccounts();saveNetWorth();
     if(data.dbLayout)  localStorage.setItem(DB_LAYOUT_KEY,  JSON.stringify(data.dbLayout));
     if(data.dbCollapsed) localStorage.setItem('lifeos_db_collapsed', JSON.stringify(data.dbCollapsed));
     if(data.navLayout) localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(data.navLayout));
@@ -3688,10 +3742,14 @@ loadProxyUrl();
     shopping=[...(data.shopping||[]),...shopping.filter(s=>!shIds.has(s.id))];
     const scIds=new Set((data.shCollections||[]).map(c=>c.id));
     shCollections=[...(data.shCollections||[]),...shCollections.filter(c=>!scIds.has(c.id))];
+    const lkIds=new Set((data.links||[]).map(l=>l.id));
+    links=[...(data.links||[]),...links.filter(l=>!lkIds.has(l.id))];
+    const lgIds=new Set((data.linkGroups||[]).map(g=>g.id));
+    linkGroups=[...(data.linkGroups||[]),...linkGroups.filter(g=>!lgIds.has(g.id))];
     // Merge taskHistory
     const thIds=new Set((data.taskHistory||[]).map(t=>t.id));
     taskHistory=[...(data.taskHistory||[]),...taskHistory.filter(t=>!thIds.has(t.id))];
-    saveData();saveTasks();saveTaskHistory();saveShopping();saveShCollections();saveLists();saveGoals();saveNotes();saveLoans();saveReceivables();saveAccounts();saveNetWorth();
+    saveData();saveTasks();saveTaskHistory();saveShopping();saveShCollections();saveLinks();saveLinkGroups();saveLists();saveGoals();saveNotes();saveLoans();saveReceivables();saveAccounts();saveNetWorth();
     // Merge layouts: only apply from backup if local layout is empty
     if(data.dbLayout  && !localStorage.getItem(DB_LAYOUT_KEY))  localStorage.setItem(DB_LAYOUT_KEY,  JSON.stringify(data.dbLayout));
     if(data.dbCollapsed && !localStorage.getItem('lifeos_db_collapsed')) localStorage.setItem('lifeos_db_collapsed', JSON.stringify(data.dbCollapsed));
@@ -4026,7 +4084,7 @@ function renderCalcPage(){
   switchCalcTab(calcTab);
 }
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeModal();closeTkModal();closeListsModal();closeSettingsModal();return;}
+  if(e.key==='Escape'){closeModal();closeTkModal();closeListsModal();closeSettingsModal();closeLinkViewer();return;}
   const active=document.activeElement;
   const typing=active&&(active.tagName==='INPUT'||active.tagName==='TEXTAREA'||active.tagName==='SELECT');
   if(!typing&&e.key==='n'){e.preventDefault();openModal();}
@@ -4037,6 +4095,8 @@ document.getElementById('modal').addEventListener('click',e=>{if(e.target===docu
 
 /* ━━ Task Manager ━━ */
 function saveTasks(){try{localStorage.setItem(KEY_TASKS,JSON.stringify(tasks));}catch(e){}asAutoSave();}
+function saveLinks(){try{localStorage.setItem(KEY_LINKS,JSON.stringify(links));}catch(e){}}
+function saveLinkGroups(){try{localStorage.setItem(KEY_LINK_GROUPS,JSON.stringify(linkGroups));}catch(e){}}
 function saveShopping(){try{localStorage.setItem(KEY_SHOPPING,JSON.stringify(shopping));}catch(e){}asAutoSave();}
 function saveShCollections(){try{localStorage.setItem(KEY_SH_LISTS,JSON.stringify(shCollections));}catch(e){}}
 function saveTaskHistory(){try{localStorage.setItem(KEY_TASK_HIST,JSON.stringify(taskHistory));}catch(e){}}
@@ -4978,6 +5038,7 @@ const DB_WIDGETS = [
   { id:'bills7',      cols:1, render: dbWidgetBills7      },
   { id:'goals',       cols:1, render: dbWidgetGoals       },
   { id:'shopping',    cols:1, render: dbWidgetShopping    },
+  { id:'links',       cols:2, render: dbWidgetLinks       },
   { id:'week',        cols:3, render: dbWidgetWeek        },
   { id:'networth',  cols:1, render: dbWidgetNetWorth    },
   { id:'aiinsight', cols:3, render: dbWidgetAIInsight   },
@@ -5429,7 +5490,7 @@ async function asWriteFile(){
   asDot('busy');
   try{
     const payload = JSON.stringify(
-      {items,payments,tabbyItems,tasks,taskHistory,shopping,shCollections,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),dbCollapsed:JSON.parse(localStorage.getItem('lifeos_db_collapsed')||'{}'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),proxyUrl:localStorage.getItem(AI_PROXY_STORE)||'',savedAt:new Date().toISOString()},
+      {items,payments,tabbyItems,tasks,taskHistory,shopping,shCollections,links,linkGroups,lists,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),dbCollapsed:JSON.parse(localStorage.getItem('lifeos_db_collapsed')||'{}'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),proxyUrl:localStorage.getItem(AI_PROXY_STORE)||'',savedAt:new Date().toISOString()},
       null, 2
     );
     const writable = await _asFileHandle.createWritable();
@@ -6483,7 +6544,7 @@ function verSnapshot(force, autoLabel){
     if(!force && versions.length && versions[0].hash === hash) return;
 
     const payload = JSON.stringify(
-      {items,payments,tabbyItems,tasks,taskHistory,shopping,shCollections,lists,goals,notes,loans,receivables,accounts,nwHistory,
+      {items,payments,tabbyItems,tasks,taskHistory,shopping,shCollections,links,linkGroups,lists,goals,notes,loans,receivables,accounts,nwHistory,
        dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),dbCollapsed:JSON.parse(localStorage.getItem('lifeos_db_collapsed')||'{}'),
        navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),
        cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),
@@ -6631,6 +6692,8 @@ function verRestore(idx){
     taskHistory = data.taskHistory || [];
     shopping    = data.shopping    || [];
     shCollections = data.shCollections || [];
+    links       = data.links       || [];
+    linkGroups  = data.linkGroups  || [];
     lists       = data.lists       || [];
     goals       = data.goals       || [];
     notes       = data.notes       || [];
@@ -6645,6 +6708,8 @@ function verRestore(idx){
     try{localStorage.setItem(KEY_TASKS,JSON.stringify(tasks));}catch(e){}
     try{localStorage.setItem(KEY_TASK_HIST,JSON.stringify(taskHistory));}catch(e){}
     try{localStorage.setItem(KEY_SHOPPING,JSON.stringify(shopping));}catch(e){}
+    try{localStorage.setItem(KEY_LINKS,JSON.stringify(links));}catch(e){}
+    try{localStorage.setItem(KEY_LINK_GROUPS,JSON.stringify(linkGroups));}catch(e){}
     try{localStorage.setItem(KEY_SH_LISTS,JSON.stringify(shCollections));}catch(e){}
     try{localStorage.setItem(KEY_LISTS,JSON.stringify(lists));}catch(e){}
     try{localStorage.setItem(KEY_GOALS,JSON.stringify(goals));}catch(e){}
@@ -7349,6 +7414,7 @@ let _navDragSrc = null;
 
 // Master nav definition — ground truth for all pages
 const NAV_ITEMS = [
+  {id:'links',    icon:'&#128279;', label:'Links',            section:'Launchpad'},
   {id:'shopping', icon:'&#128722;', label:'Shopping',         section:'Productivity'},
   {id:'tasks',    icon:'&#9635;',  label:'Tasks',            section:'Productivity'},
   {id:'goals',    icon:'&#9651;',  label:'Goals',            section:'Productivity'},
@@ -7370,13 +7436,25 @@ function navLoadLayout(){
   try{
     const saved = JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]');
     if(saved.length){
-      // Merge: keep saved order/visibility, append any new items not in saved
       const savedMap = Object.fromEntries(saved.map(s=>[s.id,s]));
-      const merged = saved
-        .filter(s=>NAV_ITEMS.find(n=>n.id===s.id))          // remove stale
-        .map(s=>({...NAV_ITEMS.find(n=>n.id===s.id), visible:s.visible}));
-      NAV_ITEMS.forEach(n=>{ if(!savedMap[n.id]) merged.push({...n,visible:true}); });
-      return merged;
+      // Remove stale saved items
+      const filtered = saved
+        .filter(s=>NAV_ITEMS.find(n=>n.id===s.id))
+        .map(s=>({...NAV_ITEMS.find(n=>n.id===s.id), visible:s.visible!==false}));
+      // Insert new items at their correct position from NAV_ITEMS
+      NAV_ITEMS.forEach((n, idx)=>{
+        if(!savedMap[n.id]){
+          // Find insertion point: after the last saved item that appears before this in NAV_ITEMS
+          let insertAt = 0;
+          for(let i=idx-1;i>=0;i--){
+            const prevId = NAV_ITEMS[i].id;
+            const pos = filtered.findIndex(f=>f.id===prevId);
+            if(pos>=0){ insertAt=pos+1; break; }
+          }
+          filtered.splice(insertAt,0,{...n,visible:true});
+        }
+      });
+      return filtered;
     }
   }catch(e){}
   return NAV_ITEMS.map(n=>({...n,visible:true}));
@@ -7907,6 +7985,15 @@ function deleteRecv(id){
   toast(`Removed: ${r.name}`, true);
 }
 
+function toggleRecvReceipt(id){
+  const r=receivables.find(x=>x.id===id);
+  if(!r)return;
+  r.receiptSubmitted=!r.receiptSubmitted;
+  saveRecv();
+  renderReceivables();
+  toast(r.receiptSubmitted?'&#10003; Receipt marked as submitted':'Receipt unmarked');
+}
+
 function renderReceivables(){
   const pending   = receivables.filter(r=>!r.collected);
   const collected = receivables.filter(r=>r.collected);
@@ -7994,7 +8081,13 @@ function renderReceivables(){
           <div class="emi-kpi-sub">${r.notes?esc(r.notes.slice(0,40))+(r.notes.length>40?'…':''):''}</div>
         </div>
       </div>
-      ${!r.collected&&r.dueDate?`<div style="padding:0 16px 12px">${dueLbl}</div>`:''}
+      <div style="padding:8px 16px 12px;display:flex;align-items:center;gap:10px;border-top:0.5px solid var(--border);margin-top:4px">
+        <button onclick="toggleRecvReceipt('${r.id}')" style="display:flex;align-items:center;gap:6px;background:${r.receiptSubmitted?'var(--positive-dim)':'var(--surface3)'};border:0.5px solid ${r.receiptSubmitted?'var(--positive-border)':'var(--border2)'};border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px;font-weight:500;color:${r.receiptSubmitted?'var(--positive)':'var(--text3)'};font-family:var(--font);transition:all .15s">
+          <span style="width:14px;height:14px;border-radius:3px;border:1.5px solid ${r.receiptSubmitted?'var(--positive)':'var(--border3)'};display:flex;align-items:center;justify-content:center;font-size:9px;background:${r.receiptSubmitted?'var(--positive)':'transparent'};color:#fff">${r.receiptSubmitted?'&#10003;':''}</span>
+          Receipt submitted
+        </button>
+        ${!r.collected&&r.dueDate?dueLbl:''}
+      </div>
     </div>`;
   }).join('') + '</div>';
 }
@@ -8395,6 +8488,215 @@ function renderShopping(){
   }).join('');
 }
 
+function dbWidgetLinks(el){
+  dbCard(el,{icon:'🔗',title:'Links',headColor:'rgba(74,142,204,.08)'});
+  var body=el.querySelector('.db-widget-body');
+  if(!body)return;
+  if(!links.length){
+    body.innerHTML='<div style="color:var(--text3);font-size:12px;padding:8px 0">No links yet.</div>';
+    return;
+  }
+  // Show top 8 most-clicked, then most recent
+  var sorted=[...links].sort(function(a,b){return (b.clicks||0)-(a.clicks||0)||(b.addedAt||0)-(a.addedAt||0);}).slice(0,8);
+  body.style.padding='10px 12px';
+  body.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px">'
+    +sorted.map(function(l){
+      return '<div onclick="openLink(\''+l.id+'\')" style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border-radius:9px;background:var(--surface2);border:0.5px solid var(--border);cursor:pointer;transition:all .15s;border-top:2px solid '+l.color+'" onmouseover="this.style.background=\'var(--surface3)\'" onmouseout="this.style.background=\'var(--surface2)\'">'
+        +'<div style="font-size:20px">'+esc(l.emoji||'🔗')+'</div>'
+        +'<div style="font-size:11px;font-weight:600;color:var(--text);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%">'+esc(l.title)+'</div>'
+      +'</div>';
+    }).join('')
+    +'</div>';
+}
+
+const LK_COLORS = ['#4A8ECC','#1D9E75','#C98A1A','#C46A8A','#7A74D4','#C95050','#C97840','#5DCAA5','#888880'];
+let lkEditId = null, lgEditId = null, lkSelColor = LK_COLORS[0];
+
+function openLinkModal(id){
+  lkEditId = id||null;
+  const l = id ? links.find(x=>x.id===id) : null;
+  document.getElementById('link-modal-title').textContent = l ? 'Edit link' : 'Add link';
+  document.getElementById('lk-emoji').value = l ? (l.emoji||'') : '';
+  document.getElementById('lk-title').value = l ? (l.title||'') : '';
+  document.getElementById('lk-url').value   = l ? (l.url||'')   : '';
+  document.getElementById('lk-desc').value  = l ? (l.desc||'')  : '';
+  lkSelColor = l ? (l.color||LK_COLORS[0]) : LK_COLORS[0];
+  renderLkColorPicker();
+  const grpSel = document.getElementById('lk-group');
+  if(grpSel){
+    grpSel.innerHTML = '<option value="">-- No group --</option>'
+      + linkGroups.map(function(g){return '<option value="'+g.id+'"'+(l&&l.groupId===g.id?' selected':'')+'>'+esc(g.name)+'</option>';}).join('');
+    if(l) grpSel.value = l.groupId||'';
+  }
+  document.getElementById('link-modal').style.display='flex';
+  setTimeout(function(){document.getElementById(l?'lk-title':'lk-url').focus();},50);
+}
+
+function closeLinkModal(){document.getElementById('link-modal').style.display='none';lkEditId=null;}
+
+function renderLkColorPicker(){
+  var el=document.getElementById('lk-color-picker');
+  if(!el)return;
+  el.innerHTML=LK_COLORS.map(function(c){
+    return '<div data-lkc="'+c+'" style="width:20px;height:20px;border-radius:50%;background:'+c+';cursor:pointer;border:2px solid '+(c===lkSelColor?'var(--text)':'transparent')+';transition:border .15s"></div>';
+  }).join('');
+  el.onclick=function(e){var d=e.target.closest('[data-lkc]');if(d){lkSelColor=d.dataset.lkc;renderLkColorPicker();}};
+}
+
+function saveLinkItem(){
+  var title=document.getElementById('lk-title').value.trim();
+  var url=document.getElementById('lk-url').value.trim();
+  if(!title||!url){toast('Title and URL are required');return;}
+  if(!/^https?:\/\//i.test(url)) url='https://'+url;
+  var obj={
+    id:lkEditId||String(Date.now()),
+    emoji:document.getElementById('lk-emoji').value.trim()||'🔗',
+    title,url,
+    desc:document.getElementById('lk-desc').value.trim(),
+    groupId:document.getElementById('lk-group').value||null,
+    color:lkSelColor,
+    clicks:lkEditId?(links.find(x=>x.id===lkEditId)||{clicks:0}).clicks:0,
+    addedAt:lkEditId?(links.find(x=>x.id===lkEditId)||{addedAt:Date.now()}).addedAt:Date.now(),
+  };
+  if(lkEditId){var i=links.findIndex(x=>x.id===lkEditId);if(i>-1)links[i]=obj;}
+  else links.unshift(obj);
+  saveLinks();closeLinkModal();renderLinks();
+  toast(lkEditId?'Link updated':'Link added: '+title);
+}
+
+function deleteLinkItem(id){
+  links=links.filter(x=>x.id!==id);
+  saveLinks();renderLinks();toast('Link removed');
+}
+
+function openLink(id){
+  var l=links.find(x=>x.id===id);
+  if(!l)return;
+  l.clicks=(l.clicks||0)+1;
+  saveLinks();
+  renderLinks(); // update click count on card
+  // Open in iframe viewer
+  document.getElementById('lv-emoji').textContent=l.emoji||'🔗';
+  document.getElementById('lv-title').textContent=l.title;
+  document.getElementById('lv-url').textContent=l.url;
+  document.getElementById('lv-open-tab').href=l.url;
+  document.getElementById('lv-iframe').src=l.url;
+  document.getElementById('link-viewer').style.display='flex';
+}
+
+function closeLinkViewer(){
+  document.getElementById('link-viewer').style.display='none';
+  document.getElementById('lv-iframe').src=''; // stop loading
+}
+
+/* ── Link Groups ── */
+function openLinkGroupModal(id){
+  lgEditId=id||null;
+  var g=id?linkGroups.find(x=>x.id===id):null;
+  document.getElementById('link-group-modal-title').textContent=g?'Edit group':'New group';
+  document.getElementById('lg-name').value=g?(g.name||''):'';
+  document.getElementById('lg-desc').value=g?(g.desc||''):'';
+  document.getElementById('link-group-modal').style.display='flex';
+  setTimeout(function(){document.getElementById('lg-name').focus();},50);
+}
+
+function closeLinkGroupModal(){document.getElementById('link-group-modal').style.display='none';lgEditId=null;}
+
+function saveLinkGroup(){
+  var name=document.getElementById('lg-name').value.trim();
+  if(!name){document.getElementById('lg-name').focus();return;}
+  var obj={
+    id:lgEditId||String(Date.now()),
+    name,
+    desc:document.getElementById('lg-desc').value.trim(),
+    addedAt:lgEditId?(linkGroups.find(x=>x.id===lgEditId)||{addedAt:Date.now()}).addedAt:Date.now(),
+  };
+  if(lgEditId){var i=linkGroups.findIndex(x=>x.id===lgEditId);if(i>-1)linkGroups[i]=obj;}
+  else linkGroups.push(obj);
+  saveLinkGroups();closeLinkGroupModal();renderLinks();
+  toast(lgEditId?'Group updated':'Group created: '+name);
+}
+
+function deleteLinkGroup(id){
+  if(!confirm('Delete this group? Links in it will become ungrouped.'))return;
+  linkGroups=linkGroups.filter(x=>x.id!==id);
+  links.forEach(function(l){if(l.groupId===id)l.groupId=null;});
+  saveLinkGroups();saveLinks();renderLinks();toast('Group deleted');
+}
+
+/* ── Render ── */
+function renderLinks(){
+  var q=(document.getElementById('links-search')||{value:''}).value.toLowerCase();
+  var el=document.getElementById('links-grid');
+  if(!el)return;
+
+  // Update sub
+  var sub=document.getElementById('links-sub');
+  if(sub) sub.textContent=links.length+' link'+(links.length!==1?'s':'')+' across '+(linkGroups.length||0)+' groups';
+
+  if(!links.length){
+    el.innerHTML='<div class="empty" style="text-align:center">No links yet.<br><span class="kbd-hint">Add links to build your quick-access dashboard</span></div>';
+    return;
+  }
+
+  var vis=links.filter(function(l){
+    if(!q)return true;
+    return (l.title||'').toLowerCase().includes(q)||(l.desc||'').toLowerCase().includes(q)||(l.url||'').toLowerCase().includes(q);
+  });
+
+  function cardHTML(l){
+    var domain='';
+    try{domain=new URL(l.url).hostname.replace(/^www\./,'');}catch(e){}
+    return '<div class="link-card" id="lk-'+l.id+'" onclick="openLink(\''+l.id+'\')" style="border-top:2px solid '+l.color+'">'
+      +'<div class="link-card-actions">'
+        +'<button class="icon-btn" onclick="event.stopPropagation();openLinkModal(\''+l.id+'\')" title="Edit" style="height:22px;padding:0 6px;font-size:11px">&#9998;</button>'
+        +'<button class="icon-btn del" onclick="event.stopPropagation();deleteLinkItem(\''+l.id+'\')" title="Remove" style="height:22px;padding:0 6px;font-size:11px">&#10005;</button>'
+      +'</div>'
+      +'<div class="link-card-icon">'+esc(l.emoji||'🔗')+'</div>'
+      +'<div class="link-card-title">'+esc(l.title)+'</div>'
+      +(l.desc?'<div class="link-card-desc">'+esc(l.desc)+'</div>':'')
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto">'
+        +'<div class="link-card-url">'+domain+'</div>'
+        +(l.clicks>0?'<span class="link-card-badge">'+l.clicks+'x</span>':'')
+      +'</div>'
+    +'</div>';
+  }
+
+  var out='';
+
+  // Grouped
+  if(linkGroups.length){
+    linkGroups.forEach(function(g){
+      var gLinks=vis.filter(function(l){return l.groupId===g.id;});
+      if(!gLinks.length&&q)return;
+      out+='<div class="links-group">'
+        +'<div class="links-group-header">'
+          +'<div class="links-group-name">'+esc(g.name)+'</div>'
+          +(g.desc?'<div class="links-group-desc">'+esc(g.desc)+'</div>':'')
+          +'<div style="display:flex;gap:4px">'
+            +'<button class="icon-btn" onclick="openLinkGroupModal(\''+g.id+'\')" title="Edit group" style="height:22px;padding:0 6px;font-size:11px">&#9998;</button>'
+            +'<button class="icon-btn del" onclick="deleteLinkGroup(\''+g.id+'\')" title="Delete group" style="height:22px;padding:0 6px;font-size:11px">&#10005;</button>'
+          +'</div>'
+        +'</div>'
+        +(gLinks.length?'<div class="links-grid-inner">'+gLinks.map(cardHTML).join('')+'</div>':'<div style="color:var(--text3);font-size:12px;padding:4px 0">No links in this group yet</div>')
+        +'</div>';
+    });
+  }
+
+  // Ungrouped
+  var ungrouped=vis.filter(function(l){return !l.groupId;});
+  if(ungrouped.length){
+    out+='<div class="links-group">'
+      +(linkGroups.length?'<div class="links-group-header"><div class="links-group-name" style="color:var(--text3)">Other</div></div>':'')
+      +'<div class="links-grid-inner">'+ungrouped.map(cardHTML).join('')+'</div>'
+    +'</div>';
+  }
+
+  el.innerHTML=out||'<div class="empty">No links match your search</div>';
+}
+
+/* ── Dashboard widget ── */
+
 /* ── App boot ── */
 loadData();
 asRestoreStatus();
@@ -8611,5 +8913,66 @@ if(_vn) _vn.textContent = APP_VERSION;
     </div>
   </div>
 </div>
+<!-- Add Link modal -->
+<div class="modal-backdrop" id="link-modal" style="display:none" onclick="if(event.target===this)closeLinkModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
+    <div class="modal-header">
+      <div class="modal-title" id="link-modal-title">Add link</div>
+      <button class="modal-close-btn" onclick="closeLinkModal()">&#10005;</button>
+    </div>
+    <div class="fields-row">
+      <div class="field" style="flex:0 0 64px"><label>Icon</label><input id="lk-emoji" type="text" placeholder="&#127760;" style="font-size:22px;text-align:center;padding:4px" maxlength="4"></div>
+      <div class="field" style="flex:1"><label>Title *</label><input id="lk-title" type="text" placeholder="e.g. Gmail, GitHub, Jira..." autocomplete="off"></div>
+    </div>
+    <div class="field"><label>URL *</label><input id="lk-url" type="url" placeholder="https://..."></div>
+    <div class="field"><label>Description (optional)</label><input id="lk-desc" type="text" placeholder="What is this link for?"></div>
+    <div class="fields-row">
+      <div class="field"><label>Group</label>
+        <select id="lk-group"><option value="">-- No group --</option></select>
+      </div>
+      <div class="field"><label>Colour accent</label>
+        <div id="lk-color-picker" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeLinkModal()">Cancel</button>
+      <button class="btn primary" onclick="saveLinkItem()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Link Group modal -->
+<div class="modal-backdrop" id="link-group-modal" style="display:none" onclick="if(event.target===this)closeLinkGroupModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title" id="link-group-modal-title">New group</div>
+      <button class="modal-close-btn" onclick="closeLinkGroupModal()">&#10005;</button>
+    </div>
+    <div class="field"><label>Group name *</label><input id="lg-name" type="text" placeholder="e.g. Work, Personal, Dev tools..." autocomplete="off"></div>
+    <div class="field"><label>Description (optional)</label><input id="lg-desc" type="text" placeholder="What's in this group?"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeLinkGroupModal()">Cancel</button>
+      <button class="btn primary" onclick="saveLinkGroup()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Link viewer modal -->
+<div class="link-viewer-backdrop" id="link-viewer" style="display:none" onclick="if(event.target===this)closeLinkViewer()">
+  <div class="link-viewer-modal" onclick="event.stopPropagation()">
+    <div class="link-viewer-bar">
+      <span class="link-viewer-emoji" id="lv-emoji">🔗</span>
+      <span class="link-viewer-title" id="lv-title"></span>
+      <span class="link-viewer-url" id="lv-url"></span>
+      <a id="lv-open-tab" href="#" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent);white-space:nowrap;text-decoration:none;padding:4px 8px;border:0.5px solid var(--accent-border);border-radius:5px;background:var(--accent-dim)">&#8599; Open in tab</a>
+      <button class="modal-close-btn" onclick="closeLinkViewer()">&#10005;</button>
+    </div>
+    <iframe class="link-viewer-iframe" id="lv-iframe" src="" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy"></iframe>
+  </div>
+</div>
+
 </body>
 </html>
+/* ═══════════════════════════════════════════════════════
+   Links Dashboard
+   ═══════════════════════════════════════════════════════ */

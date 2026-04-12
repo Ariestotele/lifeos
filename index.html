@@ -8522,6 +8522,7 @@ function renderShopping(){
           +'<span class="sh-tree-name">'+esc(c.name)+'</span>'
           +'<span class="sh-tree-meta">'+cItems.length+' item'+(cItems.length!==1?'s':'')+(cToBuy?' &middot; <b style=\'color:var(--text)\'>'+cToBuy+' to buy</b>':'')+(cVal?' &middot; AED '+fmt(cVal):'')+'</span>'
           +'<div style="display:flex;gap:4px;margin-left:auto" onclick="event.stopPropagation()">'
+            +(c.url?'<a href="'+c.url+'" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Open link" style="height:24px;padding:0 10px;border-radius:6px;border:0.5px solid var(--accent-border);background:var(--accent-dim);color:var(--accent);font-size:11px;font-weight:500;display:inline-flex;align-items:center;gap:4px;text-decoration:none">&#128279; Link</a>':'')  
             +'<button class="icon-btn" onclick="openShopModal();setTimeout(function(){document.getElementById(\'sh-item-coll\').value=\''+c.id+'\';},50)" title="Add item here" style="height:24px;padding:0 8px;font-size:11px">+ Add</button>'
             +'<button class="icon-btn" onclick="openShCollModal(\''+c.id+'\')" title="Edit collection" style="height:24px;padding:0 6px">&#9998;</button>'
           +'</div>'

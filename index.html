@@ -884,6 +884,25 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 .link-card:hover .link-card-actions{display:flex}
 .link-card-badge{font-size:9px;color:var(--text3);font-family:var(--mono);padding:1px 5px;background:var(--surface3);border-radius:3px}
 @media(max-width:640px){.links-grid-inner{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}}
+/* ── Shopping tree view ── */
+.sh-tree-group{margin-bottom:1.5rem}
+.sh-tree-header{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface2);border:0.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none;margin-bottom:8px}
+.sh-tree-header:hover{border-color:var(--border2)}
+.sh-tree-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.sh-tree-name{font-size:13px;font-weight:600;color:var(--text);flex:1}
+.sh-tree-meta{font-size:11px;color:var(--text3)}
+.sh-tree-chevron{font-size:10px;color:var(--text3);transition:transform .2s;flex-shrink:0}
+.sh-tree-header.open .sh-tree-chevron{transform:rotate(90deg)}
+.sh-tree-body{padding-left:20px;border-left:2px solid var(--border);margin-left:14px;margin-bottom:8px}
+.sh-tree-body.collapsed{display:none}
+/* Floating collections panel */
+.sh-coll-panel{position:fixed;bottom:24px;right:24px;z-index:500;background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius-lg);box-shadow:0 8px 32px rgba(0,0,0,.5);min-width:220px;max-width:280px;max-height:420px;overflow-y:auto;display:none}
+.sh-coll-panel.open{display:block}
+.sh-coll-panel-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:0.5px solid var(--border);font-size:12px;font-weight:600;color:var(--text);position:sticky;top:0;background:var(--surface2)}
+.sh-coll-panel-item{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;transition:background .12s;font-size:12px;color:var(--text2)}
+.sh-coll-panel-item:hover{background:var(--surface2);color:var(--text)}
+.sh-coll-fab{position:fixed;bottom:24px;right:24px;z-index:501;width:44px;height:44px;border-radius:50%;border:0.5px solid var(--border2);background:var(--surface2);color:var(--text2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.4);transition:all .18s}
+.sh-coll-fab:hover{background:var(--surface3);color:var(--text)}
 /* ── Shopping collections ── */
 .sh-coll-btn{width:100%;text-align:left;padding:7px 10px;border-radius:7px;border:0.5px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);margin-bottom:4px;display:flex;align-items:center;gap:7px;transition:all .15s}
 .sh-coll-btn:hover{background:var(--surface3);color:var(--text)}
@@ -2045,20 +2064,8 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
         </div>
       </div>
       <div id="shop-metrics" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:1.25rem"></div>
-      <!-- Collections + items layout -->
-      <div style="display:flex;gap:16px;align-items:flex-start">
-        <!-- Collections sidebar -->
-        <div id="sh-coll-sidebar" style="width:200px;flex-shrink:0;display:none">
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:8px">Collections</div>
-          <div id="sh-coll-list"></div>
-          <button onclick="shCollView='all';renderShopping()" id="sh-coll-all" style="width:100%;text-align:left;padding:7px 10px;border-radius:7px;border:none;background:var(--accent-dim);color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);margin-bottom:4px">&#9634; All items</button>
-        </div>
-        <!-- Main content -->
-        <div style="flex:1;min-width:0">
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem" id="shop-filters"></div>
-          <div id="shop-list" class="shop-grid"></div>
-        </div>
-      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem" id="shop-filters"></div>
+      <div id="shop-list"></div>
     </div>
 
     <div id="page-links" style="display:none">
@@ -2226,7 +2233,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.3';
+const APP_VERSION = '5.5';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_TASKS='subtracker_tasks', KEY_TASK_HIST='subtracker_task_history', KEY_SHOPPING='lifeos_shopping', KEY_SH_LISTS='lifeos_sh_lists', KEY_LISTS='subtracker_lists', KEY_GOALS='subtracker_goals', KEY_NOTES='subtracker_notes', KEY_LOANS='subtracker_loans', KEY_ACCOUNTS='subtracker_accounts', KEY_NW='subtracker_networth', KEY_RECV='subtracker_receivables';
@@ -8522,6 +8529,75 @@ function dbWidgetLinks(el){
 const LK_COLORS = ['#4A8ECC','#1D9E75','#C98A1A','#C46A8A','#7A74D4','#C95050','#C97840','#5DCAA5','#888880'];
 let lkEditId = null, lgEditId = null, lkSelColor = LK_COLORS[0];
 
+const LK_FILE_EMOJI = {'pdf':'📄','doc':'📝','docx':'📝','xls':'📊','xlsx':'📊','ppt':'📋','pptx':'📋','txt':'📃','csv':'📊','jpg':'🖼','jpeg':'🖼','png':'🖼','gif':'🖼','svg':'🎨','mp4':'🎬','mov':'🎬','mp3':'🎵','wav':'🎵','zip':'📦','rar':'📦','exe':'⚙️','dmg':'💿','html':'🌐','js':'⚡','py':'🐍','sh':'🖥'};
+
+function lkGetFileEmoji(name){
+  var ext=(name.split('.').pop()||'').toLowerCase();
+  return LK_FILE_EMOJI[ext]||'📄';
+}
+
+function lkGetFileColor(name){
+  var ext=(name.split('.').pop()||'').toLowerCase();
+  var map={pdf:'#E05252',doc:'#4A8ECC',docx:'#4A8ECC',xls:'#1D9E75',xlsx:'#1D9E75',
+           ppt:'#C97840',pptx:'#C97840',jpg:'#C46A8A',jpeg:'#C46A8A',png:'#C46A8A',
+           mp4:'#9B7FE8',mov:'#9B7FE8',mp3:'#C98A1A',zip:'#888880',py:'#4A8ECC'};
+  return map[ext]||LK_COLORS[0];
+}
+
+function lkApplyFile(file){
+  if(!file)return;
+  var name=file.name;
+  var noExt=name.includes('.')?name.slice(0,name.lastIndexOf('.')):name;
+  // Auto-fill title if empty
+  if(!document.getElementById('lk-title').value.trim()){
+    document.getElementById('lk-title').value=noExt;
+  }
+  // Auto-fill emoji
+  document.getElementById('lk-emoji').value=lkGetFileEmoji(name);
+  // Set colour
+  lkSelColor=lkGetFileColor(name);
+  renderLkColorPicker();
+  // Try to set URL — only works for file:// protocol pages
+  var hint=document.getElementById('lk-path-hint');
+  if(file.path){
+    // Electron or some browsers expose file.path
+    document.getElementById('lk-url').value='file:///'+file.path.replace(/\\/g,'/');
+  } else {
+    // Show hint to paste path manually
+    if(hint)hint.style.display='block';
+  }
+  // Highlight drop zone as done
+  var dz=document.getElementById('lk-drop-zone');
+  if(dz){
+    dz.style.borderColor='var(--positive-border)';
+    dz.style.background='var(--positive-dim)';
+    dz.innerHTML='<div style="font-size:20px;margin-bottom:4px">'+lkGetFileEmoji(name)+'</div>'
+      +'<div style="font-size:12px;color:var(--positive);font-weight:500">'+esc(name)+'</div>'
+      +'<div style="font-size:10px;color:var(--text3);margin-top:3px">Click to choose a different file</div>';
+  }
+}
+
+function lkFileSelected(input){
+  if(input.files&&input.files[0]) lkApplyFile(input.files[0]);
+}
+
+function lkDragOver(e){
+  e.preventDefault();
+  var dz=document.getElementById('lk-drop-zone');
+  if(dz){dz.style.borderColor='var(--accent-border)';dz.style.background='var(--accent-dim)';}
+}
+
+function lkDragLeave(e){
+  var dz=document.getElementById('lk-drop-zone');
+  if(dz){dz.style.borderColor='var(--border2)';dz.style.background='';}
+}
+
+function lkDrop(e){
+  e.preventDefault();
+  var files=e.dataTransfer.files;
+  if(files&&files[0])lkApplyFile(files[0]);
+}
+
 function openLinkModal(id){
   lkEditId = id||null;
   const l = id ? links.find(x=>x.id===id) : null;
@@ -8542,7 +8618,22 @@ function openLinkModal(id){
   setTimeout(function(){document.getElementById(l?'lk-title':'lk-url').focus();},50);
 }
 
-function closeLinkModal(){document.getElementById('link-modal').style.display='none';lkEditId=null;}
+function closeLinkModal(){
+  document.getElementById('link-modal').style.display='none';
+  lkEditId=null;
+  // Reset drop zone
+  var dz=document.getElementById('lk-drop-zone');
+  if(dz){
+    dz.style.borderColor='';dz.style.background='';
+    dz.innerHTML='<div style="font-size:20px;margin-bottom:4px">&#128193;</div>'
+      +'<div>Drag a file here <span style="color:var(--text3)">or</span> <span style="color:var(--accent);cursor:pointer">click to browse</span></div>'
+      +'<div style="font-size:10px;color:var(--text3);margin-top:3px">Auto-fills name and icon — paste the file path below</div>';
+  }
+  var hint=document.getElementById('lk-path-hint');
+  if(hint)hint.style.display='none';
+  var fi=document.getElementById('lk-file-input');
+  if(fi)fi.value='';
+}
 
 function renderLkColorPicker(){
   var el=document.getElementById('lk-color-picker');
@@ -8584,13 +8675,20 @@ function openLink(id){
   if(!l)return;
   l.clicks=(l.clicks||0)+1;
   saveLinks();
-  renderLinks(); // update click count on card
-  // Open in iframe viewer
+  renderLinks();
+  var url=l.url||'';
+  // Local files, app:// or non-http schemes — open directly in browser tab
+  var isLocal = /^file:\/\/\//i.test(url) || /^[a-z]:\\/i.test(url) || !/^https?:\/\//i.test(url);
+  if(isLocal){
+    window.open(url,'_blank');
+    return;
+  }
+  // Web URLs — open in iframe viewer
   document.getElementById('lv-emoji').textContent=l.emoji||'🔗';
   document.getElementById('lv-title').textContent=l.title;
-  document.getElementById('lv-url').textContent=l.url;
-  document.getElementById('lv-open-tab').href=l.url;
-  document.getElementById('lv-iframe').src=l.url;
+  document.getElementById('lv-url').textContent=url;
+  document.getElementById('lv-open-tab').href=url;
+  document.getElementById('lv-iframe').src=url;
   document.getElementById('link-viewer').style.display='flex';
 }
 
@@ -8930,11 +9028,25 @@ if(_vn) _vn.textContent = APP_VERSION;
       <div class="modal-title" id="link-modal-title">Add link</div>
       <button class="modal-close-btn" onclick="closeLinkModal()">&#10005;</button>
     </div>
+    <!-- Drag & drop zone -->
+    <div id="lk-drop-zone" style="border:1.5px dashed var(--border2);border-radius:10px;padding:14px;text-align:center;margin-bottom:14px;transition:all .18s;cursor:pointer;font-size:12px;color:var(--text3)" ondragover="lkDragOver(event)" ondragleave="lkDragLeave(event)" ondrop="lkDrop(event)" onclick="document.getElementById('lk-file-input').click()">
+      <div style="font-size:20px;margin-bottom:4px">&#128193;</div>
+      <div>Drag a file here <span style="color:var(--text3)">or</span> <span style="color:var(--accent);cursor:pointer">click to browse</span></div>
+      <div style="font-size:10px;color:var(--text3);margin-top:3px">Auto-fills name and icon — paste the file path below</div>
+    </div>
+    <input type="file" id="lk-file-input" style="display:none" onchange="lkFileSelected(this)">
     <div class="fields-row">
       <div class="field" style="flex:0 0 64px"><label>Icon</label><input id="lk-emoji" type="text" placeholder="&#127760;" style="font-size:22px;text-align:center;padding:4px" maxlength="4"></div>
       <div class="field" style="flex:1"><label>Title *</label><input id="lk-title" type="text" placeholder="e.g. Gmail, GitHub, Jira..." autocomplete="off"></div>
     </div>
-    <div class="field"><label>URL *</label><input id="lk-url" type="url" placeholder="https://..."></div>
+    <div class="field">
+      <label>URL or file path *</label>
+      <div style="display:flex;gap:7px">
+        <input id="lk-url" type="text" placeholder="https://... or file:///C:/path/to/file" style="flex:1">
+        <button onclick="document.getElementById('lk-file-input').click()" class="settings-save-btn" title="Browse for file" style="white-space:nowrap">&#128193; Browse</button>
+      </div>
+      <div id="lk-path-hint" style="font-size:10px;color:var(--amber);margin-top:4px;display:none">&#9432; Browser security hides the full path — paste it manually above if needed</div>
+    </div>
     <div class="field"><label>Description (optional)</label><input id="lk-desc" type="text" placeholder="What is this link for?"></div>
     <div class="fields-row">
       <div class="field"><label>Group</label>
@@ -9004,8 +9116,15 @@ if(_vn) _vn.textContent = APP_VERSION;
   </div>
 </div>
 
+<!-- Floating collections panel -->
+<button class="sh-coll-fab" id="sh-coll-fab" onclick="toggleShCollPanel()" title="Collections" style="display:none">&#128193;</button>
+<div class="sh-coll-panel" id="sh-coll-panel">
+  <div class="sh-coll-panel-head">
+    <span>&#128193; Collections</span>
+    <button class="modal-close-btn" onclick="toggleShCollPanel()">&#10005;</button>
+  </div>
+  <div id="sh-coll-panel-items"></div>
+</div>
+
 </body>
 </html>
-/* ═══════════════════════════════════════════════════════
-   Links Dashboard
-   ═══════════════════════════════════════════════════════ */

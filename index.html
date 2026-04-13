@@ -801,6 +801,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 .tk-basement-toggle.open .tk-basement-chevron{transform:rotate(180deg)}
 .tk-basement-list{display:none;flex-direction:column;gap:7px;margin-top:6px}
 .tk-basement-list.open{display:flex}
+.tk-tree-group{margin-bottom:1rem}.tk-tree-hdr{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface2);border:0.5px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s;user-select:none;margin-bottom:6px}.tk-tree-hdr:hover{border-color:var(--border2)}.tk-tree-hdr.open .tk-tree-chevron{transform:rotate(90deg)}.tk-tree-chevron{font-size:10px;color:var(--text3);transition:transform .2s;flex-shrink:0}.tk-tree-hdr-name{font-size:12px;font-weight:600;color:var(--text);flex:1}.tk-tree-hdr-meta{font-size:11px;color:var(--text3)}.tk-tree-body{padding-left:16px;border-left:2px solid var(--border);margin-left:10px;margin-bottom:6px;display:flex;flex-direction:column;gap:7px}.tk-tree-body.collapsed{display:none}
 .tk-pri-bar{width:4px;border-radius:0;flex-shrink:0;align-self:stretch}
 .tk-item-inner{display:contents}
 .tk-check{
@@ -2233,7 +2234,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.5';
+const APP_VERSION = '5.6';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_TASKS='subtracker_tasks', KEY_TASK_HIST='subtracker_task_history', KEY_SHOPPING='lifeos_shopping', KEY_SH_LISTS='lifeos_sh_lists', KEY_LISTS='subtracker_lists', KEY_GOALS='subtracker_goals', KEY_NOTES='subtracker_notes', KEY_LOANS='subtracker_loans', KEY_ACCOUNTS='subtracker_accounts', KEY_NW='subtracker_networth', KEY_RECV='subtracker_receivables';
@@ -2279,6 +2280,144 @@ function saveLoans(){try{localStorage.setItem(KEY_LOANS,JSON.stringify(loans));}
 function saveReceivables(){try{localStorage.setItem(KEY_RECV,JSON.stringify(receivables));}catch(e){}asAutoSave();}
 function saveAccounts(){try{localStorage.setItem(KEY_ACCOUNTS,JSON.stringify(accounts));}catch(e){}asAutoSave();}
 function saveNetWorth(){try{localStorage.setItem(KEY_NW,JSON.stringify(nwHistory));}catch(e){}}
+
+
+
+function tkToggleTree(key){
+  var stateKey='tk-tree-'+tkWorkspace+'-'+key;
+  var isOpen=localStorage.getItem(stateKey)!=='0';
+  localStorage.setItem(stateKey,isOpen?'0':'1');
+  var body=document.getElementById('tk-tree-body-'+key);
+  var header=document.getElementById('tk-tree-hdr-'+key);
+  if(body)body.classList.toggle('collapsed',isOpen);
+  if(header)header.classList.toggle('open',!isOpen);
+}
+
+
+function tkAddToList(listId){
+  openTaskModal();
+  setTimeout(function(){
+    var sel=document.getElementById('tk-list-sel');
+    if(sel)sel.value=listId;
+  },80);
+}
+
+function tkAddWithTag(tagName){
+  openTaskModal();
+  setTimeout(function(){
+    var inp=document.getElementById('tk-tags');
+    if(inp&&!inp.value.trim())inp.value=tagName;
+    else if(inp&&inp.value.indexOf(tagName)<0)inp.value=(inp.value?inp.value+', ':'')+tagName;
+  },80);
+}
+
+function tkRenameTag(oldTag){
+  // Inline rename -- show a small input overlay on the tag header
+  var grpEl=document.getElementById('tk-grp-tag:'+oldTag);
+  if(!grpEl)return;
+  var nameEl=grpEl.querySelector('.sh-tree-name');
+  if(!nameEl)return;
+
+  // Build inline editor replacing the name span temporarily
+  var prevText=nameEl.textContent;
+  var inp=document.createElement('input');
+  inp.value=oldTag;
+  inp.style.cssText='background:var(--surface3);border:0.5px solid var(--accent-border);border-radius:5px;'
+    +'color:var(--text);font-size:12px;font-weight:600;font-family:var(--font);padding:0 6px;'
+    +'height:24px;min-width:80px;max-width:140px;outline:none;flex-shrink:0';
+  inp.onclick=function(e){e.stopPropagation();};
+
+  // Confirm button
+  var okBtn=document.createElement('button');
+  okBtn.innerHTML='&#10003;';
+  okBtn.style.cssText='height:24px;padding:0 8px;border-radius:5px;border:none;'
+    +'background:var(--accent);color:#000;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;margin-left:4px';
+  okBtn.onclick=function(e){e.stopPropagation();applyTagRename(oldTag,inp.value.trim().toLowerCase().replace(/[^a-z0-9\-_]/g,''));};
+
+  // Cancel
+  var cancelBtn=document.createElement('button');
+  cancelBtn.innerHTML='&#10005;';
+  cancelBtn.style.cssText='height:24px;padding:0 6px;border-radius:5px;border:0.5px solid var(--border2);'
+    +'background:transparent;color:var(--text3);font-size:11px;cursor:pointer;flex-shrink:0;margin-left:3px';
+  cancelBtn.onclick=function(e){e.stopPropagation();renderTasks();};
+
+  // Replace name with editor row
+  var wrap=document.createElement('div');
+  wrap.style.cssText='display:flex;align-items:center;gap:0;flex:1';
+  wrap.appendChild(inp);
+  wrap.appendChild(okBtn);
+  wrap.appendChild(cancelBtn);
+  nameEl.replaceWith(wrap);
+  inp.focus();inp.select();
+
+  inp.onkeydown=function(e){
+    if(e.key==='Enter'){e.preventDefault();applyTagRename(oldTag,inp.value.trim().toLowerCase().replace(/[^a-z0-9\-_]/g,''));}
+    if(e.key==='Escape'){e.preventDefault();renderTasks();}
+  };
+}
+
+function applyTagRename(oldTag, newTag){
+  if(!newTag||newTag===oldTag){renderTasks();return;}
+  var changed=0;
+  tasks.forEach(function(t){
+    if(!t.tags)return;
+    var i=t.tags.indexOf(oldTag);
+    if(i>-1){t.tags[i]=newTag;changed++;}
+  });
+  if(changed){
+    saveTasks();
+    toast('Tag renamed: #'+oldTag+' -> #'+newTag+' ('+changed+' task'+(changed!==1?'s':'')+')');
+  }
+  renderTasks();
+}
+
+function tkGrpToggle(key){
+  var stKey='tk-grp-'+tkWorkspace+'-'+key;
+  var isOpen=localStorage.getItem(stKey)!=='0';
+  localStorage.setItem(stKey,isOpen?'0':'1');
+  var body=document.getElementById('tk-grp-body-'+key);
+  var header=document.getElementById('tk-grp-'+key);
+  if(body)body.classList.toggle('collapsed',isOpen);
+  if(header){var hdr=header.querySelector('.sh-tree-header');if(hdr)hdr.classList.toggle('open',!isOpen);}
+}
+
+function tkEditList(listId){
+  openListsModal();
+}
+
+function tkToggleListPanel(){
+  var panel=document.getElementById('tk-list-panel');
+  if(panel)panel.classList.toggle('open');
+}
+
+function tkJumpToGroup(key){
+  tkToggleListPanel();
+  if(currentPage!=='tasks')switchPage('tasks');
+  setTimeout(function(){
+    var grp=document.getElementById('tk-grp-'+key);
+    if(grp)grp.scrollIntoView({behavior:'smooth',block:'start'});
+  },200);
+}
+
+function tkRenderListFloating(grpMap, grpMeta, orderedKeys){
+  var el=document.getElementById('tk-list-panel-items');
+  if(!el||!orderedKeys||!orderedKeys.length)return;
+  var activeCt=orderedKeys.reduce(function(s,k){return s+(grpMap[k]?grpMap[k].length:0);},0);
+  el.innerHTML='<div class="sh-coll-panel-item" style="border-bottom:0.5px solid var(--border);cursor:default">'
+    +'<span>&#9635;</span><span style="flex:1">All tasks</span>'
+    +'<span style="font-size:10px;color:var(--text3)">'+activeCt+' active</span>'
+    +'</div>'
+    +orderedKeys.map(function(k){
+      var meta=grpMeta[k]; if(!meta)return '';
+      var ct=grpMap[k]?grpMap[k].length:0;
+      return '<div class="sh-coll-panel-item" onclick="tkJumpToGroup('+JSON.stringify(k)+')">'
+        +'<span style="width:10px;height:10px;border-radius:50%;background:'+meta.color+';display:inline-block;flex-shrink:0"></span>'
+        +'<span style="flex:1">'+esc(meta.label)+'</span>'
+        +'<span style="font-size:10px;color:var(--text3)">'+ct+'</span>'
+        +'</div>';
+    }).join('');
+}
+
 
 function loadData(){
   try{const d=localStorage.getItem(KEY_ITEMS);if(d)items=JSON.parse(d);}catch(e){items=[];}
@@ -2339,8 +2478,8 @@ function todayStr(){const t=new Date();return `${t.getFullYear()}-${String(t.get
    Stored in localStorage as 'lifeos_cycle_start'.
 
    Example with day=26:
-     If today = 28 Mar → cycle = 26 Mar – 25 Apr
-     If today = 15 Mar → cycle = 26 Feb – 25 Mar
+     If today = 28 Mar -> cycle = 26 Mar – 25 Apr
+     If today = 15 Mar -> cycle = 26 Feb – 25 Mar
    ─────────────────────────────────────────────────────── */
 const CYCLE_KEY = 'lifeos_cycle_start';
 
@@ -2415,10 +2554,10 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 function cycleShort(c){return c==='monthly'?'mo':c==='yearly'?'yr':c==='weekly'?'wk':c==='quarterly'?'qtr':c==='once'?'once':c;}
 
 /* Returns true if item has been paid within its current billing cycle.
-   monthly   → payment exists with date in current YYYY-MM
-   quarterly → payment exists in last 3 months
-   yearly    → payment exists in last 12 months
-   weekly    → payment exists in current ISO week (Mon–Sun)              */
+   monthly   -> payment exists with date in current YYYY-MM
+   quarterly -> payment exists in last 3 months
+   yearly    -> payment exists in last 12 months
+   weekly    -> payment exists in current ISO week (Mon–Sun)              */
 function isPaidThisCycle(item){
   if(!payments.length)return false;
   const itemPayments=payments.filter(p=>p.itemId===item.id);
@@ -2596,7 +2735,7 @@ function render(){
     }).join('')}</div>`;
   } else { trialWrap.innerHTML=''; }
 
-  // Upcoming bills strip — window wraps into next month correctly
+  // Upcoming bills strip -- window wraps into next month correctly
   const today=now.getDate();
   const daysInCurMonth=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
   const nextMonthDate=new Date(now.getFullYear(),now.getMonth()+1,1);
@@ -3018,7 +3157,7 @@ function renderInsights(){
     // ── Forecast card (appended after grid) ──
     '<div class="ins-card full" style="margin-top:14px">'+
       '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:1rem">'+
-        '<div class="ins-card-title" style="margin-bottom:0">Spending forecast — next 12 months</div>'+
+        '<div class="ins-card-title" style="margin-bottom:0">Spending forecast -- next 12 months</div>'+
         '<div style="font-size:11px;color:var(--text3)">based on current subscriptions</div>'+
       '</div>'+
       '<div style="position:relative;height:220px"><canvas id="insForecastChart"></canvas></div>'+
@@ -3165,7 +3304,7 @@ function renderInsights(){
         m.items.push({name:item.name,amount:toMonthly(amt,cycle),color:color});
       });
     } else if(cycle==='quarterly'){
-      // Every 3 months — find first hit from current month
+      // Every 3 months -- find first hit from current month
       var startMonth=fcastNow.getMonth();
       fcastMonths.forEach(function(m,idx){
         if(idx%3===0){
@@ -3174,10 +3313,10 @@ function renderInsights(){
         }
       });
     } else if(cycle==='yearly'){
-      // Only the renewal month — use dueDay month if set, otherwise current month
+      // Only the renewal month -- use dueDay month if set, otherwise current month
       var renewalMonth=item.dueDay?
         (function(){
-          // Estimate renewal month from dueDay — use the month when dueDay is in the future
+          // Estimate renewal month from dueDay -- use the month when dueDay is in the future
           var d=new Date(fcastNow.getFullYear(),fcastNow.getMonth(),item.dueDay);
           if(d<fcastNow) d=new Date(fcastNow.getFullYear(),fcastNow.getMonth()+1,item.dueDay);
           return d.getMonth();
@@ -3331,7 +3470,7 @@ function showPayFromPopup(item){
         </div>`).join('')
     : '<div style="font-size:12px;color:var(--text3);padding:8px 0">No accounts set up yet.</div>';
   const selAc=activeAccounts.find(a=>a.id===defaultAcId)||activeAccounts[0];
-  const afterBal=selAc?'AED '+fmt((parseFloat(selAc.balance)||0)-(parseFloat(item.amount)||0)):'—';
+  const afterBal=selAc?'AED '+fmt((parseFloat(selAc.balance)||0)-(parseFloat(item.amount)||0)):'--';
   const popup=document.createElement('div');
   popup.id='pay-popup-wrap';
   popup.className='pay-popup-backdrop';
@@ -3669,7 +3808,7 @@ function importJSON(e){
       document.getElementById('restore-modal-counts').textContent=counts;
       document.getElementById('restore-modal').style.display='flex';
     }catch(err){
-      toast('Could not read backup — make sure it\'s a valid backup file');
+      toast('Could not read backup -- make sure it\'s a valid backup file');
     }
     e.target.value='';
   };
@@ -3720,7 +3859,7 @@ loadProxyUrl();
     if(currentPage==='receivables')renderReceivables();
     if(currentPage==='accounts')renderAccounts();
     if(currentPage==='dashboard')renderDashboard();
-    toast('✓ Data replaced — '+items.length+' bills, '+(shopping||[]).length+' shopping, '+(links||[]).length+' links restored');
+    toast('&#10003; Data replaced -- '+items.length+' bills, '+(shopping||[]).length+' shopping, '+(links||[]).length+' links restored');
   } else {
     // Merge: backup entries win on conflict, local-only entries kept
     const noteIds=new Set((data.notes||[]).map(n=>n.id));
@@ -3782,7 +3921,7 @@ loadProxyUrl();
     if(currentPage==='dashboard')renderDashboard();
     if(currentPage==='accounts')renderAccounts();
     if(currentPage==='networth')renderNetWorth();
-    toast('✓ Backup merged — no duplicates created');
+    toast('&#10003; Backup merged -- no duplicates created');
   }
   closeRestoreModal();
 }
@@ -3821,8 +3960,8 @@ function openModal(id,forceTrial=false){
   renderColorPicker();
   const fPayAc=document.getElementById('f-pay-account');
   if(fPayAc){
-    fPayAc.innerHTML='<option value="">— No account —</option>'+
-      accounts.filter(a=>!a.archived).map(a=>`<option value="${a.id}">${esc(a.name)} — AED ${fmt(a.balance)}</option>`).join('');
+    fPayAc.innerHTML='<option value="">-- No account --</option>'+
+      accounts.filter(a=>!a.archived).map(a=>`<option value="${a.id}">${esc(a.name)} -- AED ${fmt(a.balance)}</option>`).join('');
     fPayAc.value=item?.payAccountId||'';
   }
   document.getElementById('modal').style.display='flex';
@@ -4230,7 +4369,7 @@ function renderTasks(){
       let score=priW[t.priority||'none']||0;
       if(t.dueDate){
         const daysLeft=Math.ceil((new Date(t.dueDate)-new Date())/(1000*60*60*24));
-        if(daysLeft<0)       score+=5000; // overdue → always top
+        if(daysLeft<0)       score+=5000; // overdue -> always top
         else if(daysLeft===0)score+=2000; // due today
         else if(daysLeft<=3) score+=500;  // due very soon
         else if(daysLeft<=7) score+=100;  // due this week
@@ -4273,9 +4412,135 @@ function renderTasks(){
       + '</div>';
   }
 
-  container.innerHTML = html;
-}
 
+  // Deterministic colour from tag name
+  function tkTagColor(tag){
+    var palette=['#4A8ECC','#1D9E75','#C98A1A','#C46A8A','#7A74D4','#C95050','#C97840','#5DCAA5','#6A9E30','#888880'];
+    var h=0; for(var i=0;i<tag.length;i++)h=(h*31+tag.charCodeAt(i))&0xffff;
+    return palette[h%palette.length];
+  }
+
+  // ── Tree view: group by list (if assigned) or first tag ──
+  // Build group map
+  var grpMap={};   // key -> [tasks]
+  var grpMeta={};  // key -> {label, color, isTag, isNone}
+
+  // Register lists as groups first (preserving list order)
+  lists.forEach(function(lst){
+    grpMap[lst.id]=[];
+    grpMeta[lst.id]={label:lst.name, color:lst.color, isTag:false, isNone:false};
+  });
+
+  // Assign each task to its group
+  activeTasks.forEach(function(t){
+    if(t.listId && grpMeta[t.listId]){
+      grpMap[t.listId].push(t);
+    } else {
+      // Group by first tag
+      var firstTag=(t.tags&&t.tags.length)?t.tags[0]:null;
+      if(firstTag){
+        if(!grpMap['tag:'+firstTag]){
+          grpMap['tag:'+firstTag]=[];
+          grpMeta['tag:'+firstTag]={label:'#'+firstTag, color:tkTagColor(firstTag), isTag:true, isNone:false};
+        }
+        grpMap['tag:'+firstTag].push(t);
+      } else {
+        grpMap['__none__']=grpMap['__none__']||[];
+        grpMeta['__none__']={label:'Unlisted', color:'var(--border2)', isTag:false, isNone:true};
+        grpMap['__none__'].push(t);
+      }
+    }
+  });
+
+  // Collect ordered keys: lists first, then tags (alphabetical), then unlisted
+  var orderedKeys=[];
+  lists.forEach(function(lst){ orderedKeys.push(lst.id); });
+  Object.keys(grpMap).forEach(function(k){
+    if(k.indexOf('tag:')==='0' || k==='tag:'+k.slice(4)) orderedKeys.push(k);
+  });
+  // Actually gather tag keys properly
+  orderedKeys=[];
+  lists.forEach(function(lst){ if(grpMap[lst.id]!==undefined) orderedKeys.push(lst.id); });
+  var tagKeys=Object.keys(grpMap).filter(function(k){return k.indexOf('tag:')==0;}).sort();
+  tagKeys.forEach(function(k){orderedKeys.push(k);});
+  if(grpMap['__none__']) orderedKeys.push('__none__');
+
+  // Check if there are any groups to show
+  var hasAnyGroup=orderedKeys.some(function(k){return grpMap[k]&&grpMap[k].length>0;});
+  if(!hasAnyGroup && !lists.length){
+    container.innerHTML=html;
+    return;
+  }
+
+  var treeHtml='';
+
+  orderedKeys.forEach(function(key){
+    var meta=grpMeta[key]; if(!meta) return;
+    var tItems=grpMap[key]||[];
+    var stKey='tk-grp-'+tkWorkspace+'-'+key;
+    var isOpen=localStorage.getItem(stKey)!=='0';
+    var overdueCt=tItems.filter(function(t){return t.dueDate&&t.dueDate<todayStr();}).length;
+    var urgCt=tItems.filter(function(t){return t.priority==='urgent'||t.priority==='high';}).length;
+    var metaParts=[tItems.length+' task'+(tItems.length!==1?'s':'')];
+    if(overdueCt) metaParts.push('<b style="color:var(--red)">'+overdueCt+' overdue</b>');
+    else if(urgCt) metaParts.push('<span style="color:var(--amber)">'+urgCt+' urgent</span>');
+
+    var safeKey=JSON.stringify(key);
+
+    // Header actions
+    var headerActions='<div style="display:flex;gap:4px;margin-left:auto" onclick="event.stopPropagation()">';
+    if(!meta.isTag && !meta.isNone){
+      // List group -- show + Add and ✏ Edit
+      headerActions+='<button class="icon-btn" onclick="tkAddToList(this.dataset.lid)" data-lid="'+key+'" title="Add task to this list" style="height:24px;padding:0 8px;font-size:11px">+ Add</button>';
+      headerActions+='<button class="icon-btn" onclick="openListsModal()" title="Edit lists" style="height:24px;padding:0 6px">&#9998;</button>';
+    } else if(meta.isTag){
+      // Tag group -- show + Add and ✏ Rename
+      headerActions+='<button class="icon-btn" onclick="tkAddWithTag(this.dataset.tag)" data-tag="'+meta.label.slice(1)+'" title="Add task with this tag" style="height:24px;padding:0 8px;font-size:11px">+ Add</button>';
+      headerActions+='<button class="icon-btn" onclick="tkRenameTag(this.dataset.tag)" data-tag="'+meta.label.slice(1)+'" title="Rename tag" style="height:24px;padding:0 6px">&#9998;</button>';
+    }
+    headerActions+='</div>';
+
+    var nameStyle=meta.isNone?'color:var(--text2)':'';
+
+    treeHtml+=
+      '<div class="sh-tree-group" id="tk-grp-'+key+'">'
+      +'<div class="sh-tree-header'+(isOpen?' open':'')+'" '
+        +'onclick="tkGrpToggle(this.dataset.gkey)" data-gkey="'+key+'" '
+        +'style="border-left:3px solid '+meta.color+'">'
+        +'<span class="sh-tree-chevron" style="margin-right:2px">&#9654;</span>'
+        +'<span class="sh-tree-name"'+(nameStyle?' style="'+nameStyle+'"':'')+'>'+esc(meta.label)+'</span>'
+        +'<span class="sh-tree-meta">'+metaParts.join(' &middot; ')+'</span>'
+        +headerActions
+      +'</div>'
+      +'<div class="sh-tree-body'+(isOpen?'':' collapsed')+'" id="tk-grp-body-'+key+'">'
+        +(tItems.length
+          ?'<div style="display:flex;flex-direction:column;gap:7px">'+tItems.map(renderTaskItem).join('')+'</div>'
+          :'<div style="color:var(--text3);font-size:12px;padding:10px 14px;font-style:italic">No tasks here yet &mdash; click <b style="font-weight:600;color:var(--text2)">+ Add</b></div>')
+      +'</div>'
+      +'</div>';
+  });
+
+  // Completed basement at bottom
+  if(doneTasks.length){
+    var bId='tk-basement-'+tkWorkspace;
+    var bOpen=localStorage.getItem(bId)==='1';
+    treeHtml+=
+      '<button class="tk-basement-toggle'+(bOpen?' open':'')+'" onclick="toggleBasement(this.dataset.bid)" data-bid="'+bId+'">'
+      +'<span class="tk-basement-chevron">&#9660;</span>'
+      +'<span>Completed &mdash; '+doneTasks.length+' task'+(doneTasks.length!==1?'s':'')+'</span>'
+      +'</button>'
+      +'<div class="tk-basement-list'+(bOpen?' open':'')+'" id="'+bId+'-list">'
+      +doneTasks.map(renderTaskItem).join('')
+      +'</div>';
+  }
+
+  container.innerHTML=treeHtml;
+
+  // FAB
+  var tkFab=document.getElementById('tk-list-fab');
+  if(tkFab) tkFab.style.display=currentPage==='tasks'?'flex':'none';
+  tkRenderListFloating(grpMap, grpMeta, orderedKeys);
+}
 function toggleBasement(id){
   const isOpen = localStorage.getItem(id)==='1';
   localStorage.setItem(id, isOpen?'0':'1');
@@ -4427,7 +4692,7 @@ function refreshModalSubtasks(){
     inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();addSubtaskRow();}});
     // Delete button
     const del=document.createElement('button');
-    del.className='tk-sub-del';del.title='Remove';del.textContent='✕';
+    del.className='tk-sub-del';del.title='Remove';del.textContent='&#10005;';
     del.addEventListener('click',function(){removeSubtaskRow(i);});
     row.appendChild(cb);row.appendChild(inp);row.appendChild(del);
     container.appendChild(row);
@@ -4496,7 +4761,7 @@ function addList(){
   const input=document.getElementById('new-list-input');
   const name=input.value.trim();
   if(!name)return;
-  lists.push({id:String(Date.now()),name,color:COLORS[lists.length%COLORS.length]});
+  lists.push({id:String(Date.now()),name,color:COLORS[1+(lists.length%(COLORS.length-1))]});
   saveLists();input.value='';renderListsModal();
 }
 function deleteList(id){
@@ -4530,7 +4795,7 @@ function triggerDownload(blob,filename){
   a.style.cssText='position:absolute;left:-9999px;top:-9999px';
   document.body.appendChild(a);
   a.click();
-  // Remove anchor immediately — download is already queued.
+  // Remove anchor immediately -- download is already queued.
   // Revoke the blob URL after 30s so tab-switching / prompt-sending
   // cannot cancel the download before Chrome has had a chance to start it.
   setTimeout(function(){document.body.removeChild(a);},200);
@@ -5042,7 +5307,7 @@ function calGoToday(){
 }
 
 /* ═══════════════════════════════════════════════════════
-   DASHBOARD — Widget Registry
+   DASHBOARD -- Widget Registry
    To add a new widget: push one object to DB_WIDGETS.
    Shape: { id, cols, render(container) }
    cols: 1, 2, or 3 (grid column span)
@@ -5079,11 +5344,11 @@ function dbGreeting(){
   if(overdueB+overdueTasks>0){
     const alertPage=overdueB>=overdueTasks?'active':'tasks';
     const count=overdueB+overdueTasks;
-    summary='<button class="db-link" style="color:var(--red);font-size:13px;font-weight:500" onclick="switchPage(\''+alertPage+'\')">'+count+' item'+(count!==1?'s':'')+' need'+(count===1?'s':'')+' attention →</button>';
+    summary='<button class="db-link" style="color:var(--red);font-size:13px;font-weight:500" onclick="switchPage(\''+alertPage+'\')">'+count+' item'+(count!==1?'s':'')+' need'+(count===1?'s':'')+' attention -></button>';
   } else if(todayTasks>0){
-    summary='<button class="db-link" style="color:var(--text2);font-size:13px" onclick="switchPage(\'tasks\')">'+todayTasks+' task'+(todayTasks!==1?'s':'')+' due today →</button>';
+    summary='<button class="db-link" style="color:var(--text2);font-size:13px" onclick="switchPage(\'tasks\')">'+todayTasks+' task'+(todayTasks!==1?'s':'')+' due today -></button>';
   } else {
-    summary='<span style="color:var(--positive)">All clear — nothing urgent.</span>';
+    summary='<span style="color:var(--positive)">All clear -- nothing urgent.</span>';
   }
   document.getElementById('db-greeting').innerHTML=`
     <div class="db-greeting-time">${greet}</div>
@@ -5277,7 +5542,7 @@ function dbWidgetShopping(el){
       +'</div>';
   });
   if(toBuy.length>4){
-    out+='<div style="font-size:11px;color:var(--text3);padding-top:6px;cursor:pointer" onclick="switchPage(&quot;shopping&quot;)">+ '+(toBuy.length-4)+' more →</div>';
+    out+='<div style="font-size:11px;color:var(--text3);padding-top:6px;cursor:pointer" onclick="switchPage(&quot;shopping&quot;)">+ '+(toBuy.length-4)+' more -></div>';
   }
   body.innerHTML=out;
 }
@@ -5452,7 +5717,7 @@ function dbWidgetWeek(el){
 
 
 /* ═══════════════════════════════════════════════════════
-   Auto-save — File System Access API
+   Auto-save -- File System Access API
    Works in Chrome/Edge from any origin (local file,
    GitHub Pages, localhost).
    - asSetup()      : open Save dialog, pick file location
@@ -5476,7 +5741,7 @@ function asSupported(){ return typeof window.showSaveFilePicker==='function'; }
 /* ── Setup: let user pick save location ── */
 async function asSetup(){
   if(!asSupported()){
-    toast('Auto-save requires Chrome or Edge — not supported in this browser');
+    toast('Auto-save requires Chrome or Edge -- not supported in this browser');
     return;
   }
   try{
@@ -5488,12 +5753,12 @@ async function asSetup(){
     localStorage.setItem(AS_FILE_KEY, name);
     document.getElementById('as-file-name').textContent = name;
     document.getElementById('as-file-row').style.display = 'block';
-    asStatus('ok','Ready — '+name);
+    asStatus('ok','Ready -- '+name);
     // Immediately write current data to the chosen file
     await asWriteFile();
-    toast('✔ Auto-save set up — '+name);
+    toast('✔ Auto-save set up -- '+name);
   } catch(e){
-    if(e.name==='AbortError') return; // user cancelled — fine
+    if(e.name==='AbortError') return; // user cancelled -- fine
     asStatus('err','Setup failed');
     console.error('AS setup:',e);
   }
@@ -5519,14 +5784,14 @@ async function asWriteFile(){
     const timeStr = now.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'});
     asStatus('ok','✔ Saved '+timeStr);
   } catch(e){
-    // Permission may have expired — prompt user to re-grant
+    // Permission may have expired -- prompt user to re-grant
     if(e.name==='NotAllowedError'){
       try{
         const perm = await _asFileHandle.requestPermission({mode:'readwrite'});
         if(perm==='granted'){ await asWriteFile(); return; }
       } catch(e2){}
     }
-    asStatus('err','Save failed — click Choose file');
+    asStatus('err','Save failed -- click Choose file');
     console.error('AS write:',e);
   }
   _asBusy = false;
@@ -5552,13 +5817,13 @@ function asRestoreStatus(){
     const str = d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})
               + ' ' + d.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'});
     asStatus('ok','✔ Last saved '+str);
-    asTxt('Last: '+str+(name?' — '+name:''));
+    asTxt('Last: '+str+(name?' -- '+name:''));
   } else if(name){
     asStatus('','Click “Choose save file” to reconnect');
   }
   // Note: file handle does NOT persist across page loads in the browser.
   // User needs to click "Choose save file" once per session to reconnect.
-  // This is a browser security requirement — we can't store the handle.
+  // This is a browser security requirement -- we can't store the handle.
   // Sync settings modal status indicators
   const sDot = document.getElementById('settings-as-dot');
   const sTxt = document.getElementById('settings-as-status-text');
@@ -5824,7 +6089,7 @@ function renderLoans(){
     return true;
   });
 
-  // Sort — urgency = closest payoff date first
+  // Sort -- urgency = closest payoff date first
   visible = visible.slice().sort((a,b)=>{
     if(a.paidOff !== b.paidOff) return a.paidOff?1:-1;
     if(sortBy==='balance')  return lnRemainingBalance(b)-lnRemainingBalance(a);
@@ -5842,7 +6107,7 @@ function renderLoans(){
     return 0;
   });
 
-  // Upcoming EMI strip — next 30 days
+  // Upcoming EMI strip -- next 30 days
   const upcomingEl = document.getElementById('emi-upcoming');
   if(upcomingEl){
     const upcomingEMI = visible.filter(l=>!l.paidOff).map(l=>{
@@ -5855,7 +6120,7 @@ function renderLoans(){
     }).filter(Boolean).sort((a,b)=>a.diff-b.diff);
 
     if(upcomingEMI.length){
-      upcomingEl.innerHTML = '<div style="margin-bottom:8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3)">Upcoming — next 30 days</div>'
+      upcomingEl.innerHTML = '<div style="margin-bottom:8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3)">Upcoming -- next 30 days</div>'
         + '<div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:6px">'
         + upcomingEMI.map(({l,diff,emi})=>{
             const c = LN_COLORS[l.type]||'#888';
@@ -6072,7 +6337,7 @@ function markLoanPaidOff(id){
    Each account has:
    - id, name, type, bank, balance, currency, rate,
      maturity, acnum, notes, color, createdAt, updatedAt
-   - history: [{balance, date, note}]  — balance snapshots
+   - history: [{balance, date, note}]  -- balance snapshots
    ═══════════════════════════════════════════════════════ */
 
 function acFmtDate(ts){
@@ -6256,13 +6521,13 @@ function acQuickUpdate(id){
   if(a.history.length>24) a.history=a.history.slice(-24); // keep last 24 snapshots
   saveAccounts();renderAccounts();
   const delta=val-old;
-  toast('Updated: '+a.name+' → AED '+fmt(val)+(delta!==0?' ('+(delta>0?'+':'')+fmt(delta)+')':''));
+  toast('Updated: '+a.name+' -> AED '+fmt(val)+(delta!==0?' ('+(delta>0?'+':'')+fmt(delta)+')':''));
 }
 
 /* ── History modal ── */
 function openAcHistoryModal(id){
   const a=accounts.find(x=>x.id===id);if(!a)return;
-  document.getElementById('ac-history-title').textContent=a.name+' — History';
+  document.getElementById('ac-history-title').textContent=a.name+' -- History';
   const history=(a.history||[]).slice().reverse();
   if(!history.length){
     document.getElementById('ac-history-content').innerHTML='<div style="text-align:center;padding:2rem;color:var(--text3);font-size:13px">No balance history yet.<br>Use Quick Update to start logging.</div>';
@@ -6364,8 +6629,8 @@ function deleteAccount(id){
 /* ═══════════════════════════════════════════════════════
    Bill Reminders
    Two-layer system:
-   1. In-app sticky banner — always works, no permissions
-   2. Browser push notifications — opt-in, persisted
+   1. In-app sticky banner -- always works, no permissions
+   2. Browser push notifications -- opt-in, persisted
    Checks on every page load. Dismissed-today state stored
    in sessionStorage so it doesn't re-appear mid-session.
    ═══════════════════════════════════════════════════════ */
@@ -6421,7 +6686,7 @@ function checkReminders(){
   const notifEnabled = localStorage.getItem(REM_NOTIF)==='true';
   const notifGranted = 'Notification' in window && Notification.permission==='granted';
 
-  // Build text — names are clickable links that jump to + highlight the bill
+  // Build text -- names are clickable links that jump to + highlight the bill
   const hlBtn = (d) => {
     const style = 'background:none;border:none;cursor:pointer;font-family:var(--font);font-size:inherit;font-weight:600;color:var(--text);padding:0;text-decoration:underline;text-underline-offset:2px';
     return '<button onclick="highlightBill(\'' + d.item.id + '\')" style="' + style + '" title="Jump to ' + esc(d.item.name) + '">' + esc(d.item.name) + '</button>';
@@ -6480,7 +6745,7 @@ function requestNotifPermission(){
       checkReminders(); // refresh banner to remove the enable button
       toast('&#10003; Browser notifications enabled');
     } else {
-      toast('Notifications blocked — use the in-app banner instead');
+      toast('Notifications blocked -- use the in-app banner instead');
     }
   });
 }
@@ -6493,7 +6758,7 @@ function fireNotifications(due){
   due.forEach((d,idx)=>{
     setTimeout(()=>{
       const label = d.diff===0?'Due today':'Due in '+d.diff+' day'+(d.diff!==1?'s':'');
-      const n = new Notification('Bill reminder — '+esc(d.item.name),{
+      const n = new Notification('Bill reminder -- '+esc(d.item.name),{
         body: label+' · AED '+fmt(d.item.amount),
         icon: '',
         tag: 'lifeos-bill-'+d.item.name,
@@ -6518,7 +6783,7 @@ let _verPanelOpen  = false;
 
 /* ── Improvement 2: Data hash for deduplication ── */
 function verDataHash(){
-  // Fast hash of counts + last payment ts + last item id — good enough for change detection
+  // Fast hash of counts + last payment ts + last item id -- good enough for change detection
   const lastPay = payments.length ? payments[0].id : '';
   const lastItem = items.length ? items[0].id : '';
   const lastTask = tasks.length ? tasks[0].id : '';
@@ -6658,7 +6923,7 @@ function renderVerPanel(){
       const filenameHtml = v.filename
         ? '<div style="font-size:10px;color:var(--text3);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">&#128196; '+v.filename+'</div>'
         : '';
-      // Editable name input — shown above the timestamp
+      // Editable name input -- shown above the timestamp
       const nameHtml = '<input class="ver-name-input" id="ver-name-'+i+'" type="text" '+
         'value="'+((v.name||'').replace(/"/g,'&quot;'))+'" '+
         'placeholder="Add a label&#8230;" '+
@@ -6699,7 +6964,7 @@ function verRestore(idx){
     return;
   }
   try{
-    // Take a snapshot of current state before overwriting (safety net — always force)
+    // Take a snapshot of current state before overwriting (safety net -- always force)
     verSnapshot(true);
     const data = JSON.parse(snap.data);
     items       = data.items       || [];
@@ -6786,7 +7051,7 @@ function nwTakeSnapshot(){
   saveNetWorth();
   if(document.getElementById('nw-snap-note')) document.getElementById('nw-snap-note').value='';
   renderNetWorth();
-  toast('\u2713 Net worth snapshot saved — AED '+fmt(net));
+  toast('\u2713 Net worth snapshot saved -- AED '+fmt(net));
 }
 
 /* ── Main render ── */
@@ -6899,7 +7164,7 @@ function nwRenderChart(currentNet){
     : snaps.length + ' snapshot' + (snaps.length!==1?'s':'') + ' saved';
 
   if(chartData.length < 2){
-    // Not enough data — show placeholder message
+    // Not enough data -- show placeholder message
     const canvas = document.getElementById('nwTrendChart');
     const ctx = canvas.getContext('2d');
     canvas.height = 200;
@@ -6979,7 +7244,7 @@ function nwRenderChart(currentNet){
      financial snapshot to generate one contextual observation
    - Result cached in localStorage keyed by today's date
    - Re-fetch on manual refresh or when date changes
-   - API key stored in localStorage — never leaves the device
+   - API key stored in localStorage -- never leaves the device
    ═══════════════════════════════════════════════════════ */
 const AI_KEY_STORE   = 'lifeos_anthropic_key';
 const AI_INS_STORE   = 'lifeos_ai_insight';
@@ -7032,7 +7297,7 @@ function aiFinancialContext(){
     'Cycle: '+cycleLabel(),
     'Total monthly bills: AED '+Math.round(monthly)+' ('+active.length+' active)',
     'Paid so far: AED '+Math.round(paidAmt)+' ('+Math.round(monthly>0?paidAmt/monthly*100:0)+'% of cycle)',
-    'Previous cycle total: AED '+Math.round(prevPaid)+(prevPaid>0?' — change: AED '+(Math.round(paidAmt-prevPaid)):''),
+    'Previous cycle total: AED '+Math.round(prevPaid)+(prevPaid>0?' -- change: AED '+(Math.round(paidAmt-prevPaid)):''),
     unpaid.length?'Unpaid this cycle: '+unpaid.map(i=>i.name+' AED '+Math.round(i.amount)).join(', '):'All bills paid this cycle!',
     overdue.length?'⚠ OVERDUE: '+overdue.map(i=>i.name+' AED '+Math.round(i.amount)).join(', '):'No overdue bills',
     upcoming7.length?'Due next 7 days: '+upcoming7.map(i=>i.name+' AED '+Math.round(i.amount)+' in '+Math.ceil((dueDateInCycle(i.dueDay)-now)/(1000*60*60*24))+'d').join(', '):'',
@@ -7063,7 +7328,7 @@ async function aiFetchInsight(force){
   const key=aiGetKey();
   const proxyUrl=aiGetProxy();
   if(!proxyUrl && !key) return null;
-  if(!proxyUrl && key && !key.startsWith('sk-ant-')) throw new Error('Invalid API key format — key should start with sk-ant-');
+  if(!proxyUrl && key && !key.startsWith('sk-ant-')) throw new Error('Invalid API key format -- key should start with sk-ant-');
 
   const context=aiFinancialContext();
   const prompt=`You are a proactive personal finance analyst. Analyse this user's LifeOS data and return 4-5 specific, actionable insights they can act on TODAY.
@@ -7081,7 +7346,7 @@ Rules:
 - opportunity = specific money-saving or money-making action (cancel X, pay off Y early, move money to earn more)
 - trend = pattern over time with specific numbers (spending up/down vs last cycle, goal velocity, net worth change)
 - tip = specific actionable advice based on their actual situation (not generic advice)
-- Never say "consider" or "you might want to" — be direct
+- Never say "consider" or "you might want to" -- be direct
 - Use actual bill/account/goal/loan names from the data
 
 User data:
@@ -7090,7 +7355,7 @@ ${context}`;
   const endpoint = proxyUrl || 'https://api.anthropic.com/v1/messages';
   const headers = {'Content-Type':'application/json'};
   if(!proxyUrl){
-    // Direct call — requires browser CORS support (may fail on some origins)
+    // Direct call -- requires browser CORS support (may fail on some origins)
     headers['x-api-key'] = key;
     headers['anthropic-version'] = '2023-06-01';
     headers['anthropic-dangerous-allow-browser'] = 'true';
@@ -7107,16 +7372,16 @@ ${context}`;
       }),
     });
   }catch(netErr){
-    if(location.protocol==='file:') throw new Error('Open via GitHub Pages — browsers block API calls from local files.');
-    if(!proxyUrl) throw new Error('CORS blocked. Set up a proxy in Settings → AI Proxy URL and try again.');
+    if(location.protocol==='file:') throw new Error('Open via GitHub Pages -- browsers block API calls from local files.');
+    if(!proxyUrl) throw new Error('CORS blocked. Set up a proxy in Settings -> AI Proxy URL and try again.');
     throw new Error('Could not reach proxy at '+endpoint+'. Check the URL is correct. ('+netErr.message+')');
   }
   if(!resp.ok){
     let errMsg='API error '+resp.status;
     try{const e=await resp.json();errMsg=e?.error?.message||errMsg;}catch(e){}
-    if(resp.status===401) errMsg='Invalid API key — please re-enter your key.';
-    if(resp.status===403) errMsg='API key does not have permission — check your Anthropic account.';
-    if(resp.status===529) errMsg='Anthropic API is overloaded — try again in a moment.';
+    if(resp.status===401) errMsg='Invalid API key -- please re-enter your key.';
+    if(resp.status===403) errMsg='API key does not have permission -- check your Anthropic account.';
+    if(resp.status===529) errMsg='Anthropic API is overloaded -- try again in a moment.';
     throw new Error(errMsg);
   }
   const data=await resp.json();
@@ -7256,14 +7521,14 @@ function aiSaveKeyAndRun(){
 }
 
 /* ═══════════════════════════════════════════════════════
-   Dashboard edit mode — drag to reorder + show/hide
+   Dashboard edit mode -- drag to reorder + show/hide
    Widget order & visibility stored in localStorage.
    ═══════════════════════════════════════════════════════ */
 const DB_LAYOUT_KEY = 'lifeos_db_layout';
 let _dbEditing = false;
 let _dbDragSrc = null;  // widget id being dragged
 
-/* ── Load saved layout → returns [{id, visible}] ── */
+/* ── Load saved layout -> returns [{id, visible}] ── */
 function dbLoadLayout(){
   try{
     const saved = JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]');
@@ -7423,13 +7688,13 @@ function dbOnDragEnd(){
 }
 
 /* ═══════════════════════════════════════════════════════
-   Sidebar nav — dynamic render + drag-to-reorder + hide
+   Sidebar nav -- dynamic render + drag-to-reorder + hide
    ═══════════════════════════════════════════════════════ */
 const NAV_LAYOUT_KEY = 'lifeos_nav_layout';
 let _navEditing = false;
 let _navDragSrc = null;
 
-// Master nav definition — ground truth for all pages
+// Master nav definition -- ground truth for all pages
 const NAV_ITEMS = [
   {id:'links',    icon:'&#128279;', label:'Links',            section:'Launchpad'},
   {id:'shopping', icon:'&#128722;', label:'Shopping',         section:'Productivity'},
@@ -7588,7 +7853,7 @@ function navSaveOrder(){
     if(order.length) localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(order));
   }
   renderNav();
-  toast('✓ Sidebar order saved');
+  toast('&#10003; Sidebar order saved');
 }
 
 /* ── Toggle item visibility ── */
@@ -7625,7 +7890,7 @@ function navDrop(e){
   const [moved] = layout.splice(si,1);
   layout.splice(di,0,moved);
   localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(layout));
-  // Defer DOM rebuild until after dragend fires — destroying elements mid-drag
+  // Defer DOM rebuild until after dragend fires -- destroying elements mid-drag
   // prevents subsequent drags from working in Chrome/Firefox
   setTimeout(renderNav, 0);
 }
@@ -7638,7 +7903,7 @@ function navDragEnd(){
   setTimeout(renderNav, 0);
 }
 
-/* ── Paid this month — breakdown modal ── */
+/* ── Paid this month -- breakdown modal ── */
 function showPaidBreakdown(){
   const now = new Date();
   const ym  = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
@@ -7805,7 +8070,7 @@ function saveProxyUrl(){
   if(!inp) return;
   aiSetProxy(inp.value);
   localStorage.removeItem(AI_INS_STORE); // clear cached error/insight
-  toast('Proxy URL saved ✓');
+  toast('Proxy URL saved &#10003;');
   // Re-render widget now
   const w = document.getElementById('dbw-aiinsight');
   if(w) setTimeout(()=>{ try{ dbWidgetAIInsight(w); }catch(e){} }, 200);
@@ -7918,7 +8183,7 @@ function aiSaveKeyFromSettings(){
   inp.value='';
   inp.placeholder='sk-ant-…'+aiGetKey().slice(-6);
   localStorage.removeItem(AI_INS_STORE);
-  toast('API key saved ✓');
+  toast('API key saved &#10003;');
 }
 function saveCycleDay(){
   const v = parseInt(document.getElementById('cycle-day-input').value)||1;
@@ -7928,7 +8193,7 @@ function saveCycleDay(){
   updateCyclePreview();
   render();
   renderDashboard();
-  toast('\u2713 Billing cycle updated — starts day ' + clamped);
+  toast('\u2713 Billing cycle updated -- starts day ' + clamped);
 }
 
 function updateCyclePreview(){
@@ -7941,7 +8206,7 @@ function updateCyclePreview(){
 }
 
 /* ═══════════════════════════════════════════════════════
-   Receivables — money owed TO the user
+   Receivables -- money owed TO the user
    ═══════════════════════════════════════════════════════ */
 const RECV_TYPE_COLORS = {person:'#9B7FE8', work:'#4A8ECC', other:'#888880'};
 const RECV_TYPE_ICONS  = {person:'&#129309;', work:'&#127970;', other:'&#9679;'};
@@ -8175,7 +8440,7 @@ async function shExtractFromUrl(){
   const status=document.getElementById('sh-extract-status');
   const proxyUrl=aiGetProxy();
   if(!proxyUrl){
-    if(status)status.textContent='URL extraction needs a proxy — use Paste text instead';
+    if(status)status.textContent='URL extraction needs a proxy -- use Paste text instead';
     btn.disabled=false;
     return;
   }
@@ -8214,7 +8479,7 @@ async function shExtractFromUrl(){
     if(status)status.textContent='Analysing with AI...';
     await shCallClaudeExtract(fullPageText, status, !meta.price);
   }catch(e){
-    if(status)status.textContent='URL fetch failed — try Paste text instead';
+    if(status)status.textContent='URL fetch failed -- try Paste text instead';
     toast('URL extract failed: '+e.message);
   }
   btn.disabled=false;
@@ -8250,9 +8515,9 @@ async function shCallClaudeExtract(pageText,statusEl,extractPrice){
   const enteredUrl=(document.getElementById('sh-url')||{value:''}).value.trim();
   const isCategoryUrl = enteredUrl && /\/(category|categories|collection|search|browse|s\?|c\/|department|list)/i.test(enteredUrl);
   const msg = isCategoryUrl
-    ? 'This looks like a category page — paste a specific product URL for better results'
-    : filled===0 ? 'Could not extract details — enter manually'
-    : filled<2  ? 'Partial info extracted — fill in the rest'
+    ? 'This looks like a category page -- paste a specific product URL for better results'
+    : filled===0 ? 'Could not extract details -- enter manually'
+    : filled<2  ? 'Partial info extracted -- fill in the rest'
     : 'Extracted successfully';
   if(statusEl){statusEl.textContent=msg;statusEl.style.color=filled===0?'var(--amber)':'var(--positive)';}
   toast(msg);
@@ -8652,7 +8917,7 @@ function lkApplyFile(file){
   // Set colour
   lkSelColor=lkGetFileColor(name);
   renderLkColorPicker();
-  // Try to set URL — only works for file:// protocol pages
+  // Try to set URL -- only works for file:// protocol pages
   var hint=document.getElementById('lk-path-hint');
   if(file.path){
     // Electron or some browsers expose file.path
@@ -8722,7 +8987,7 @@ function closeLinkModal(){
     dz.style.borderColor='';dz.style.background='';
     dz.innerHTML='<div style="font-size:20px;margin-bottom:4px">&#128193;</div>'
       +'<div>Drag a file here <span style="color:var(--text3)">or</span> <span style="color:var(--accent);cursor:pointer">click to browse</span></div>'
-      +'<div style="font-size:10px;color:var(--text3);margin-top:3px">Auto-fills name and icon — paste the file path below</div>';
+      +'<div style="font-size:10px;color:var(--text3);margin-top:3px">Auto-fills name and icon -- paste the file path below</div>';
   }
   var hint=document.getElementById('lk-path-hint');
   if(hint)hint.style.display='none';
@@ -8773,7 +9038,7 @@ function openLink(id){
   renderLinks();
   var url=l.url||'';
   if(!url)return;
-  // Always open directly in browser — works for file:// and https://
+  // Always open directly in browser -- works for file:// and https://
   window.open(url,'_blank','noopener');
 }
 
@@ -9211,5 +9476,15 @@ if(_vn) _vn.textContent = APP_VERSION;
   <div id="sh-coll-panel-items"></div>
 </div>
 
+
+<!-- Task list FAB + panel -->
+<button class="sh-coll-fab" id="tk-list-fab" onclick="tkToggleListPanel()" title="Lists" style="display:none;bottom:74px"><span style="font-size:16px">&#9635;</span></button>
+<div class="sh-coll-panel" id="tk-list-panel" style="bottom:120px">
+  <div class="sh-coll-panel-head">
+    <span>&#9635; Lists</span>
+    <button class="modal-close-btn" onclick="tkToggleListPanel()">&#10005;</button>
+  </div>
+  <div id="tk-list-panel-items"></div>
+</div>
 </body>
 </html>

@@ -1,13 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tracker</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%23212121'/%3E%3Ctext%20x='9'%20y='23'%20font-family='system-ui,sans-serif'%20font-size='20'%20font-weight='700'%20fill='%23ffffff'%3ET%3C/text%3E%3Ccircle%20cx='24'%20cy='21'%20r='3.5'%20fill='%234A8ECC'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:opsz,wght@9..40,400;9..40,500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&amp;family=DM+Mono:opsz,wght@9..40,400;9..40,500&amp;display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#0c0d10;--surface:#15161a;--surface2:#1c1d22;--surface3:#232429;--surface4:#2b2c32;
@@ -1540,39 +1538,39 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 .ins-month-avg{font-size:11px;color:var(--text3)}
 @media(max-width:700px){.ins-grid{grid-template-columns:1fr}}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script><link type="text/css" rel="stylesheet" id="dark-mode-custom-link"><link type="text/css" rel="stylesheet" id="dark-mode-general-link"><style lang="en" type="text/css" id="dark-mode-custom-style"></style><style lang="en" type="text/css" id="dark-mode-native-style"></style><style lang="en" type="text/css" id="dark-mode-native-sheet"></style>
 </head>
-<body>
+<body data-new-gr-c-s-check-loaded="14.1282.0" data-gr-ext-installed="">
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
 
 <div class="app" id="app">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="logo">
-        <div class="logo-icon">&#9775;</div>
+        <div class="logo-icon">☯</div>
         <div class="logo-text-wrap">
           <span class="logo-text">Tracker<span style="color:var(--accent);text-shadow:0 0 10px rgba(74,142,204,.5)">.</span></span>
           <span class="logo-sub">Life Management</span>
         </div>
       </div>
-      <button class="sidebar-toggle" onclick="toggleSidebar()" id="sidebar-btn" title="Toggle sidebar">&#8592;</button>
+      <button class="sidebar-toggle" onclick="toggleSidebar()" id="sidebar-btn" title="Toggle sidebar">←</button>
     </div>
-    <button class="nav-item" id="nav-dashboard" onclick="switchPage('dashboard')" style="margin-bottom:4px"><span class="nav-icon">&#9632;</span><span class="nav-label"> Dashboard</span></button>
-    <div id="nav-sections-wrap"></div>
+    <button class="nav-item active" id="nav-dashboard" onclick="switchPage('dashboard')" style="margin-bottom:4px"><span class="nav-icon">■</span><span class="nav-label"> Dashboard</span></button>
+    <div id="nav-sections-wrap"><div class="nav-section-wrap" data-section="Launchpad"><div class="nav-section-edit-label">Launchpad</div><button id="nav-links" class="nav-item" data-navid="links"><span class="nav-icon">🔗</span><span class="nav-label"> Links</span></button></div><div class="nav-section-wrap" data-section="Productivity"><div class="nav-section-edit-label">Productivity</div><button id="nav-tasks" class="nav-item" data-navid="tasks"><span class="nav-icon">▣</span><span class="nav-label"> Tasks</span></button><button id="nav-goals" class="nav-item" data-navid="goals"><span class="nav-icon">△</span><span class="nav-label"> Goals</span></button><button id="nav-shopping" class="nav-item" data-navid="shopping"><span class="nav-icon">🛒</span><span class="nav-label"> Shopping</span></button></div><div class="nav-section-wrap" data-section="Finances"><div class="nav-section-edit-label">Finances</div><button id="nav-active" class="nav-item" data-navid="active"><span class="nav-icon">◈</span><span class="nav-label"> Monthly Expenses</span></button><button id="nav-tabby" class="nav-item" data-navid="tabby"><span class="nav-icon">◑</span><span class="nav-label"> Tabby</span></button><button id="nav-accounts" class="nav-item" data-navid="accounts"><span class="nav-icon">🏭</span><span class="nav-label"> Accounts</span></button><button id="nav-loans" class="nav-item" data-navid="loans"><span class="nav-icon">🏠</span><span class="nav-label"> Loans</span></button><button id="nav-receivables" class="nav-item" data-navid="receivables"><span class="nav-icon">☯</span><span class="nav-label"> Receivables</span></button><button id="nav-networth" class="nav-item" data-navid="networth"><span class="nav-icon">✦</span><span class="nav-label"> Net Worth</span></button><button id="nav-trials" class="nav-item" data-navid="trials"><span class="nav-icon">⏳</span><span class="nav-label"> Free trials</span></button></div><div class="nav-section-wrap" data-section="Tools"><div class="nav-section-edit-label">Tools</div><button id="nav-calendar" class="nav-item" data-navid="calendar"><span class="nav-icon">☐</span><span class="nav-label"> Calendar</span></button><button id="nav-insights" class="nav-item" data-navid="insights"><span class="nav-icon">◉</span><span class="nav-label"> Insights</span></button><button id="nav-calc" class="nav-item" data-navid="calc"><span class="nav-icon">⊞</span><span class="nav-label"> Calculator</span></button><button id="nav-notes" class="nav-item" data-navid="notes"><span class="nav-icon">✎</span><span class="nav-label"> Notes</span></button><button id="nav-history" class="nav-item" data-navid="history"><span class="nav-icon">◷</span><span class="nav-label"> History</span></button></div></div>
     <div class="sidebar-section">Settings</div>
-    <button class="nav-item" onclick="openSettingsModal()"><span class="nav-icon">&#9881;</span><span class="nav-label"> Settings</span></button>
-    <button class="nav-item" onclick="asSetup()" title="Quick save to file"><span class="nav-icon">&#128190;</span><span class="nav-label"> Quick save</span></button>
+    <button class="nav-item" onclick="openSettingsModal()"><span class="nav-icon">⚙</span><span class="nav-label"> Settings</span></button>
+    <button class="nav-item" onclick="asSetup()" title="Quick save to file"><span class="nav-icon">💾</span><span class="nav-label"> Quick save</span></button>
     <div style="display:none">
-      <div class="as-dot" id="as-dot"></div>
-      <span id="as-status-text">Not set up</span>
-      <div id="as-file-row"></div>
-      <div id="as-file-name"></div>
+      <div class="as-dot ok" id="as-dot"></div>
+      <span id="as-status-text">Last: 15 Apr 12:23 AM -- lifeos-backup-april-2.json</span>
+      <div id="as-file-row" style="display: block;"></div>
+      <div id="as-file-name">lifeos-backup-april-2.json</div>
       <button id="as-setup-btn" onclick="asSetup()"></button>
     </div>
     <div id="ver-panel" style="display:none"></div>
     <div class="sidebar-bottom">
-      <button id="nav-save-order-btn" onclick="navSaveOrder()" style="display:none;width:100%;height:30px;border-radius:7px;border:none;background:var(--positive);color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);margin-bottom:6px;transition:opacity .15s">&#10003; Save order</button>
-      <div style="font-size:10px;color:var(--text3);text-align:center;padding:4px 0;font-family:var(--mono)" id="app-version-label">v<span id="app-ver-num"></span></div>
+      <button id="nav-save-order-btn" onclick="navSaveOrder()" style="display:none;width:100%;height:30px;border-radius:7px;border:none;background:var(--positive);color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);margin-bottom:6px;transition:opacity .15s">✓ Save order</button>
+      <div style="font-size:10px;color:var(--text3);text-align:center;padding:4px 0;font-family:var(--mono)" id="app-version-label">v<span id="app-ver-num">5.7</span></div>
     </div>
   <div class="sidebar-resize-handle" id="sidebar-resize-handle"></div>
   </aside>
@@ -1580,38 +1578,377 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 
   <main class="main">
     <!-- Bill reminders banner — injected by checkReminders() on load -->
-    <div id="reminder-banner-wrap"></div>
+    <div id="reminder-banner-wrap"><div class="reminder-banner"><span class="reminder-banner-icon">⚠</span><span class="reminder-banner-text"><button onclick="highlightBill('1773689954991')" style="background:none;border:none;cursor:pointer;font-family:var(--font);font-size:inherit;font-weight:600;color:var(--text);padding:0;text-decoration:underline;text-underline-offset:2px" title="Jump to Noon One">Noon One</button> <span style="font-weight:400;color:var(--amber)">in 1d</span>&nbsp;&nbsp;Â·&nbsp;&nbsp;<button onclick="highlightBill('1774384015804')" style="background:none;border:none;cursor:pointer;font-family:var(--font);font-size:inherit;font-weight:600;color:var(--text);padding:0;text-decoration:underline;text-underline-offset:2px" title="Jump to Claude">Claude</button> <span style="font-weight:400;color:var(--amber)">in 2d</span></span><div class="reminder-banner-actions"><button class="reminder-notif-btn" onclick="requestNotifPermission()" title="Enable browser notifications for bill reminders">🔔</button><button class="reminder-banner-btn primary" onclick="switchPage('active')">View bills</button><button class="reminder-banner-btn ghost" onclick="dismissReminder()" title="Dismiss until tomorrow">✕</button></div></div></div>
     <!-- Dashboard page -->
-    <div id="page-dashboard" style="display:none">
+    <div id="page-dashboard" style="">
       <div class="db-header-row">
-        <div class="db-greeting" id="db-greeting" style="margin-bottom:0;flex:1"></div>
-        <button class="db-edit-toggle-btn" id="db-edit-btn" onclick="dbToggleEditMode()">&#9998; Customise</button>
+        <div class="db-greeting" id="db-greeting" style="margin-bottom:0;flex:1">
+    <div class="db-greeting-time">Good morning</div>
+    <div class="db-greeting-date">Wednesday, 15 April 2026 &nbsp;·&nbsp; <button class="db-link" style="color:var(--red);font-size:13px;font-weight:500" onclick="switchPage('tasks')">10 items need attention -&gt;</button></div></div>
+        <button class="db-edit-toggle-btn" id="db-edit-btn" onclick="dbToggleEditMode()">✎ Customise</button>
       </div>
       <div class="db-edit-bar" id="db-edit-bar">
-        <span class="db-edit-bar-label">&#9998; Drag to reorder &nbsp;&middot;&nbsp; click eye to show/hide</span>
-        <button class="db-edit-done-btn" onclick="dbToggleEditMode()">&#10003; Done</button>
+        <span class="db-edit-bar-label">✎ Drag to reorder &nbsp;·&nbsp; click eye to show/hide</span>
+        <button class="db-edit-done-btn" onclick="dbToggleEditMode()">✓ Done</button>
       </div>
-      <div class="db-grid" id="db-grid"></div>
+      <div class="db-grid" id="db-grid"><div class="db-widget db-w1" id="dbw-alerts" data-wid="alerts" draggable="false">
+    <div class="db-widget-head" style="background:rgba(224,82,82,.08);border-bottom-color:rgba(224,82,82, .2)"> 
+      <div class="db-widget-title" style="color:rgba(224,82,82,1)"><span class="db-widget-icon">⚠</span>Alerts</div>
+      <div style="display:flex;align-items:center;gap:6px"><span class="db-badge db-badge-red">10</span><button class="db-widget-collapse-btn" onclick="dbToggleCollapse('dbw-alerts')" title="Collapse">▼</button></div>
+    </div>
+    <div class="db-widget-body" id="dbwb-alerts"><div class="db-stat-row"><div class="db-stat-left"><div class="db-stat-dot" style="background:var(--red)"></div><div><div class="db-stat-name">Talabat Pro</div><div class="db-stat-sub">Bill overdue</div></div></div><div><div class="db-stat-val" style="color:var(--red)">AED 29.00</div></div></div><div class="db-stat-row"><div class="db-stat-left"><div class="db-stat-dot" style="background:var(--red)"></div><div><div class="db-stat-name">ChatGPT</div><div class="db-stat-sub">Bill overdue</div></div></div><div><div class="db-stat-val" style="color:var(--red)">AED 31.00</div></div></div><div class="db-stat-row"><div class="db-stat-left"><div class="db-stat-dot" style="background:var(--purple)"></div><div><div class="db-stat-name">Medicine Ginsomin</div><div class="db-stat-sub">Task overdue</div></div></div><div><div class="db-stat-val" style="color:var(--red);font-family:var(--font);font-size:11px">past due</div></div></div><div class="db-stat-row"><div class="db-stat-left"><div class="db-stat-dot" style="background:var(--purple)"></div><div><div class="db-stat-name">Purchase items</div><div class="db-stat-sub">Task overdue</div></div></div><div><div class="db-stat-val" style="color:var(--red);font-family:var(--font);font-size:11px">past due</div></div></div><div class="db-stat-row"><div class="db-stat-left"><div class="db-stat-dot" style="background:var(--purple)"></div><div><div class="db-stat-name">Clean Balcony</div><div class="db-stat-sub">Task overdue</div></div></div><div><div class="db-stat-val" style="color:var(--red);font-family:var(--font);font-size:11px">past due</div></div></div></div>
+    
+    <div class="db-widget-footer">
+      <span></span>
+      <button class="db-link" onclick="switchPage('tasks')">View tasks →</button>
+    </div></div><div class="db-widget db-w1" id="dbw-tasks" data-wid="tasks" draggable="false">
+    <div class="db-widget-head" style="background:rgba(155,127,232,.08);border-bottom-color:rgba(155,127,232, .2)"> 
+      <div class="db-widget-title" style="color:rgba(155,127,232,1)"><span class="db-widget-icon">▣</span>Tasks today</div>
+      <div style="display:flex;align-items:center;gap:6px"><span class="db-badge db-badge-purple">8</span><button class="db-widget-collapse-btn" onclick="dbToggleCollapse('dbw-tasks')" title="Collapse">▼</button></div>
+    </div>
+    <div class="db-widget-body" id="dbwb-tasks"><div style="font-size:10px;font-weight:600;color:var(--red);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">▲ Overdue</div><div class="db-task-row">
+      <div class="db-task-check" onclick="dbCheckTask('1774717197648')"></div>
+      <div class="db-task-body">
+        <div class="db-task-name">Buy Gold Earrings</div>
+        <div class="db-task-meta"><span style="color:var(--red)">overdue</span><span style="color:var(--purple)">medium</span></div>
+      </div>
+    </div><div class="db-task-row">
+      <div class="db-task-check" onclick="dbCheckTask('1774671886156')"></div>
+      <div class="db-task-body">
+        <div class="db-task-name">ALCON Natural tears</div>
+        <div class="db-task-meta"><span style="color:var(--red)">overdue</span><span style="color:var(--purple)">medium</span></div>
+      </div>
+    </div><div class="db-task-row">
+      <div class="db-task-check" onclick="dbCheckTask('1774643881701')"></div>
+      <div class="db-task-body">
+        <div class="db-task-name">Update bundle on site</div>
+        <div class="db-task-meta"><span style="color:var(--red)">overdue</span><span style="color:var(--purple)">medium</span></div>
+      </div>
+    </div></div>
+    
+    <div class="db-widget-footer">
+      <span>8 overdue</span>
+      <button class="db-link" onclick="switchPage('tasks')">All tasks →</button>
+    </div></div><div class="db-widget db-w1" id="dbw-bills7" data-wid="bills7" draggable="false">
+    <div class="db-widget-head" style="background:rgba(201,138,26,.08);border-bottom-color:rgba(201,138,26, .2)"> 
+      <div class="db-widget-title" style="color:rgba(201,138,26,1)"><span class="db-widget-icon">◯</span>Bills this week</div>
+      <div style="display:flex;align-items:center;gap:6px"><span class="db-badge db-badge-amber">2</span><button class="db-widget-collapse-btn" onclick="dbToggleCollapse('dbw-bills7')" title="Collapse">▼</button></div>
+    </div>
+    <div class="db-widget-body" id="dbwb-bills7"><div class="db-stat-row">
+      <div class="db-stat-left">
+        <div class="db-stat-dot" style="background:#BA7517"></div>
+        <div>
+          <div class="db-stat-name">Noon One</div>
+          <div class="db-stat-sub">Tomorrow · Food</div>
+        </div>
+      </div>
+      <div>
+        <div class="db-stat-val">AED 5.00</div>
+        <div class="db-stat-val-sub">mo</div>
+      </div>
+    </div><div class="db-stat-row">
+      <div class="db-stat-left">
+        <div class="db-stat-dot" style="background:#C98A1A"></div>
+        <div>
+          <div class="db-stat-name">Claude</div>
+          <div class="db-stat-sub">In 2d · Streaming</div>
+        </div>
+      </div>
+      <div>
+        <div class="db-stat-val">AED 80.00</div>
+        <div class="db-stat-val-sub">mo</div>
+      </div>
+    </div></div>
+    
+    <div class="db-widget-footer">
+      <span>AED 85.00 due</span>
+      <button class="db-link" onclick="switchPage('active')">View all →</button>
+    </div></div><div class="db-widget db-w3" id="dbw-week" data-wid="week" draggable="false">
+    <div class="db-widget-head" style="background:rgba(74,142,204,.07);border-bottom-color:rgba(74,142,204, .18)"> 
+      <div class="db-widget-title" style="color:rgba(74,142,204,1)"><span class="db-widget-icon">☐</span>Next 14 days</div>
+      <div style="display:flex;align-items:center;gap:6px"><button class="db-widget-collapse-btn" onclick="dbToggleCollapse('dbw-week')" title="Collapse">▼</button></div>
+    </div>
+    <div class="db-widget-body" id="dbwb-week">
+    <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">This week</div>
+    <div class="db-week"><div class="db-day db-day-today" onclick="switchPage('calendar')">
+      <div class="db-day-name">Wed</div>
+      <div class="db-day-num">15</div>
+      <div class="db-day-dots">
+        
+        
+      </div>
+    </div><div class="db-day" onclick="switchPage('calendar')">
+      <div class="db-day-name">Thu</div>
+      <div class="db-day-num">16</div>
+      <div class="db-day-dots">
+        <div class="db-day-ev db-day-ev-bill">Noon One</div><div class="db-day-ev db-day-ev-task">Get Mom a Laptop</div>
+        
+      </div>
+    </div><div class="db-day" onclick="switchPage('calendar')">
+      <div class="db-day-name">Fri</div>
+      <div class="db-day-num">17</div>
+      <div class="db-day-dots">
+        <div class="db-day-ev db-day-ev-bill">Claude</div><div class="db-day-ev db-day-ev-task">Reimburse Reciepts</div>
+        
+      </div>
+    </div><div class="db-day" onclick="switchPage('calendar')">
+      <div class="db-day-name">Sat</div>
+      <div class="db-day-num">18</div>
+      <div class="db-day-dots">
+        
+        
+      </div>
+    </div><div class="db-day" onclick="switchPage('calendar')">
+      <div class="db-day-name">Sun</div>
+      <div class="db-day-num">19</div>
+      <div class="db-day-dots">
+        
+        
+      </div>
+    </div><div class="db-day" onclick="switchPage('calendar')">
+      <div class="db-day-name">Mon</div>
+      <div class="db-day-num">20</div>
+      <div class="db-day-dots">
+        <div class="db-day-ev db-day-ev-task">Req. BOM</div>
+        
+      </div>
+    </div><div class="db-day" onclick="switchPage('calendar')">
+      <div class="db-day-name">Tue</div>
+      <div class="db-day-num">21</div>
+      <div class="db-day-dots">
+        
+        
+      </div>
+    </div></div>
+    <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin:10px 0 5px">Next week</div>
+    <div class="db-week"><div class="db-day" onclick="switchPage('calendar')">
+      <div class="db-day-name">Wed</div>
+      <div class="db-day-num">22</div>
+      <div class="db-day-dots">
+        
+        
+      </div>
+    </div><div class="db-day" onclick="switchPage('calendar')">
+      <div class="db-day-name">Thu</div>
+      <div class="db-day-num">23</div>
+      <div class="db-day-dots">
+        
+        
+      </div>
+    </div><div class="db-day" onclick="switchPage('calendar')">
+      <div class="db-day-name">Fri</div>
+      <div class="db-day-num">24</div>
+      <div class="db-day-dots">
+        
+        
+      </div>
+    </div><div class="db-day" onclick="switchPage('calendar')">
+      <div class="db-day-name">Sat</div>
+      <div class="db-day-num">25</div>
+      <div class="db-day-dots">
+        <div class="db-day-ev db-day-ev-task">Clean Outer Balcony</div>
+        
+      </div>
+    </div><div class="db-day" onclick="switchPage('calendar')">
+      <div class="db-day-name">Sun</div>
+      <div class="db-day-num">26</div>
+      <div class="db-day-dots">
+        <div class="db-day-ev db-day-ev-bill">Spotify</div>
+        
+      </div>
+    </div><div class="db-day" onclick="switchPage('calendar')">
+      <div class="db-day-name">Mon</div>
+      <div class="db-day-num">27</div>
+      <div class="db-day-dots">
+        
+        
+      </div>
+    </div><div class="db-day" onclick="switchPage('calendar')">
+      <div class="db-day-name">Tue</div>
+      <div class="db-day-num">28</div>
+      <div class="db-day-dots">
+        
+        
+      </div>
+    </div></div></div>
+    
+    <div class="db-widget-footer">
+      <span></span>
+      <button class="db-link" onclick="switchPage('calendar')">Calendar →</button>
+    </div></div><div class="db-widget db-w3" id="dbw-aiinsight" data-wid="aiinsight" draggable="false">
+    <div class="db-widget-head" style="background:rgba(155,127,232,.08);border-bottom-color:rgba(155,127,232, .2)"> 
+      <div class="db-widget-title" style="color:rgba(155,127,232,1)"><span class="db-widget-icon">✨</span>AI insights</div>
+      <div style="display:flex;align-items:center;gap:6px"><button class="db-widget-collapse-btn" onclick="dbToggleCollapse('dbw-aiinsight')" title="Collapse">▼</button></div>
+    </div>
+    <div class="db-widget-body" id="dbwb-aiinsight"><div class="ai-insight-body"><div class="ai-cards"><div class="ai-card alert">
+      <div class="ai-card-header">
+        <span class="ai-card-icon">🚨</span>
+        <span class="ai-card-tag">Alert</span>
+      </div>
+      <div class="ai-card-title">Five bills overdue today</div>
+      <div class="ai-card-text">Tasleem AED 100, Google One AED 8, Plex Remote Access AED 10, Talabat Pro AED 29, and ChatGPT AED 31 are overdue. Pay these AED 178 immediately to avoid late fees.</div>
+      <div class="ai-card-action"><span>→</span>Pay overdue bills within 2 hours</div>
+    </div><div class="ai-card alert">
+      <div class="ai-card-header">
+        <span class="ai-card-icon">⚠️</span>
+        <span class="ai-card-tag">Alert</span>
+      </div>
+      <div class="ai-card-title">Monthly bills spike 301%</div>
+      <div class="ai-card-text">This cycle's bills jumped from AED 5163 last month to AED 21763—an increase of AED 20689. The Debit Rent Last Month AED 2000 suggests a duplicate billing error.</div>
+      <div class="ai-card-action"><span>→</span>Investigate Debit Rent Last Month duplicate charge</div>
+    </div><div class="ai-card opportunity">
+      <div class="ai-card-header">
+        <span class="ai-card-icon">💰</span>
+        <span class="ai-card-tag">Opportunity</span>
+      </div>
+      <div class="ai-card-title">Cancel 5 low-value subscriptions</div>
+      <div class="ai-card-text">Plex Remote Access AED 10, Google One AED 8, Talabat Pro AED 29, ChatGPT AED 31, and Spotify AED 25 total AED 103/month. Cancel unused services today.</div>
+      <div class="ai-card-action"><span>→</span>Cancel Plex, Google One, Talabat Pro immediately</div>
+    </div><div class="ai-card trend">
+      <div class="ai-card-header">
+        <span class="ai-card-icon">📊</span>
+        <span class="ai-card-tag">Trend</span>
+      </div>
+      <div class="ai-card-title">Loan payoff window closing</div>
+      <div class="ai-card-text">You have 5 loans totaling AED 8000 all due in exactly 1 month. With AED 6000/month in loan payments (Helping Hands AED 4000 + others), your final payoff is locked in.</div>
+      <div class="ai-card-action"><span>→</span>Confirm final loan payments scheduled for May</div>
+    </div><div class="ai-card tip">
+      <div class="ai-card-header">
+        <span class="ai-card-icon">🎯</span>
+        <span class="ai-card-tag">Tip</span>
+      </div>
+      <div class="ai-card-title">Two undefined goals stalled</div>
+      <div class="ai-card-text">Your AED 100000 goal (262 days left) and AED 20000 goal (47 days left) show 0% progress. With AED 1000/month unpaid savings, redirect this toward your 47-day deadline goal.</div>
+      <div class="ai-card-action"><span>→</span>Allocate Savings AED 1000 to 47-day goal</div>
+    </div></div><div class="ai-insight-meta"><span>Updated 10:54 Â· 5 insights</span><div style="display:flex;gap:8px"><button class="ai-insight-refresh-btn" onclick="aiRefreshInsight()">↻ Refresh</button><button class="ai-insight-refresh-btn" onclick="aiShowKeyInput()">🔑 Key</button></div></div></div></div>
+    </div><div class="db-widget db-w2 collapsed" id="dbw-finances" data-wid="finances" draggable="false">
+    <div class="db-widget-head" style="background:rgba(74,142,204,.08);border-bottom-color:rgba(74,142,204, .2)"> 
+      <div class="db-widget-title" style="color:rgba(74,142,204,1)"><span class="db-widget-icon">💰</span>Finances</div>
+      <div style="display:flex;align-items:center;gap:6px"><span class="db-badge db-badge-red">2 overdue</span><button class="db-widget-collapse-btn" onclick="dbToggleCollapse('dbw-finances')" title="Collapse">▼</button></div>
+    </div>
+    <div class="db-widget-body" id="dbwb-finances">
+    <div class="db-kpi-grid">
+      <div class="db-kpi green">
+        <div class="db-kpi-label">Monthly spend</div>
+        <div class="db-kpi-val">AED 21,763</div>
+        <div class="db-kpi-sub">21 active subs</div>
+      </div>
+      <div class="db-kpi">
+        <div class="db-kpi-label">Annual projected</div>
+        <div class="db-kpi-val">AED 262,716</div>
+        <div class="db-kpi-sub">at current rate</div>
+      </div>
+      <div class="db-kpi red">
+        <div class="db-kpi-label">Paid this month</div>
+        <div class="db-kpi-val">AED 26,180</div>
+        <div class="db-kpi-sub">120% of monthly</div>
+      </div>
+      <div class="db-kpi amber">
+        <div class="db-kpi-label">Tabby next cycle</div>
+        <div class="db-kpi-val">AED 630</div>
+        <div class="db-kpi-sub">2 active plans</div>
+      </div>
+    </div></div>
+    
+    <div class="db-widget-footer">
+      <span></span>
+      <button class="db-link" onclick="switchPage('active')">View bills →</button>
+    </div></div><div class="db-widget db-w1 collapsed" id="dbw-networth" data-wid="networth" draggable="false">
+    <div class="db-widget-head"> 
+      <div class="db-widget-title"><span class="db-widget-icon">â¶</span>Net worth</div>
+      <div style="display:flex;align-items:center;gap:6px"><button class="db-widget-collapse-btn" onclick="dbToggleCollapse('dbw-networth')" title="Collapse">▼</button></div>
+    </div>
+    <div class="db-widget-body" id="dbwb-networth">
+    <div style="text-align:center;padding:10px 0 8px">
+      <div style="font-size:26px;font-weight:600;font-family:var(--mono);letter-spacing:-.02em;color:var(--accent)">
+        AEDâ¯49,752
+      </div>
+      
+      <div style="font-size:10px;color:var(--text3);margin-top:2px">no snapshot yet</div>
+    </div>
+    <div class="db-kpi-grid" style="margin-top:4px">
+      <div class="db-kpi green">
+        <div class="db-kpi-label">Assets</div>
+        <div class="db-kpi-val">AED 57,752</div>
+        <div class="db-kpi-sub">6 accounts</div>
+      </div>
+      <div class="db-kpi red">
+        <div class="db-kpi-label">Liabilities</div>
+        <div class="db-kpi-val">AED 8,000</div>
+        <div class="db-kpi-sub">5 active loans</div>
+      </div>
+    </div></div>
+    
+    <div class="db-widget-footer">
+      <span></span>
+      <button class="db-link" onclick="switchPage('networth')">View details →</button>
+    </div></div><div class="db-widget db-w1" id="dbw-goals" data-wid="goals" draggable="false">
+    <div class="db-widget-head" style="background:rgba(31,170,126,.08);border-bottom-color:rgba(31,170,126, .2)"> 
+      <div class="db-widget-title" style="color:rgba(31,170,126,1)"><span class="db-widget-icon">△</span>Goals</div>
+      <div style="display:flex;align-items:center;gap:6px"><span class="db-badge db-badge-green">2</span><button class="db-widget-collapse-btn" onclick="dbToggleCollapse('dbw-goals')" title="Collapse">▼</button></div>
+    </div>
+    <div class="db-widget-body" id="dbwb-goals"><div class="db-prog-wrap">
+      <div class="db-prog-row">
+        <div class="db-prog-name">🏠 Buy Real Estate</div>
+        <div class="db-prog-pct">0% · <span class="gl-days-ok" style="font-size:10px">~9mo left</span></div>
+      </div>
+      <div class="db-prog-track"><div class="db-prog-fill" style="width:0%;background:var(--accent)"></div></div>
+    </div><div class="db-prog-wrap">
+      <div class="db-prog-row">
+        <div class="db-prog-name">✈️ Trip to Japan</div>
+        <div class="db-prog-pct">0% · <span class="gl-days-ok" style="font-size:10px">~2mo left</span></div>
+      </div>
+      <div class="db-prog-track"><div class="db-prog-fill" style="width:0%;background:var(--purple)"></div></div>
+    </div></div>
+    
+    <div class="db-widget-footer">
+      <span>0 completed</span>
+      <button class="db-link" onclick="switchPage('goals')">All goals →</button>
+    </div></div><div class="db-widget db-w1" id="dbw-shopping" data-wid="shopping" draggable="false"><div class="db-widget-edit-overlay"><div class="db-drag-handle">⋮⋮</div><button class="db-vis-btn" title="Hide widget">👁</button></div></div><div class="db-widget db-w2" id="dbw-links" data-wid="links" draggable="false">
+    <div class="db-widget-head" style="background:rgba(74,142,204,.08);border-bottom-color:rgba(74,142,204, .2)"> 
+      <div class="db-widget-title" style="color:rgba(74,142,204,1)"><span class="db-widget-icon">ð</span>Links</div>
+      <div style="display:flex;align-items:center;gap:6px"><button class="db-widget-collapse-btn" onclick="dbToggleCollapse('dbw-links')" title="Collapse">▼</button></div>
+    </div>
+    <div class="db-widget-body" id="dbwb-links" style="padding: 10px 12px;"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px"><div onclick="openLink('1776016484629')" style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border-radius:9px;background:var(--surface2);border:0.5px solid var(--border);cursor:pointer;transition:all .15s;border-top:2px solid #4A8ECC" onmouseover="this.style.background='var(--surface3)'" onmouseout="this.style.background='var(--surface2)'"><div style="font-size:20px">📄</div><div style="font-size:11px;font-weight:600;color:var(--text);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%">lifeos-backup-april-2</div></div></div></div>
+    </div></div>
     </div>
 
     <!-- Active page -->
-    <div id="page-active">
+    <div id="page-active" style="display: none;">
       <div class="page-header">
         <div>
           <div class="page-title">Monthly Expenses</div>
-          <div class="page-sub" id="page-sub"></div>
+          <div class="page-sub" id="page-sub">26 Mar â 25 Apr 2026 · 23 entries</div>
         </div>
         <div class="header-actions">
           <button class="btn primary" onclick="openModal()">+ Add new</button>
         </div>
       </div>
-      <div class="metrics" id="metrics"></div>
+      <div class="metrics" id="metrics">
+    <div class="metric"><div class="metric-label">Monthly</div><div class="metric-value">AED 21,763.00</div><div class="metric-sub">21 subs + 2 Tabby</div></div>
+    <div class="metric"><div class="metric-label">Annual</div><div class="metric-value">AED 262,716.00</div><div class="metric-sub">projected</div></div>
+    <div class="metric green clickable" onclick="showPaidBreakdown()" title="Click to see breakdown"><div class="metric-label">Paid this month ⓘ</div><div class="metric-value">AED 26,180.37</div><div class="metric-sub">20 payments</div></div>
+    <div class="metric red"><div class="metric-label">Overdue</div><div class="metric-value">2</div><div class="metric-sub">needs attention</div></div>
+    
+  </div>
       <div id="trial-wrap"></div>
-      <div id="upcoming-wrap"></div>
+      <div id="upcoming-wrap"><div class="section-label">Upcoming — next 14 days</div><div class="upcoming-strip"><div class="upcoming-card urgent">
+        <div style="display:flex;align-items:center;gap:6px"><div class="item-dot" style="background:#BA7517"></div><div class="upcoming-name">Noon One</div></div>
+        <div class="upcoming-day">Tomorrow</div>
+        <div class="upcoming-amt">AED 5.00</div>
+      </div><div class="upcoming-card urgent">
+        <div style="display:flex;align-items:center;gap:6px"><div class="item-dot" style="background:#C98A1A"></div><div class="upcoming-name">Claude</div></div>
+        <div class="upcoming-day">In 2 days</div>
+        <div class="upcoming-amt">AED 80.00</div>
+      </div><div class="upcoming-card">
+        <div style="display:flex;align-items:center;gap:6px"><div class="item-dot" style="background:#639922"></div><div class="upcoming-name">Spotify</div></div>
+        <div class="upcoming-day">In 11 days</div>
+        <div class="upcoming-amt">AED 25.00</div>
+      </div></div></div>
       <div class="toolbar">
         <div class="search-wrap">
-          <span class="search-icon">&#8981;</span>
-          <input id="search" type="text" placeholder="Search&#8230; (press N to add)" oninput="render()">
+          <span class="search-icon">⌕</span>
+          <input id="search" type="text" placeholder="Search… (press N to add)" oninput="render()">
         </div>
         <select class="sort-select" id="sort" onchange="render()">
           <option value="due">Sort: Due date</option>
@@ -1621,8 +1958,566 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
           <option value="default">Sort: Added</option>
         </select>
       </div>
-      <div class="filter-row" id="filters"></div>
-      <div class="items" id="items"></div>
+      <div class="filter-row" id="filters"><button class="pill active" onclick="setFilter('All')">All</button><button class="pill" onclick="setFilter('Tabby')">Tabby</button><button class="pill" onclick="setFilter('Housing')">Housing</button><button class="pill" onclick="setFilter('Streaming')">Streaming</button><button class="pill" onclick="setFilter('Software')">Software</button><button class="pill" onclick="setFilter('Finance')">Finance</button><button class="pill" onclick="setFilter('Utilities')">Utilities</button><button class="pill" onclick="setFilter('Food')">Food</button></div>
+      <div class="items" id="items"><div class="item" id="bill-1775131055919">
+    <div class="item-dot" style="background:#4A8ECC"></div>
+    <div>
+      <div class="item-name">
+        <span>For Work</span>
+        <span style="font-size:11px;font-weight:400;color:var(--text3)">1 May </span>
+        
+        <span class="badge badge-paid">paid</span>
+        
+      </div>
+      <div class="item-meta"><span>Streaming</span><span class="item-due due-future">Day 1</span><span class="sep">·</span><span style="color:var(--positive);font-size:11px">resets in 16d</span></div>
+      
+    </div>
+    <div>
+        <div class="item-amount">AED 4,000.00<span style="font-size:11px;font-weight:400;color:var(--text3)"> / mo</span></div>
+        
+        
+      </div>
+    <div class="item-actions">
+      <button class="icon-btn pay done" onclick="togglePaid('1775131055919')" title="Click to unpay">✓ Paid</button>
+      <button class="icon-btn" onclick="duplicateItem('1775131055919')" title="Duplicate">⧉</button>
+      <button class="icon-btn" onclick="openModal('1775131055919')" title="Edit">✎</button>
+      <button class="icon-btn del" onclick="deleteItem('1775131055919')" title="Delete">✕</button>
+    </div>
+  </div><div class="item" id="bill-1773690352019">
+    <div class="item-dot" style="background:#E24B4A"></div>
+    <div>
+      <div class="item-name">
+        <span>Etisalat Elife Neo 1GB</span>
+        <span style="font-size:11px;font-weight:400;color:var(--text3)">1 May </span>
+        
+        <span class="badge badge-paid">paid</span>
+        
+      </div>
+      <div class="item-meta"><span>Housing</span><span class="item-due due-future">Day 1</span><span class="sep">·</span><span style="color:var(--positive);font-size:11px">resets in 16d</span></div>
+      
+    </div>
+    <div>
+        <div class="item-amount">AED 445.00<span style="font-size:11px;font-weight:400;color:var(--text3)"> / mo</span></div>
+        
+        
+      </div>
+    <div class="item-actions">
+      <button class="icon-btn pay done" onclick="togglePaid('1773690352019')" title="Click to unpay">✓ Paid</button>
+      <button class="icon-btn" onclick="duplicateItem('1773690352019')" title="Duplicate">⧉</button>
+      <button class="icon-btn" onclick="openModal('1773690352019')" title="Edit">✎</button>
+      <button class="icon-btn del" onclick="deleteItem('1773690352019')" title="Delete">✕</button>
+    </div>
+  </div><div class="item" id="bill-1773690295450">
+    <div class="item-dot" style="background:#E24B4A"></div>
+    <div>
+      <div class="item-name">
+        <span>TAQA</span>
+        <span style="font-size:11px;font-weight:400;color:var(--text3)">2 May </span>
+        
+        <span class="badge badge-paid">paid</span>
+        
+      </div>
+      <div class="item-meta"><span>Housing</span><span class="item-due due-future">Day 2</span><span class="sep">·</span><span style="color:var(--positive);font-size:11px">resets in 17d</span></div>
+      
+    </div>
+    <div>
+        <div class="item-amount">AED 380.00<span style="font-size:11px;font-weight:400;color:var(--text3)"> / mo</span></div>
+        
+        
+      </div>
+    <div class="item-actions">
+      <button class="icon-btn pay done" onclick="togglePaid('1773690295450')" title="Click to unpay">✓ Paid</button>
+      <button class="icon-btn" onclick="duplicateItem('1773690295450')" title="Duplicate">⧉</button>
+      <button class="icon-btn" onclick="openModal('1773690295450')" title="Edit">✎</button>
+      <button class="icon-btn del" onclick="deleteItem('1773690295450')" title="Delete">✕</button>
+    </div>
+  </div><div class="item" id="bill-1775396307398">
+    <div class="item-dot" style="background:#4A8ECC"></div>
+    <div>
+      <div class="item-name">
+        <span>For Work (copy)</span>
+        <span style="font-size:11px;font-weight:400;color:var(--text3)">3 May </span>
+        
+        <span class="badge badge-paid">paid</span>
+        
+      </div>
+      <div class="item-meta"><span>Streaming</span><span class="item-due due-future">Day 3</span><span class="sep">·</span><span style="color:var(--positive);font-size:11px">resets in 18d</span></div>
+      
+    </div>
+    <div>
+        <div class="item-amount">AED 4,000.00<span style="font-size:11px;font-weight:400;color:var(--text3)"> / mo</span></div>
+        
+        
+      </div>
+    <div class="item-actions">
+      <button class="icon-btn pay done" onclick="togglePaid('1775396307398')" title="Click to unpay">✓ Paid</button>
+      <button class="icon-btn" onclick="duplicateItem('1775396307398')" title="Duplicate">⧉</button>
+      <button class="icon-btn" onclick="openModal('1775396307398')" title="Edit">✎</button>
+      <button class="icon-btn del" onclick="deleteItem('1775396307398')" title="Delete">✕</button>
+    </div>
+  </div><div class="item" id="bill-1773690443363">
+    <div class="item-dot" style="background:#E24B4A"></div>
+    <div>
+      <div class="item-name">
+        <span>Tasleem</span>
+        <span style="font-size:11px;font-weight:400;color:var(--text3)">5 May </span>
+        
+        <span class="badge badge-paid">paid</span>
+        
+      </div>
+      <div class="item-meta"><span>Housing</span><span class="item-due due-future">Day 5</span><span class="sep">·</span><span style="color:var(--positive);font-size:11px">resets in 20d</span></div>
+      
+    </div>
+    <div>
+        <div class="item-amount">AED 100.00<span style="font-size:11px;font-weight:400;color:var(--text3)"> / mo</span></div>
+        
+        
+      </div>
+    <div class="item-actions">
+      <button class="icon-btn pay done" onclick="togglePaid('1773690443363')" title="Click to unpay">✓ Paid</button>
+      <button class="icon-btn" onclick="duplicateItem('1773690443363')" title="Duplicate">⧉</button>
+      <button class="icon-btn" onclick="openModal('1773690443363')" title="Edit">✎</button>
+      <button class="icon-btn del" onclick="deleteItem('1773690443363')" title="Delete">✕</button>
+    </div>
+  </div><div class="item" id="bill-1774381539605">
+    <div class="item-dot" style="background:#C95050"></div>
+    <div>
+      <div class="item-name">
+        <span>Rent</span>
+        <span style="font-size:11px;font-weight:400;color:var(--text3)">10 May </span>
+        
+        <span class="badge badge-paid">paid</span>
+        
+      </div>
+      <div class="item-meta"><span>Housing</span><span class="item-due due-future">Day 10</span><span class="sep">·</span><span style="color:var(--positive);font-size:11px">resets in 25d</span></div>
+      
+    </div>
+    <div>
+        <div class="item-amount">AED 4,000.00<span style="font-size:11px;font-weight:400;color:var(--text3)"> / mo</span></div>
+        
+        
+      </div>
+    <div class="item-actions">
+      <button class="icon-btn pay done" onclick="togglePaid('1774381539605')" title="Click to unpay">✓ Paid</button>
+      <button class="icon-btn" onclick="duplicateItem('1774381539605')" title="Duplicate">⧉</button>
+      <button class="icon-btn" onclick="openModal('1774381539605')" title="Edit">✎</button>
+      <button class="icon-btn del" onclick="deleteItem('1774381539605')" title="Delete">✕</button>
+    </div>
+  </div><div class="item" id="bill-1773690193715">
+    <div class="item-dot" style="background:#7F77DD"></div>
+    <div>
+      <div class="item-name">
+        <span>Google One</span>
+        <span style="font-size:11px;font-weight:400;color:var(--text3)">10 May </span>
+        
+        <span class="badge badge-paid">paid</span>
+        
+      </div>
+      <div class="item-meta"><span>Utilities</span><span class="item-due due-future">Day 10</span><span class="sep">·</span><span style="color:var(--positive);font-size:11px">resets in 25d</span></div>
+      
+    </div>
+    <div>
+        <div class="item-amount">AED 8.00<span style="font-size:11px;font-weight:400;color:var(--text3)"> / mo</span></div>
+        
+        
+      </div>
+    <div class="item-actions">
+      <button class="icon-btn pay done" onclick="togglePaid('1773690193715')" title="Click to unpay">✓ Paid</button>
+      <button class="icon-btn" onclick="duplicateItem('1773690193715')" title="Duplicate">⧉</button>
+      <button class="icon-btn" onclick="openModal('1773690193715')" title="Edit">✎</button>
+      <button class="icon-btn del" onclick="deleteItem('1773690193715')" title="Delete">✕</button>
+    </div>
+  </div><div class="item" id="bill-1775927230404">
+    <div class="item-dot" style="background:#C95050"></div>
+    <div>
+      <div class="item-name">
+        <span>Tasleem</span>
+        <span style="font-size:11px;font-weight:400;color:var(--text3)">11 May </span>
+        
+        <span class="badge badge-paid">paid</span>
+        
+      </div>
+      <div class="item-meta"><span>Housing</span><span class="item-due due-future">Day 11</span><span class="sep">·</span><span style="color:var(--positive);font-size:11px">resets in 26d</span></div>
+      <div class="item-notes">Overdue last month</div>
+    </div>
+    <div>
+        <div class="item-amount">AED 80.00</div>
+        
+        <div class="item-amount-sub" style="color:var(--accent)">One-time</div>
+      </div>
+    <div class="item-actions">
+      <button class="icon-btn pay done" onclick="togglePaid('1775927230404')" title="Click to unpay">✓ Paid</button>
+      <button class="icon-btn" onclick="duplicateItem('1775927230404')" title="Duplicate">⧉</button>
+      <button class="icon-btn" onclick="openModal('1775927230404')" title="Edit">✎</button>
+      <button class="icon-btn del" onclick="deleteItem('1775927230404')" title="Delete">✕</button>
+    </div>
+  </div><div class="item" id="bill-1775926026489">
+    <div class="item-dot" style="background:#4A8ECC"></div>
+    <div>
+      <div class="item-name">
+        <span>Haircut/Shave</span>
+        <span style="font-size:11px;font-weight:400;color:var(--text3)">11 May </span>
+        
+        <span class="badge badge-paid">paid</span>
+        
+      </div>
+      <div class="item-meta"><span>Streaming</span><span style="font-size:11px;color:var(--accent);opacity:.7">→ Bills</span><span class="item-due due-future">Day 11</span><span class="sep">·</span><span style="color:var(--positive);font-size:11px">resets in 26d</span></div>
+      
+    </div>
+    <div>
+        <div class="item-amount">AED 50.00</div>
+        
+        <div class="item-amount-sub" style="color:var(--accent)">One-time</div>
+      </div>
+    <div class="item-actions">
+      <button class="icon-btn pay done" onclick="togglePaid('1775926026489')" title="Click to unpay">✓ Paid</button>
+      <button class="icon-btn" onclick="duplicateItem('1775926026489')" title="Duplicate">⧉</button>
+      <button class="icon-btn" onclick="openModal('1775926026489')" title="Edit">✎</button>
+      <button class="icon-btn del" onclick="deleteItem('1775926026489')" title="Delete">✕</button>
+    </div>
+  </div><div class="item" id="bill-1773690158305">
+    <div class="item-dot" style="background:#D4537E"></div>
+    <div>
+      <div class="item-name">
+        <span>Plex Remote Access</span>
+        <span style="font-size:11px;font-weight:400;color:var(--text3)">11 May </span>
+        
+        <span class="badge badge-paid">paid</span>
+        
+      </div>
+      <div class="item-meta"><span>Streaming</span><span class="item-due due-future">Day 11</span><span class="sep">·</span><span style="color:var(--positive);font-size:11px">resets in 26d</span></div>
+      
+    </div>
+    <div>
+        <div class="item-amount">AED 10.00<span style="font-size:11px;font-weight:400;color:var(--text3)"> / mo</span></div>
+        
+        
+      </div>
+    <div class="item-actions">
+      <button class="icon-btn pay done" onclick="togglePaid('1773690158305')" title="Click to unpay">✓ Paid</button>
+      <button class="icon-btn" onclick="duplicateItem('1773690158305')" title="Duplicate">⧉</button>
+      <button class="icon-btn" onclick="openModal('1773690158305')" title="Edit">✎</button>
+      <button class="icon-btn del" onclick="deleteItem('1773690158305')" title="Delete">✕</button>
+    </div>
+  </div><div class="item" style="border-color:rgba(201,138,26,.25)">
+    <div class="item-dot" style="background:#7A74D4"></div>
+    <div style="min-width:0">
+      <div class="item-name">
+        <span>Amazon</span>
+        <span class="badge-tabby">3/4</span>
+        
+      </div>
+      <div class="item-meta">
+        <span>Tabby</span><span class="sep">·</span>
+        <span style="font-size:11px;color:var(--text3)">3 of 4 paid</span>
+        <span class="sep">·</span><span style="color:var(--accent);font-size:11px">12 May</span>
+        
+      </div>
+      <div style="height:3px;background:var(--surface3);border-radius:99px;margin-top:6px;overflow:hidden;max-width:200px">
+        <div style="height:100%;border-radius:99px;background:var(--amber);width:75%;transition:width .4s ease"></div>
+      </div>
+    </div>
+    <div>
+      <div class="item-amount">AED 80.12<span style="font-size:11px;font-weight:400;color:var(--text3)"> / inst</span></div>
+      <div class="item-amount-sub">AED 320.49 total</div>
+    </div>
+    <div class="item-actions">
+      <button class="icon-btn pay" onclick="markNextInstalment('1773720858296')" title="Pay next instalment">✓ Pay</button>
+      <button class="icon-btn" onclick="switchPage('tabby')" title="View in Tabby">⊞</button>
+      <button class="icon-btn del" onclick="deleteTabbyItem('1773720858296')" title="Delete">✕</button>
+    </div>
+  </div><div class="item" id="bill-1773690066419">
+    <div class="item-dot" style="background:#D85A30"></div>
+    <div>
+      <div class="item-name">
+        <span>Talabat Pro</span>
+        <span style="font-size:11px;font-weight:400;color:var(--text3)">14 May </span>
+        
+        
+        
+      </div>
+      <div class="item-meta"><span>Food</span><span class="item-due due-future">Day 14</span><span class="sep">·</span><span style="color:var(--text3);font-size:11px">last paid 16 Mar</span></div>
+      
+    </div>
+    <div>
+        <div class="item-amount">AED 29.00<span style="font-size:11px;font-weight:400;color:var(--text3)"> / mo</span></div>
+        
+        
+      </div>
+    <div class="item-actions">
+      <button class="icon-btn pay" onclick="togglePaid('1773690066419')" title="Mark as paid">✓ Paid</button>
+      <button class="icon-btn" onclick="duplicateItem('1773690066419')" title="Duplicate">⧉</button>
+      <button class="icon-btn" onclick="openModal('1773690066419')" title="Edit">✎</button>
+      <button class="icon-btn del" onclick="deleteItem('1773690066419')" title="Delete">✕</button>
+    </div>
+  </div><div class="item" id="bill-1773690026376">
+    <div class="item-dot" style="background:#378ADD"></div>
+    <div>
+      <div class="item-name">
+        <span>ChatGPT</span>
+        <span style="font-size:11px;font-weight:400;color:var(--text3)">14 May </span>
+        
+        
+        
+      </div>
+      <div class="item-meta"><span>Software</span><span class="item-due due-future">Day 14</span><span class="sep">·</span><span style="color:var(--text3);font-size:11px">last paid 16 Mar</span></div>
+      
+    </div>
+    <div>
+        <div class="item-amount">AED 31.00<span style="font-size:11px;font-weight:400;color:var(--text3)"> / mo</span></div>
+        
+        
+      </div>
+    <div class="item-actions">
+      <button class="icon-btn pay" onclick="togglePaid('1773690026376')" title="Mark as paid">✓ Paid</button>
+      <button class="icon-btn" onclick="duplicateItem('1773690026376')" title="Duplicate">⧉</button>
+      <button class="icon-btn" onclick="openModal('1773690026376')" title="Edit">✎</button>
+      <button class="icon-btn del" onclick="deleteItem('1773690026376')" title="Delete">✕</button>
+    </div>
+  </div><div class="item" id="bill-1773689954991">
+    <div class="item-dot" style="background:#BA7517"></div>
+    <div>
+      <div class="item-name">
+        <span>Noon One</span>
+        <span style="font-size:11px;font-weight:400;color:var(--text3)">16 Apr </span>
+        
+        
+        
+      </div>
+      <div class="item-meta"><span>Food</span><span class="item-due due-soon">Due in 1d</span><span class="sep">·</span><span style="color:var(--text3);font-size:11px">last paid 16 Mar</span></div>
+      
+    </div>
+    <div>
+        <div class="item-amount">AED 5.00<span style="font-size:11px;font-weight:400;color:var(--text3)"> / mo</span></div>
+        
+        
+      </div>
+    <div class="item-actions">
+      <button class="icon-btn pay" onclick="togglePaid('1773689954991')" title="Mark as paid">✓ Paid</button>
+      <button class="icon-btn" onclick="duplicateItem('1773689954991')" title="Duplicate">⧉</button>
+      <button class="icon-btn" onclick="openModal('1773689954991')" title="Edit">✎</button>
+      <button class="icon-btn del" onclick="deleteItem('1773689954991')" title="Delete">✕</button>
+    </div>
+  </div><div class="item" id="bill-1774384015804">
+    <div class="item-dot" style="background:#C98A1A"></div>
+    <div>
+      <div class="item-name">
+        <span>Claude</span>
+        <span style="font-size:11px;font-weight:400;color:var(--text3)">17 Apr </span>
+        
+        
+        
+      </div>
+      <div class="item-meta"><span>Streaming</span><span class="item-due due-soon">Due in 2d</span><span class="sep">·</span><span style="color:var(--text3);font-size:11px">last paid 27 Mar</span></div>
+      
+    </div>
+    <div>
+        <div class="item-amount">AED 80.00<span style="font-size:11px;font-weight:400;color:var(--text3)"> / mo</span></div>
+        
+        
+      </div>
+    <div class="item-actions">
+      <button class="icon-btn pay" onclick="togglePaid('1774384015804')" title="Mark as paid">✓ Paid</button>
+      <button class="icon-btn" onclick="duplicateItem('1774384015804')" title="Duplicate">⧉</button>
+      <button class="icon-btn" onclick="openModal('1774384015804')" title="Edit">✎</button>
+      <button class="icon-btn del" onclick="deleteItem('1774384015804')" title="Delete">✕</button>
+    </div>
+  </div><div class="item" style="border-color:rgba(201,138,26,.25)">
+    <div class="item-dot" style="background:#1D9E75"></div>
+    <div style="min-width:0">
+      <div class="item-name">
+        <span>iPhone Y</span>
+        <span class="badge-tabby">2/4</span>
+        
+      </div>
+      <div class="item-meta">
+        <span>Tabby</span><span class="sep">·</span>
+        <span style="font-size:11px;color:var(--text3)">2 of 4 paid</span>
+        <span class="sep">·</span><span class="item-due due-overdue">Overdue</span>
+        
+      </div>
+      <div style="height:3px;background:var(--surface3);border-radius:99px;margin-top:6px;overflow:hidden;max-width:200px">
+        <div style="height:100%;border-radius:99px;background:var(--amber);width:50%;transition:width .4s ease"></div>
+      </div>
+    </div>
+    <div>
+      <div class="item-amount">AED 550.00<span style="font-size:11px;font-weight:400;color:var(--text3)"> / inst</span></div>
+      <div class="item-amount-sub">AED 2,200.00 total</div>
+    </div>
+    <div class="item-actions">
+      <button class="icon-btn pay" onclick="markNextInstalment('1774620511026')" title="Pay next instalment">✓ Pay</button>
+      <button class="icon-btn" onclick="switchPage('tabby')" title="View in Tabby">⊞</button>
+      <button class="icon-btn del" onclick="deleteTabbyItem('1774620511026')" title="Delete">✕</button>
+    </div>
+  </div><div class="item" id="bill-1773690001803">
+    <div class="item-dot" style="background:#639922"></div>
+    <div>
+      <div class="item-name">
+        <span>Spotify</span>
+        <span style="font-size:11px;font-weight:400;color:var(--text3)">26 Apr </span>
+        
+        
+        
+      </div>
+      <div class="item-meta"><span>Streaming</span><span class="item-due due-future">Day 26</span><span class="sep">·</span><span style="color:var(--text3);font-size:11px">last paid 26 Mar</span></div>
+      
+    </div>
+    <div>
+        <div class="item-amount">AED 25.00<span style="font-size:11px;font-weight:400;color:var(--text3)"> / mo</span></div>
+        
+        
+      </div>
+    <div class="item-actions">
+      <button class="icon-btn pay" onclick="togglePaid('1773690001803')" title="Mark as paid">✓ Paid</button>
+      <button class="icon-btn" onclick="duplicateItem('1773690001803')" title="Duplicate">⧉</button>
+      <button class="icon-btn" onclick="openModal('1773690001803')" title="Edit">✎</button>
+      <button class="icon-btn del" onclick="deleteItem('1773690001803')" title="Delete">✕</button>
+    </div>
+  </div><div class="item" id="bill-1775131970387">
+    <div class="item-dot" style="background:#C97840"></div>
+    <div>
+      <div class="item-name">
+        <span>Claude</span>
+        <span style="font-size:11px;font-weight:400;color:var(--text3)">29 Apr </span>
+        
+        <span class="badge badge-paid">paid</span>
+        
+      </div>
+      <div class="item-meta"><span>Software</span><span class="item-due due-future">Day 29</span><span class="sep">·</span><span style="color:var(--positive);font-size:11px">resets in 14d</span></div>
+      
+    </div>
+    <div>
+        <div class="item-amount">AED 350.00<span style="font-size:11px;font-weight:400;color:var(--text3)"> / mo</span></div>
+        
+        
+      </div>
+    <div class="item-actions">
+      <button class="icon-btn pay done" onclick="togglePaid('1775131970387')" title="Click to unpay">✓ Paid</button>
+      <button class="icon-btn" onclick="duplicateItem('1775131970387')" title="Duplicate">⧉</button>
+      <button class="icon-btn" onclick="openModal('1775131970387')" title="Edit">✎</button>
+      <button class="icon-btn del" onclick="deleteItem('1775131970387')" title="Delete">✕</button>
+    </div>
+  </div><div class="item" id="bill-1774731682739">
+    <div class="item-dot" style="background:#888880"></div>
+    <div>
+      <div class="item-name">
+        <span>Pocket Money</span>
+        <span style="font-size:11px;font-weight:400;color:var(--text3)">30 Apr </span>
+        
+        
+        
+      </div>
+      <div class="item-meta"><span>Finance</span><span class="item-due due-future">Day 30</span><span class="sep">·</span><span style="color:var(--text3);font-size:11px">last paid 29 Mar</span></div>
+      
+    </div>
+    <div>
+        <div class="item-amount">AED 2,000.00<span style="font-size:11px;font-weight:400;color:var(--text3)"> / mo</span></div>
+        
+        
+      </div>
+    <div class="item-actions">
+      <button class="icon-btn pay" onclick="togglePaid('1774731682739')" title="Mark as paid">✓ Paid</button>
+      <button class="icon-btn" onclick="duplicateItem('1774731682739')" title="Duplicate">⧉</button>
+      <button class="icon-btn" onclick="openModal('1774731682739')" title="Edit">✎</button>
+      <button class="icon-btn del" onclick="deleteItem('1774731682739')" title="Delete">✕</button>
+    </div>
+  </div><div class="item" id="bill-1774731626549">
+    <div class="item-dot" style="background:#888880"></div>
+    <div>
+      <div class="item-name">
+        <span>Debit Rent Last Month</span>
+        <span style="font-size:11px;font-weight:400;color:var(--text3)">30 Apr </span>
+        
+        
+        
+      </div>
+      <div class="item-meta"><span>Finance</span><span class="item-due due-future">Day 30</span><span class="sep">·</span><span style="color:var(--text3);font-size:11px">last paid 29 Mar</span></div>
+      
+    </div>
+    <div>
+        <div class="item-amount">AED 2,000.00<span style="font-size:11px;font-weight:400;color:var(--text3)"> / mo</span></div>
+        
+        
+      </div>
+    <div class="item-actions">
+      <button class="icon-btn pay" onclick="togglePaid('1774731626549')" title="Mark as paid">✓ Paid</button>
+      <button class="icon-btn" onclick="duplicateItem('1774731626549')" title="Duplicate">⧉</button>
+      <button class="icon-btn" onclick="openModal('1774731626549')" title="Edit">✎</button>
+      <button class="icon-btn del" onclick="deleteItem('1774731626549')" title="Delete">✕</button>
+    </div>
+  </div><div class="item" id="bill-1774729738700">
+    <div class="item-dot" style="background:#888880"></div>
+    <div>
+      <div class="item-name">
+        <span>Travel</span>
+        <span style="font-size:11px;font-weight:400;color:var(--text3)">30 Apr </span>
+        
+        
+        
+      </div>
+      <div class="item-meta"><span>Finance</span><span class="item-due due-future">Day 30</span><span class="sep">·</span><span style="color:var(--text3);font-size:11px">last paid 29 Mar</span></div>
+      
+    </div>
+    <div>
+        <div class="item-amount">AED 3,000.00<span style="font-size:11px;font-weight:400;color:var(--text3)"> / mo</span></div>
+        
+        
+      </div>
+    <div class="item-actions">
+      <button class="icon-btn pay" onclick="togglePaid('1774729738700')" title="Mark as paid">✓ Paid</button>
+      <button class="icon-btn" onclick="duplicateItem('1774729738700')" title="Duplicate">⧉</button>
+      <button class="icon-btn" onclick="openModal('1774729738700')" title="Edit">✎</button>
+      <button class="icon-btn del" onclick="deleteItem('1774729738700')" title="Delete">✕</button>
+    </div>
+  </div><div class="item" id="bill-1774618809293">
+    <div class="item-dot" style="background:#888880"></div>
+    <div>
+      <div class="item-name">
+        <span>Savings</span>
+        <span style="font-size:11px;font-weight:400;color:var(--text3)">30 Apr </span>
+        
+        
+        
+      </div>
+      <div class="item-meta"><span>Finance</span><span class="item-due due-future">Day 30</span><span class="sep">·</span><span style="color:var(--text3);font-size:11px">last paid 28 Mar</span></div>
+      
+    </div>
+    <div>
+        <div class="item-amount">AED 1,000.00<span style="font-size:11px;font-weight:400;color:var(--text3)"> / mo</span></div>
+        
+        
+      </div>
+    <div class="item-actions">
+      <button class="icon-btn pay" onclick="togglePaid('1774618809293')" title="Mark as paid">✓ Paid</button>
+      <button class="icon-btn" onclick="duplicateItem('1774618809293')" title="Duplicate">⧉</button>
+      <button class="icon-btn" onclick="openModal('1774618809293')" title="Edit">✎</button>
+      <button class="icon-btn del" onclick="deleteItem('1774618809293')" title="Delete">✕</button>
+    </div>
+  </div><div class="item" id="bill-1774618778687">
+    <div class="item-dot" style="background:#888880"></div>
+    <div>
+      <div class="item-name">
+        <span>Expenses Extra Spare</span>
+        <span style="font-size:11px;font-weight:400;color:var(--text3)">30 Apr </span>
+        
+        
+        
+      </div>
+      <div class="item-meta"><span>Finance</span><span class="item-due due-future">Day 30</span><span class="sep">·</span><span style="color:var(--text3);font-size:11px">last paid 27 Mar</span></div>
+      
+    </div>
+    <div>
+        <div class="item-amount">AED 300.00<span style="font-size:11px;font-weight:400;color:var(--text3)"> / mo</span></div>
+        
+        
+      </div>
+    <div class="item-actions">
+      <button class="icon-btn pay" onclick="togglePaid('1774618778687')" title="Mark as paid">✓ Paid</button>
+      <button class="icon-btn" onclick="duplicateItem('1774618778687')" title="Duplicate">⧉</button>
+      <button class="icon-btn" onclick="openModal('1774618778687')" title="Edit">✎</button>
+      <button class="icon-btn del" onclick="deleteItem('1774618778687')" title="Delete">✕</button>
+    </div>
+  </div></div>
     </div>
 
     <!-- Tabby page -->
@@ -1675,7 +2570,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
             <div class="calc-field">
               <label>Pick from your subs or enter manually</label>
               <select id="cc-pick" onchange="calcPickSub()">
-                <option value="">&#8212; Enter manually &#8212;</option>
+                <option value="">— Enter manually —</option>
               </select>
             </div>
             <div class="calc-field"><label>Name</label><input id="cc-name" type="text" placeholder="e.g. Netflix" oninput="calcCost()"></div>
@@ -1726,11 +2621,11 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
       <!-- Compare subs -->
       <div id="calc-compare" style="display:none">
         <div class="calc-card full" style="margin-bottom:16px">
-          <div class="calc-section-title">Your active subscriptions &#8212; ranked by monthly cost</div>
+          <div class="calc-section-title">Your active subscriptions — ranked by monthly cost</div>
           <div id="cmp-list"></div>
         </div>
         <div class="calc-card full">
-          <div class="calc-section-title">Custom comparison &#8212; add up to 4 options</div>
+          <div class="calc-section-title">Custom comparison — add up to 4 options</div>
           <div id="cmp-custom-inputs" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:12px"></div>
           <div id="cmp-custom-results"></div>
         </div>
@@ -1744,7 +2639,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
             <div class="calc-field">
               <label>Pick from your subs or enter manually</label>
               <select id="wt-pick" onchange="worthPickSub()">
-                <option value="">&#8212; Enter manually &#8212;</option>
+                <option value="">— Enter manually —</option>
               </select>
             </div>
             <div class="fields-row">
@@ -1790,14 +2685,14 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
           <div class="page-sub" id="tasks-sub"></div>
         </div>
         <div class="header-actions">
-          <button class="btn" onclick="exportTasksCSV()">&#8599; Export CSV</button>
+          <button class="btn" onclick="exportTasksCSV()">↗ Export CSV</button>
           <button class="btn primary" onclick="openTaskModal()">+ Add task</button>
         </div>
       </div>
       <!-- Workspace tabs -->
       <div class="tk-workspace-tabs">
-        <button class="tk-workspace-tab active" id="wstab-personal" onclick="switchWorkspace('personal')">&#128100; Personal</button>
-        <button class="tk-workspace-tab" id="wstab-work" onclick="switchWorkspace('work')">&#128188; Work</button>
+        <button class="tk-workspace-tab active" id="wstab-personal" onclick="switchWorkspace('personal')">👤 Personal</button>
+        <button class="tk-workspace-tab" id="wstab-work" onclick="switchWorkspace('work')">💼 Work</button>
       </div>
       <div class="tk-layout">
         <!-- Tint overlay -->
@@ -1807,8 +2702,8 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
           <div class="metrics" id="tasks-metrics"></div>
           <div class="toolbar">
             <div class="search-wrap">
-              <span class="search-icon">&#8981;</span>
-              <input id="tk-search" type="text" placeholder="Search tasks&#8230; (press T to add)" oninput="renderTasks()">
+              <span class="search-icon">⌕</span>
+              <input id="tk-search" type="text" placeholder="Search tasks… (press T to add)" oninput="renderTasks()">
             </div>
             <select class="sort-select" id="tk-sort" onchange="renderTasks()">
               <option value="urgency">Sort: Urgency</option>
@@ -1828,14 +2723,14 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
           <div class="tk-panel-inner">
             <div class="tk-panel-header">
               <div class="tk-panel-title" id="tk-modal-title">Add task</div>
-              <button class="modal-close-btn" onclick="closeTkModal()">&#10005;</button>
+              <button class="modal-close-btn" onclick="closeTkModal()">✕</button>
             </div>
-            <div class="field"><label>Title</label><input id="tk-title" type="text" placeholder="What needs to be done?" autocomplete="off" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();saveTask();}"></div>
-            <div class="field"><label>Notes</label><textarea id="tk-notes" placeholder="Details, links, context&#8230;" style="height:72px"></textarea></div>
+            <div class="field"><label>Title</label><input id="tk-title" type="text" placeholder="What needs to be done?" autocomplete="off" onkeydown="if(event.key==='Enter'&amp;&amp;!event.shiftKey){event.preventDefault();saveTask();}"></div>
+            <div class="field"><label>Notes</label><textarea id="tk-notes" placeholder="Details, links, context…" style="height:72px"></textarea></div>
             <div class="fields-row">
               <div class="field"><label>Priority</label>
                 <select id="tk-priority">
-                  <option value="none">&#8212; None</option>
+                  <option value="none">— None</option>
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
                   <option value="high">High</option>
@@ -1850,8 +2745,8 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
               </div>
               <div class="field"><label>Workspace</label>
                 <select id="tk-workspace-sel">
-                  <option value="personal">&#128100; Personal</option>
-                  <option value="work">&#128188; Work</option>
+                  <option value="personal">👤 Personal</option>
+                  <option value="work">💼 Work</option>
                 </select>
               </div>
             </div>
@@ -1860,7 +2755,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
             <div class="field">
               <label>Subtasks</label>
               <div id="tk-sub-list" style="margin-bottom:6px"></div>
-              <button type="button" class="btn" style="font-size:12px;height:30px;width:100%;justify-content:center" onclick="addSubtaskRow()">&#65291; Add subtask</button>
+              <button type="button" class="btn" style="font-size:12px;height:30px;width:100%;justify-content:center" onclick="addSubtaskRow()">＋ Add subtask</button>
             </div>
             <div class="field"><label>Color</label><div class="color-dots" id="tk-color-picker"></div></div>
             <div style="display:flex;gap:8px;margin-top:1.25rem">
@@ -1908,8 +2803,8 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
             <div class="cal-month-title" id="cal-month-title"></div>
             <div class="cal-nav-btns">
               <button class="cal-today-btn" onclick="calGoToday()">Today</button>
-              <button class="cal-arrow" onclick="calPrev()">&#8592;</button>
-              <button class="cal-arrow" onclick="calNext()">&#8594;</button>
+              <button class="cal-arrow" onclick="calPrev()">←</button>
+              <button class="cal-arrow" onclick="calNext()">→</button>
             </div>
           </div>
           <div class="cal-grid-wrap">
@@ -1928,7 +2823,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
                 <div class="cal-panel-date" id="cal-panel-date"></div>
                 <div class="cal-panel-sub" id="cal-panel-sub"></div>
               </div>
-              <button class="icon-btn" onclick="calClosePanel()" title="Close">&#10005;</button>
+              <button class="icon-btn" onclick="calClosePanel()" title="Close">✕</button>
             </div>
             <div id="cal-panel-content"></div>
           </div>
@@ -1949,8 +2844,8 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
       </div>
       <div class="qn-toolbar">
         <div class="qn-search-wrap">
-          <span class="qn-search-icon">&#8981;</span>
-          <input id="qn-search" type="text" placeholder="Search notes&#8230;" oninput="renderNotes()">
+          <span class="qn-search-icon">⌕</span>
+          <input id="qn-search" type="text" placeholder="Search notes…" oninput="renderNotes()">
         </div>
         <select class="sort-select" id="qn-sort" onchange="renderNotes()">
           <option value="updated">Sort: Recent</option>
@@ -2040,8 +2935,8 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
       <div class="metrics" id="ac-metrics"></div>
       <div class="ac-filter-row">
         <div class="ac-search-wrap">
-          <span class="ac-search-icon">&#8981;</span>
-          <input id="ac-search" type="text" placeholder="Search accounts&#8230;" oninput="renderAccounts()">
+          <span class="ac-search-icon">⌕</span>
+          <input id="ac-search" type="text" placeholder="Search accounts…" oninput="renderAccounts()">
         </div>
         <select class="sort-select" id="ac-sort" onchange="renderAccounts()">
           <option value="balance">Sort: Balance</option>
@@ -2093,13 +2988,13 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
           <div class="page-sub" id="nw-sub">Assets minus liabilities</div>
         </div>
         <div class="header-actions">
-          <button class="btn primary" onclick="nwTakeSnapshot()">&#9998; Save snapshot</button>
+          <button class="btn primary" onclick="nwTakeSnapshot()">✎ Save snapshot</button>
         </div>
       </div>
       <div id="nw-hero"></div>
       <div class="nw-snapshot-bar">
-        <span style="font-size:11px;color:var(--text3);white-space:nowrap">&#9662; Snapshot note</span>
-        <input id="nw-snap-note" type="text" placeholder="e.g. End of March, after bonus&#8230;" maxlength="60">
+        <span style="font-size:11px;color:var(--text3);white-space:nowrap">▾ Snapshot note</span>
+        <input id="nw-snap-note" type="text" placeholder="e.g. End of March, after bonus…" maxlength="60">
         <button class="nw-snap-btn" onclick="nwTakeSnapshot()">Save now</button>
       </div>
       <div class="nw-section-grid" id="nw-sections"></div>
@@ -2116,7 +3011,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
 
 <!-- Toast -->
 <div class="toast" id="toast">
-  <span id="toast-msg"></span>
+  <span id="toast-msg">GitHub token saved</span>
   <button class="toast-undo" id="toast-undo" style="display:none" onclick="undoDelete()">Undo</button>
 </div>
 
@@ -2139,15 +3034,15 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
           <option value="Electronics">Electronics</option>
           <option value="Fashion">Fashion</option>
           <option value="Home">Home</option>
-          <option value="Health">Health & Beauty</option>
+          <option value="Health">Health &amp; Beauty</option>
           <option value="Travel">Travel</option>
-          <option value="Food">Food & Dining</option>
+          <option value="Food">Food &amp; Dining</option>
           <option value="Other">Other</option>
         </select>
       </div>
       <div class="field"><label>Color</label><div class="color-dots" id="tabby-color-picker" style="margin-top:10px"></div></div>
     </div>
-    <div class="field"><label>Notes (optional)</label><textarea id="t-notes" placeholder="e.g. order number, store, delivery date&#8230;"></textarea></div>
+    <div class="field"><label>Notes (optional)</label><textarea id="t-notes" placeholder="e.g. order number, store, delivery date…"></textarea></div>
     <div class="field"><label>Pay from account (optional)</label><select id="t-pay-account"><option value="">-- No account --</option></select></div>
     <div class="modal-actions">
       <button class="btn" onclick="closeTabbyModal()">Cancel</button>
@@ -2179,7 +3074,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
           <option value="Streaming">Streaming</option>
           <option value="Utilities">Utilities</option>
           <option value="Software">Software</option>
-          <option value="Food">Food & Dining</option>
+          <option value="Food">Food &amp; Dining</option>
           <option value="Housing">Housing</option>
           <option value="Health">Health</option>
           <option value="Transport">Transport</option>
@@ -2187,9 +3082,9 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
           <option value="Other">Other</option>
         </select>
       </div>
-      <div class="field"><label>Due day of month</label><input id="f-due" type="number" min="1" max="31" placeholder="1&#8211;31"></div>
+      <div class="field"><label>Due day of month</label><input id="f-due" type="number" min="1" max="31" placeholder="1–31"></div>
     </div>
-    <div class="field"><label>Notes (optional)</label><textarea id="f-notes" placeholder="e.g. account email, login URL, contract details&#8230;"></textarea></div>
+    <div class="field"><label>Notes (optional)</label><textarea id="f-notes" placeholder="e.g. account email, login URL, contract details…"></textarea></div>
     <div class="field"><label>Status</label>
       <select id="f-status"><option value="active">Active</option><option value="paused">Paused</option></select>
     </div>
@@ -2221,7 +3116,7 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:4
     <div class="modal-title">Manage lists</div>
     <div id="lists-manage-content" style="min-height:40px"></div>
     <div style="display:flex;gap:8px;margin-top:14px">
-      <input id="new-list-input" type="text" placeholder="New list name&#8230;" style="flex:1;height:34px;background:var(--surface2);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);padding:0 10px;font-size:13px;font-family:var(--font);outline:none;transition:border-color .18s" onkeydown="if(event.key==='Enter')addList()">
+      <input id="new-list-input" type="text" placeholder="New list name…" style="flex:1;height:34px;background:var(--surface2);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);padding:0 10px;font-size:13px;font-family:var(--font);outline:none;transition:border-color .18s" onkeydown="if(event.key==='Enter')addList()">
       <button class="btn primary" onclick="addList()">Add</button>
     </div>
     <div class="modal-actions">
@@ -2240,26 +3135,26 @@ eval(atob('CmNvbnN0IENPTE9SUz1bJ25vbmUnLCcjMUQ5RTc1JywnIzRBOEVDQycsJyNDNDZBOEEnL
 
     <div class="modal-header">
       <div class="modal-title" id="shop-modal-title">Add item</div>
-      <button class="modal-close-btn" onclick="closeShopModal()">&#10005;</button>
+      <button class="modal-close-btn" onclick="closeShopModal()">✕</button>
     </div>
 
     <!-- Extract panel -->
     <div style="background:var(--surface2);border:0.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px">
-      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">&#10024; Auto-fill from product page</div>
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">✨ Auto-fill from product page</div>
       <div style="display:flex;background:var(--surface3);border-radius:8px;padding:2px;margin-bottom:10px">
-        <button id="sh-tab-url"   onclick="shSwitchTab('url')"   style="flex:1;height:30px;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.15);transition:all .15s">&#128279; From URL</button>
-        <button id="sh-tab-paste" onclick="shSwitchTab('paste')" style="flex:1;height:30px;border:none;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);background:transparent;color:var(--text3);transition:all .15s">&#128196; Paste text</button>
+        <button id="sh-tab-url" onclick="shSwitchTab('url')" style="flex:1;height:30px;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.15);transition:all .15s">🔗 From URL</button>
+        <button id="sh-tab-paste" onclick="shSwitchTab('paste')" style="flex:1;height:30px;border:none;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);background:transparent;color:var(--text3);transition:all .15s">📄 Paste text</button>
       </div>
       <div id="sh-mode-url">
         <div style="display:flex;gap:6px">
           <input id="sh-url" type="url" placeholder="https://..." style="flex:1;font-size:12px" oninput="shUrlChanged()">
-          <button class="shop-extract-btn" id="sh-extract-btn" onclick="shExtractFromUrl()" disabled style="flex-shrink:0">&#10024; Extract</button>
+          <button class="shop-extract-btn" id="sh-extract-btn" onclick="shExtractFromUrl()" disabled="" style="flex-shrink:0">✨ Extract</button>
         </div>
-        <div style="font-size:10px;color:var(--text3);margin-top:5px;line-height:1.4">Needs Cloudflare proxy in Settings &mdash; or switch to Paste text (works on any site).</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:5px;line-height:1.4">Needs Cloudflare proxy in Settings — or switch to Paste text (works on any site).</div>
       </div>
       <div id="sh-mode-paste" style="display:none">
-        <textarea id="sh-paste-text" placeholder="Go to the product page &#8594; Ctrl+A, Ctrl+C &#8594; paste here" style="height:80px;font-size:12px;width:100%;box-sizing:border-box;resize:vertical;line-height:1.5"></textarea>
-        <button class="shop-extract-btn" id="sh-paste-extract-btn" onclick="shExtractFromPaste()" style="margin-top:7px;width:100%;height:34px">&#10024; Extract product info</button>
+        <textarea id="sh-paste-text" placeholder="Go to the product page → Ctrl+A, Ctrl+C → paste here" style="height:80px;font-size:12px;width:100%;box-sizing:border-box;resize:vertical;line-height:1.5"></textarea>
+        <button class="shop-extract-btn" id="sh-paste-extract-btn" onclick="shExtractFromPaste()" style="margin-top:7px;width:100%;height:34px">✨ Extract product info</button>
       </div>
       <div id="sh-extract-status" style="font-size:11px;color:var(--positive);margin-top:7px;min-height:16px;font-weight:500"></div>
     </div>
@@ -2315,12 +3210,12 @@ eval(atob('CmNvbnN0IENPTE9SUz1bJ25vbmUnLCcjMUQ5RTc1JywnIzRBOEVDQycsJyNDNDZBOEEnL
 
 
 <!-- Settings modal -->
-<div class="settings-modal-backdrop" id="settings-modal" style="display:none" onclick="if(event.target===this)closeSettingsModal()">
+<div class="settings-modal-backdrop" id="settings-modal" style="display: flex;" onclick="if(event.target===this)closeSettingsModal()">
   <div class="settings-modal" onclick="event.stopPropagation()">
 
     <div class="settings-modal-head">
-      <div class="settings-modal-title">&#9881; Settings</div>
-      <button class="modal-close-btn" onclick="closeSettingsModal()">&#10005;</button>
+      <div class="settings-modal-title">⚙ Settings</div>
+      <button class="modal-close-btn" onclick="closeSettingsModal()">✕</button>
     </div>
 
     <!-- Billing cycle -->
@@ -2329,12 +3224,11 @@ eval(atob('CmNvbnN0IENPTE9SUz1bJ25vbmUnLCcjMUQ5RTc1JywnIzRBOEVDQycsJyNDNDZBOEEnL
       <div class="settings-row">
         <div class="settings-label">Cycle starts on day</div>
         <div class="settings-field-row" style="margin-top:4px">
-          <input id="cycle-day-input" type="number" min="1" max="28" value="1" class="settings-input" style="width:72px;flex:none"
-            oninput="this.value=Math.min(28,Math.max(1,parseInt(this.value)||1))">
+          <input id="cycle-day-input" type="number" min="1" max="28" value="1" class="settings-input" style="width:72px;flex:none" oninput="this.value=Math.min(28,Math.max(1,parseInt(this.value)||1))">
           <span style="font-size:12px;color:var(--text3)">of each month</span>
           <button onclick="saveCycleDay()" class="settings-save-btn">Save</button>
         </div>
-        <div id="cycle-label-preview" class="settings-hint" style="margin-top:4px"></div>
+        <div id="cycle-label-preview" class="settings-hint" style="margin-top:4px">Current cycle: 26 Mar â 25 Apr 2026</div>
       </div>
     </div>
 
@@ -2342,11 +3236,11 @@ eval(atob('CmNvbnN0IENPTE9SUz1bJ25vbmUnLCcjMUQ5RTc1JywnIzRBOEVDQycsJyNDNDZBOEEnL
     <div class="settings-section">
       <div class="settings-section-title">Auto-save</div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-        <div class="as-dot" id="settings-as-dot"></div>
-        <span id="settings-as-status-text" style="font-size:12px;color:var(--text2);flex:1">Not set up</span>
+        <div class="as-dot ok" id="settings-as-dot"></div>
+        <span id="settings-as-status-text" style="font-size:12px;color:var(--text2);flex:1">Last: 15 Apr 12:23 AM -- lifeos-backup-april-2.json</span>
       </div>
       <button class="settings-action-btn" onclick="asSetup();closeSettingsModal()">
-        <div class="settings-action-icon" style="background:rgba(74,142,204,.15)">&#128194;</div>
+        <div class="settings-action-icon" style="background:rgba(74,142,204,.15)">📂</div>
         <span>Choose save file</span>
       </button>
     </div>
@@ -2356,15 +3250,15 @@ eval(atob('CmNvbnN0IENPTE9SUz1bJ25vbmUnLCcjMUQ5RTc1JywnIzRBOEVDQycsJyNDNDZBOEEnL
       <div class="settings-section-title">Backup</div>
       <div style="display:flex;flex-direction:column;gap:6px">
         <button class="settings-action-btn" onclick="exportJSON();closeSettingsModal()">
-          <div class="settings-action-icon" style="background:rgba(31,170,126,.15)">&#8595;</div>
+          <div class="settings-action-icon" style="background:rgba(31,170,126,.15)">↓</div>
           <div><div>Backup data</div><div style="font-size:10px;color:var(--text3);margin-top:1px">Download full .json backup</div></div>
         </button>
         <button class="settings-action-btn" onclick="closeSettingsModal();document.getElementById('import-input').click()">
-          <div class="settings-action-icon" style="background:rgba(201,138,26,.15)">&#8593;</div>
+          <div class="settings-action-icon" style="background:rgba(201,138,26,.15)">↑</div>
           <div><div>Restore backup</div><div style="font-size:10px;color:var(--text3);margin-top:1px">Import from a .json file</div></div>
         </button>
         <button class="settings-action-btn" onclick="exportCSV();closeSettingsModal()">
-          <div class="settings-action-icon" style="background:rgba(155,127,232,.15)">&#8599;</div>
+          <div class="settings-action-icon" style="background:rgba(155,127,232,.15)">↗</div>
           <div><div>Export CSV</div><div style="font-size:10px;color:var(--text3);margin-top:1px">Bills &amp; payments spreadsheet</div></div>
         </button>
       </div>
@@ -2375,11 +3269,11 @@ eval(atob('CmNvbnN0IENPTE9SUz1bJ25vbmUnLCcjMUQ5RTc1JywnIzRBOEVDQycsJyNDNDZBOEEnL
       <div class="settings-section-title">Data versions</div>
       <div style="display:flex;gap:7px;margin-bottom:10px">
         <button class="settings-action-btn" style="flex:1;height:34px" onclick="toggleSettingsVerPanel()" id="settings-ver-btn">
-          <div class="settings-action-icon" style="background:rgba(74,142,204,.12);width:24px;height:24px;border-radius:6px;font-size:11px">&#9719;</div>
+          <div class="settings-action-icon" style="background:rgba(74,142,204,.12);width:24px;height:24px;border-radius:6px;font-size:11px">◷</div>
           <span style="font-size:12px">View snapshots</span>
         </button>
         <button class="settings-action-btn" style="flex:1;height:34px" onclick="verManualCheckpoint()">
-          <div class="settings-action-icon" style="background:rgba(224,82,82,.12);width:24px;height:24px;border-radius:6px;font-size:11px">&#128204;</div>
+          <div class="settings-action-icon" style="background:rgba(224,82,82,.12);width:24px;height:24px;border-radius:6px;font-size:11px">📌</div>
           <span style="font-size:12px">Save checkpoint</span>
         </button>
       </div>
@@ -2390,7 +3284,7 @@ eval(atob('CmNvbnN0IENPTE9SUz1bJ25vbmUnLCcjMUQ5RTc1JywnIzRBOEVDQycsJyNDNDZBOEEnL
     <div class="settings-section">
       <div class="settings-section-title">Layout</div>
       <button class="settings-action-btn" onclick="navToggleEditMode()" id="nav-edit-btn">
-        <div class="settings-action-icon" style="background:rgba(201,138,26,.15)">&#9998;</div>
+        <div class="settings-action-icon" style="background:rgba(201,138,26,.15)">✎</div>
         <div><div>Reorder tabs</div><div style="font-size:10px;color:var(--text3)">Drag to rearrange the sidebar</div></div>
       </button>
     </div>
@@ -2409,7 +3303,7 @@ eval(atob('CmNvbnN0IENPTE9SUz1bJ25vbmUnLCcjMUQ5RTc1JywnIzRBOEVDQycsJyNDNDZBOEEnL
       <div class="settings-row" style="margin-top:10px">
         <div class="settings-label">API key <span style="font-size:10px;color:var(--text3);font-weight:400">(direct mode only)</span></div>
         <div class="settings-field-row" style="margin-top:4px">
-          <input id="ai-key-input-settings" type="password" placeholder="sk-ant-..." class="settings-input">
+          <input id="ai-key-input-settings" type="password" placeholder="sk-ant-â¦rs.dev" class="settings-input">
           <button onclick="aiSaveKeyFromSettings()" class="settings-save-btn">Save</button>
         </div>
         <div class="settings-hint" style="margin-top:4px">Only needed without a proxy. Stored in your browser only.</div>
@@ -2429,26 +3323,26 @@ eval(atob('CmNvbnN0IENPTE9SUz1bJ25vbmUnLCcjMUQ5RTc1JywnIzRBOEVDQycsJyNDNDZBOEEnL
       </div>
       <div class="settings-row" style="margin-top:10px">
         <div class="settings-label">Personal access token
-          <span id="gh-token-status" style="margin-left:8px;font-size:10px;padding:2px 7px;border-radius:4px;font-weight:500;display:none"></span>
+          <span id="gh-token-status" style="margin-left: 8px; font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 500; display: inline; background: var(--positive-dim); color: var(--positive); border: 0.5px solid var(--positive-border);">Saved ghp_...X7lF</span>
         </div>
         <div class="settings-field-row" style="margin-top:4px">
-          <input id="gh-token-input" type="password" placeholder="ghp_..." class="settings-input">
+          <input id="gh-token-input" type="password" placeholder="ghp_...X7lF" class="settings-input">
           <button onclick="ghSaveToken()" class="settings-save-btn">Save</button>
         </div>
         <div class="settings-hint" style="margin-top:4px">Needs <b>repo</b> scope. Stored in your browser only.</div>
       </div>
       <div style="margin-top:12px">
-        <button class="settings-action-btn" onclick="ghConfirmDeploy()" id="gh-deploy-btn">
-          <div class="settings-action-icon" style="background:rgba(31,170,126,.15)">&#8599;</div>
-          <div><div>Push to GitHub</div><div style="font-size:10px;color:var(--text3);margin-top:1px" id="gh-deploy-status">Deploy index.html to your repo</div></div>
+        <button class="settings-action-btn" onclick="ghConfirmDeploy()" id="gh-deploy-btn" style="opacity: 0.6; display: none;">
+          <div class="settings-action-icon" style="background:rgba(31,170,126,.15)">↗</div>
+          <div><div>Push to GitHub</div><div style="font-size:10px;color:var(--text3);margin-top:1px" id="gh-deploy-status">Encoding file...</div></div>
         </button>
       </div>
       <!-- Confirm row — hidden until button clicked -->
-      <div id="gh-confirm-row" style="display:none;margin-top:8px;padding:10px 12px;background:var(--amber-dim);border:0.5px solid var(--amber-border);border-radius:8px">
-        <div style="font-size:12px;color:var(--amber);font-weight:600;margin-bottom:8px">&#9888; Push to GitHub?</div>
-        <div style="font-size:11px;color:var(--text2);margin-bottom:10px">This will overwrite <b>index.html</b> in <span id="gh-confirm-repo" style="font-family:var(--mono)"></span> on branch <b>main</b>.</div>
+      <div id="gh-confirm-row" style="display: block; margin-top: 8px; padding: 10px 12px; background: var(--amber-dim); border: 0.5px solid var(--amber-border); border-radius: 8px;">
+        <div style="font-size:12px;color:var(--amber);font-weight:600;margin-bottom:8px">⚠ Push to GitHub?</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:10px">This will overwrite <b>index.html</b> in <span id="gh-confirm-repo" style="font-family:var(--mono)">Ariestotele/lifeos</span> on branch <b>main</b>.</div>
         <div style="display:flex;gap:8px">
-          <button onclick="ghDeploy()" style="flex:1;height:32px;border-radius:7px;border:none;background:var(--positive);color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)">&#10003; Yes, push</button>
+          <button onclick="ghDeploy()" style="flex:1;height:32px;border-radius:7px;border:none;background:var(--positive);color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)">✓ Yes, push</button>
           <button onclick="ghCancelDeploy()" style="flex:1;height:32px;border-radius:7px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);font-size:12px;cursor:pointer;font-family:var(--font)">Cancel</button>
         </div>
       </div>
@@ -2462,7 +3356,7 @@ eval(atob('CmNvbnN0IENPTE9SUz1bJ25vbmUnLCcjMUQ5RTc1JywnIzRBOEVDQycsJyNDNDZBOEEnL
   <div class="modal" onclick="event.stopPropagation()" style="max-width:420px">
     <div class="modal-header">
       <div class="modal-title" id="sh-coll-modal-title">New collection</div>
-      <button class="modal-close-btn" onclick="closeShCollModal()">&#10005;</button>
+      <button class="modal-close-btn" onclick="closeShCollModal()">✕</button>
     </div>
     <div class="field"><label>Collection name *</label><input id="sh-coll-name" type="text" placeholder="e.g. Living Room, Gym Gear, Wishlist..." autocomplete="off"></div>
     <div class="field"><label>Search / reference URL (optional)</label><input id="sh-coll-url" type="url" placeholder="https://amazon.ae/s?k=..."></div>
@@ -2481,26 +3375,26 @@ eval(atob('CmNvbnN0IENPTE9SUz1bJ25vbmUnLCcjMUQ5RTc1JywnIzRBOEVDQycsJyNDNDZBOEEnL
   <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
     <div class="modal-header">
       <div class="modal-title" id="link-modal-title">Add link</div>
-      <button class="modal-close-btn" onclick="closeLinkModal()">&#10005;</button>
+      <button class="modal-close-btn" onclick="closeLinkModal()">✕</button>
     </div>
     <!-- Drag & drop zone -->
     <div id="lk-drop-zone" style="border:1.5px dashed var(--border2);border-radius:10px;padding:14px;text-align:center;margin-bottom:14px;transition:all .18s;cursor:pointer;font-size:12px;color:var(--text3)" ondragover="lkDragOver(event)" ondragleave="lkDragLeave(event)" ondrop="lkDrop(event)" onclick="document.getElementById('lk-file-input').click()">
-      <div style="font-size:20px;margin-bottom:4px">&#128193;</div>
+      <div style="font-size:20px;margin-bottom:4px">📁</div>
       <div>Drag a file here <span style="color:var(--text3)">or</span> <span style="color:var(--accent);cursor:pointer">click to browse</span></div>
       <div style="font-size:10px;color:var(--text3);margin-top:3px">Auto-fills name and icon — paste the file path below</div>
     </div>
     <input type="file" id="lk-file-input" style="display:none" onchange="lkFileSelected(this)">
     <div class="fields-row">
-      <div class="field" style="flex:0 0 64px"><label>Icon</label><input id="lk-emoji" type="text" placeholder="&#127760;" style="font-size:22px;text-align:center;padding:4px" maxlength="4"></div>
+      <div class="field" style="flex:0 0 64px"><label>Icon</label><input id="lk-emoji" type="text" placeholder="🌐" style="font-size:22px;text-align:center;padding:4px" maxlength="4"></div>
       <div class="field" style="flex:1"><label>Title *</label><input id="lk-title" type="text" placeholder="e.g. Gmail, GitHub, Jira..." autocomplete="off"></div>
     </div>
     <div class="field">
       <label>URL or file path *</label>
       <div style="display:flex;gap:7px">
         <input id="lk-url" type="text" placeholder="https://... or file:///C:/path/to/file" style="flex:1">
-        <button onclick="document.getElementById('lk-file-input').click()" class="settings-save-btn" title="Browse for file" style="white-space:nowrap">&#128193; Browse</button>
+        <button onclick="document.getElementById('lk-file-input').click()" class="settings-save-btn" title="Browse for file" style="white-space:nowrap">📁 Browse</button>
       </div>
-      <div id="lk-path-hint" style="font-size:10px;color:var(--amber);margin-top:4px;display:none">&#9432; Browser security hides the full path — paste it manually above if needed</div>
+      <div id="lk-path-hint" style="font-size:10px;color:var(--amber);margin-top:4px;display:none">ⓘ Browser security hides the full path — paste it manually above if needed</div>
     </div>
     <div class="field"><label>Description (optional)</label><input id="lk-desc" type="text" placeholder="What is this link for?"></div>
     <div class="fields-row">
@@ -2523,7 +3417,7 @@ eval(atob('CmNvbnN0IENPTE9SUz1bJ25vbmUnLCcjMUQ5RTc1JywnIzRBOEVDQycsJyNDNDZBOEEnL
   <div class="modal" onclick="event.stopPropagation()" style="max-width:400px">
     <div class="modal-header">
       <div class="modal-title" id="link-group-modal-title">New group</div>
-      <button class="modal-close-btn" onclick="closeLinkGroupModal()">&#10005;</button>
+      <button class="modal-close-btn" onclick="closeLinkGroupModal()">✕</button>
     </div>
     <div class="field"><label>Group name *</label><input id="lg-name" type="text" placeholder="e.g. Work, Personal, Dev tools..." autocomplete="off"></div>
     <div class="field"><label>Description (optional)</label><input id="lg-desc" type="text" placeholder="What's in this group?"></div>
@@ -2541,8 +3435,8 @@ eval(atob('CmNvbnN0IENPTE9SUz1bJ25vbmUnLCcjMUQ5RTc1JywnIzRBOEVDQycsJyNDNDZBOEEnL
       <span class="link-viewer-emoji" id="lv-emoji">🔗</span>
       <span class="link-viewer-title" id="lv-title"></span>
       <span class="link-viewer-url" id="lv-url"></span>
-      <a id="lv-open-tab" href="#" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent);white-space:nowrap;text-decoration:none;padding:4px 8px;border:0.5px solid var(--accent-border);border-radius:5px;background:var(--accent-dim)">&#8599; Open in tab</a>
-      <button class="modal-close-btn" onclick="closeLinkViewer()">&#10005;</button>
+      <a id="lv-open-tab" href="#" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent);white-space:nowrap;text-decoration:none;padding:4px 8px;border:0.5px solid var(--accent-border);border-radius:5px;background:var(--accent-dim)">↗ Open in tab</a>
+      <button class="modal-close-btn" onclick="closeLinkViewer()">✕</button>
     </div>
     <iframe class="link-viewer-iframe" id="lv-iframe" src="" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy"></iframe>
   </div>
@@ -2553,14 +3447,14 @@ eval(atob('CmNvbnN0IENPTE9SUz1bJ25vbmUnLCcjMUQ5RTc1JywnIzRBOEVDQycsJyNDNDZBOEEnL
   <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
     <div class="modal-header">
       <div class="modal-title">Restore backup</div>
-      <button class="modal-close-btn" onclick="closeRestoreModal()">&#10005;</button>
+      <button class="modal-close-btn" onclick="closeRestoreModal()">✕</button>
     </div>
     <div style="margin-bottom:16px">
       <div style="font-size:12px;color:var(--text2);margin-bottom:6px" id="restore-modal-meta"></div>
       <div style="font-size:12px;color:var(--text3)" id="restore-modal-counts"></div>
     </div>
     <div style="background:var(--amber-dim);border:0.5px solid var(--amber-border);border-radius:8px;padding:10px 14px;margin-bottom:16px">
-      <div style="font-size:12px;color:var(--amber);font-weight:600;margin-bottom:4px">&#9888; How do you want to restore?</div>
+      <div style="font-size:12px;color:var(--amber);font-weight:600;margin-bottom:4px">⚠ How do you want to restore?</div>
       <div style="font-size:11px;color:var(--text3)"><strong style="color:var(--text2)">Replace</strong> — overwrites all current data with the backup.<br><strong style="color:var(--text2)">Merge</strong> — adds backup items without removing your existing data.</div>
     </div>
     <div class="modal-actions">
@@ -2572,24 +3466,25 @@ eval(atob('CmNvbnN0IENPTE9SUz1bJ25vbmUnLCcjMUQ5RTc1JywnIzRBOEVDQycsJyNDNDZBOEEnL
 </div>
 
 <!-- Floating collections panel -->
-<button class="sh-coll-fab" id="sh-coll-fab" onclick="toggleShCollPanel()" title="Collections" style="display:none"><span style="font-size:14px;font-weight:700;letter-spacing:-.02em">&#9776;</span></button>
+<button class="sh-coll-fab" id="sh-coll-fab" onclick="toggleShCollPanel()" title="Collections" style="display:none"><span style="font-size:14px;font-weight:700;letter-spacing:-.02em">☰</span></button>
 <div class="sh-coll-panel" id="sh-coll-panel">
   <div class="sh-coll-panel-head">
     <span style="display:flex;align-items:center;gap:7px"><span style="width:14px;height:11px;border:1.5px solid currentColor;border-top:none;border-radius:0 0 3px 3px;position:relative;display:inline-block;margin-top:3px"><span style="position:absolute;top:-5px;left:-1px;width:6px;height:5px;border:1.5px solid currentColor;border-bottom:none;border-radius:2px 2px 0 0;background:var(--surface2)"></span></span>Collections</span>
-    <button class="modal-close-btn" onclick="toggleShCollPanel()">&#10005;</button>
+    <button class="modal-close-btn" onclick="toggleShCollPanel()">✕</button>
   </div>
   <div id="sh-coll-panel-items"></div>
 </div>
 
 
 <!-- Task list FAB + panel -->
-<button class="sh-coll-fab" id="tk-list-fab" onclick="tkToggleListPanel()" title="Lists" style="display:none;bottom:74px"><span style="font-size:16px">&#9635;</span></button>
+<button class="sh-coll-fab" id="tk-list-fab" onclick="tkToggleListPanel()" title="Lists" style="display:none;bottom:74px"><span style="font-size:16px">▣</span></button>
 <div class="sh-coll-panel" id="tk-list-panel" style="bottom:120px">
   <div class="sh-coll-panel-head">
-    <span>&#9635; Lists</span>
-    <button class="modal-close-btn" onclick="tkToggleListPanel()">&#10005;</button>
+    <span>▣ Lists</span>
+    <button class="modal-close-btn" onclick="tkToggleListPanel()">✕</button>
   </div>
   <div id="tk-list-panel-items"></div>
 </div>
-</body>
-</html>
+
+
+</body><grammarly-desktop-integration data-grammarly-shadow-root="true"></grammarly-desktop-integration></html>

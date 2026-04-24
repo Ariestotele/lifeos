@@ -1,8 +1,8 @@
-// LifeOS service worker v5.18.1
-// HTML navigations: network-first (always fresh when online, cache fallback offline).
-// Other assets: cache-first with background refresh.
-// IMPORTANT: still bump CACHE on every release -- it's the invalidation key.
-const CACHE = 'lifeos-v5.18.1';
+// LifeOS service worker v5.18
+// Cache-first strategy with network fallback + auto-update on new version.
+// IMPORTANT: bump CACHE on every release so activate purges stale caches
+// and clients re-fetch the new HTML/JS.
+const CACHE = 'lifeos-v5.18';
 const CORE = [
   './',
   './index.html',
@@ -45,23 +45,10 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Network-first for HTML navigations so deploys take effect on the very next load.
-  if (req.mode === 'navigate' || (req.destination === 'document')) {
-    e.respondWith(
-      fetch(req).then(resp => {
-        if (resp && resp.ok) {
-          const copy = resp.clone();
-          caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
-        }
-        return resp;
-      }).catch(() => caches.match(req).then(hit => hit || caches.match('./index.html') || caches.match('./')))
-    );
-    return;
-  }
-  // Cache-first for everything else (static assets + fonts + cdn).
   e.respondWith(
     caches.match(req).then(hit => {
       if (hit) {
+        // Background refresh for same-origin so the user gets new versions eventually
         if (isSameOrigin) {
           fetch(req).then(resp => {
             if (resp && resp.ok) caches.open(CACHE).then(c => c.put(req, resp.clone()));
@@ -75,6 +62,12 @@ self.addEventListener('fetch', e => {
           caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
         }
         return resp;
+      }).catch(err => {
+        // Offline fallback: if requesting the shell, return cached index
+        if (req.mode === 'navigate') {
+          return caches.match('./index.html') || caches.match('./');
+        }
+        throw err;
       });
     })
   );

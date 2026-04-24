@@ -50,6 +50,7 @@ The entire JS is wrapped as `eval(atob('…'))`. For every edit:
 7. Surgical edits only — never rewrite large sections unless necessary.
 8. Atomic writes — Python transform script with `sub_unique` style asserts; every assertion must pass before any `f.write()` / `os.replace()`.
 9. Update **both** `life_manager.html` and `index.html` (byte-identical) in the same commit.
+10. **Bump `service-worker.js` `CACHE` constant on every visible release** (e.g. `'lifeos-v5.18'` → `'lifeos-v5.19'`). The SW is cache-first; if `CACHE` doesn't change, installed PWAs keep serving the old HTML even after the new HTML is in cache. Skipping this silently breaks every fix for installed users.
 
 ## Architecture
 

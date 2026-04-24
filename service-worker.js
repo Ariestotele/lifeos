@@ -1,6 +1,8 @@
-// LifeOS service worker v5.15
+// LifeOS service worker v5.18
 // Cache-first strategy with network fallback + auto-update on new version.
-const CACHE = 'lifeos-v5.15';
+// IMPORTANT: bump CACHE on every release so activate purges stale caches
+// and clients re-fetch the new HTML/JS.
+const CACHE = 'lifeos-v5.18';
 const CORE = [
   './',
   './index.html',

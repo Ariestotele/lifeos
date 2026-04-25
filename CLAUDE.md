@@ -13,7 +13,7 @@ Vanilla JS, HTML/CSS, `localStorage`, Chart.js CDN. No frameworks. The entire JS
 
 ## Current version
 
-**v5.17.4** (keyboard shortcuts panel).
+**v5.18.4** (mobile UI overlap fixes — z-index + bottom-nav clearance).
 
 ## Workflow preferences
 
@@ -57,6 +57,10 @@ The entire JS is wrapped as `eval(atob('…'))`. For every edit:
 - Two files deploy to GitHub Pages: `index.html` + `service-worker.js`.
 - HTML is self-contained: inline manifest (data URI), inline SVG icons, inline CSS.
 - Sandbox guard in `pwaInit()` skips SW registration on preview origins (Claude, CodeSandbox, `file://`, etc.).
+- **Service worker (v5.18.1+)**: network-first for HTML navigations (deploys take effect on the very next load), cache-first for static assets (fonts, CDN, same-origin sub-resources). Still bump `CACHE` per release.
+- **Mobile layout detection (v5.18.2+)**: `pwaInit()` adds `body.touch-device` when `'ontouchstart' in window || navigator.maxTouchPoints > 0`. All mobile chrome (bottom nav, task bottom sheet, sidebar slide, larger tap targets) is gated on this class with `!important` overrides — bypasses the unreliable `@media (max-width:640px)` breakpoint that didn't fire on some phones.
+- **Version stamp (v5.18.2+)**: small `#version-stamp` div near the corner displays `v<APP_VERSION> · <viewport>px · touch:<yes|no>` for at-a-glance debugging. Update is deferred to `window.load` so the DOM element exists.
+- z-index hierarchy: mobile-nav 100, page-header (sticky) 150, modal-backdrop 200, toast 300 (lifted on touch), sidebar overlay 399, sidebar 400, task panel 410, sh-coll-fab 501, settings/pay-popup 600, link-viewer 800, PWA banners 9999, version stamp 9999.
 
 ## Branding
 
@@ -69,7 +73,7 @@ LifeOS "LO" monogram as inline SVG in sidebar, favicon, and PWA icons:
 
 ## Pages
 
-Dashboard, Bills (active/trials/history), Tabby tracker, Insights, Calculator, Tasks (Work/Personal sections), Goals, Calendar, Notes, Loans, Receivables, Accounts, Net Worth, Shopping, Links.
+Dashboard, Bills (active/trials/history), Tabby tracker, Insights, Calculator, Tasks (one section per workspace), Goals, Calendar, Notes, Loans, Receivables, Accounts, Net Worth, Shopping, Links.
 
 ## Features
 
@@ -82,8 +86,9 @@ Dashboard, Bills (active/trials/history), Tabby tracker, Insights, Calculator, T
 - **Global search palette** — `Ctrl/Cmd+K` or `/`, 9 entity types, keyboard nav, grouped results
 - **PWA install** — manifest + service worker (cache-first + bg refresh + auto-update banner)
 - **Mobile bottom nav** — hamburger, Home, FAB, Tasks, Bills (context-aware FAB across 9 pages)
-- **Workspace-scoped lists** — each list optionally belongs to Work / Personal / Global; filter pills grouped by workspace
-- **Fix task workspaces** migration tool — in Manage Lists, reclassify legacy tasks in bulk
+- **Custom workspaces** — `workspaces` array of `{id, name, emoji, color}`; Manage Workspaces modal (🔧 button on Tasks filter row); add / delete with id-keyed reassignment of tasks + lists; first-load defaults seed Personal 👤 + Work 💼 so legacy `'personal'`/`'work'` values still work without migration.
+- **Workspace-scoped lists** — each list optionally belongs to a workspace or `null` (global); filter pills grouped per workspace + Global; cycleListWorkspace iterates real workspaces array.
+- **Fix task workspaces** migration tool — in Manage Lists, reclassify legacy tasks in bulk; options dynamically populate from `workspaces`.
 - **Keyboard shortcuts panel** — press `?`
 - **Links UX** — per-group `+ link` shortcut, empty-group CTA, mobile-visible card actions
 
@@ -108,6 +113,7 @@ Shortcuts are disabled while typing in inputs.
 | Bills / subs | `items` | `subtracker_items` | name, cat, notes, amount, cycle, dueDay, status, isTrial |
 | Tasks | `tasks` | `subtracker_tasks` | title, notes, tags, priority, dueDate, workspace, listId, subtasks, done, starred |
 | Lists | `lists` | `subtracker_lists` | id, name, color, **workspace** (nullable = global) |
+| Workspaces | `workspaces` | `lifeos_workspaces` | id, name, emoji, color |
 | Notes | `notes` | `subtracker_notes` | title, body, tags, color |
 | Loans | `loans` | `subtracker_loans` | name, lender, principal, rate, tenure, notes, paidOff |
 | Goals | `goals` | `subtracker_goals` | title, category, type, target, current, milestones, deadline |
@@ -117,7 +123,9 @@ Shortcuts are disabled while typing in inputs.
 | Links | `links` | `lifeos_links` | title, url, desc, groupId, emoji, color, clicks |
 | Link groups | `linkGroups` | `lifeos_link_groups` | id, name, desc |
 
-Workspace values: `'personal'`, `'work'`, or `null` (global, lists only).
+Workspace values: any `workspaces[].id` (defaults `'personal'` / `'work'` always present unless user deleted them), or `null` (global, lists only).
+
+`workspaces` is included in every export bundle (3 sites in JS) and restored by both restore-import and merge-import paths, with default-seeding fallback for older backups that omit the field.
 
 ## Version history
 
@@ -129,6 +137,11 @@ Workspace values: `'personal'`, `'work'`, or `null` (global, lists only).
 - **v5.17.2** — Workspace hygiene: "Fix task workspaces" migration modal (batch reclassify) + removed silent list-workspace override on every save (now only syncs on list change)
 - **v5.17.3** — Links fixes: mobile-visible card actions (`hover:none` media query), per-group `+ link` shortcut, empty-group CTA
 - **v5.17.4** — Keyboard shortcuts panel (`?` key)
+- **v5.18** — Custom workspaces: first-class `workspaces` array, Manage Workspaces modal (🔧 button on Tasks filter row), dynamic per-workspace section rendering + filter pill groups, dynamic populates for task / lists / wsfix modals, defaults seed Personal+Work on first load
+- **v5.18.1** — Mobile breakpoint expanded to `(pointer:coarse)` and SW switched to network-first for HTML navigations (deploys take effect on the very next page load)
+- **v5.18.2** — JS touch detection: `body.touch-device` class with `!important` overrides forces mobile layout regardless of viewport. Solved a bug where the user's phone reported viewport >640px so the media query never fired. Added a small version stamp (`v · …px · touch:yes`) for debugging
+- **v5.18.3** — `workspaces` added to every export bundle + both import paths (restore + merge) so backups round-trip cleanly. Version-stamp update deferred to `window.load`
+- **v5.18.4** — Mobile UI overlap fixes: dropped `.mobile-nav` z-index from 380 → 100 so modals always sit above it; lifted toast / PWA install / PWA update / Shopping FAB above the bottom nav on touch devices
 
 Deploy note: `index.html` was brought up to v5.17+ parity via a dedicated commit ("Deploy v5.17 to index.html (mobile nav fix)") so the installed PWA at `/lifeos/` picks up all mobile-nav + workspace-lists work.
 
@@ -136,9 +149,13 @@ Deploy note: `index.html` was brought up to v5.17+ parity via a dedicated commit
 
 1. **Subtask quick-toggle** from task card (click subtask checkbox without opening modal) — small
 2. **Quick-date buttons** on task modal (Today / Tomorrow / This week) — small
-3. **v5.18 Custom workspaces** — replace hardcoded Work/Personal with arbitrary workspaces (`workspaces` array, Manage Workspaces modal, dynamic section rendering, migration for legacy `'personal'`/`'work'` values) — large
-4. **Recurring tasks** — rrule-lite (daily/weekly/monthly + interval), generation on app load — large
-5. **Budget tracker per bill category** — medium
+3. **Recurring tasks** — rrule-lite (daily/weekly/monthly + interval), generation on app load — large
+4. **Budget tracker per bill category** — medium
+
+## Open reminders (carry forward across sessions)
+
+- Verify workspace **export → import round-trip** on the user's device after v5.18.3 (create custom workspace, export backup, restore — should preserve).
+- Once the user confirms the mobile bar + modals are fully stable, **remove the temporary `#version-stamp` element** (HTML + CSS + JS update) — it was added in v5.18.2 for debugging and isn't intended to be permanent.
 
 ## User context
 

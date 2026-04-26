@@ -13,7 +13,7 @@ Vanilla JS, HTML/CSS, `localStorage`, Chart.js CDN. No frameworks. The entire JS
 
 ## Current version
 
-**v5.18.4** (mobile UI overlap fixes — z-index + bottom-nav clearance).
+**v5.19.5** (theme unification refactor — final phase of the v5.19 series).
 
 ## Workflow preferences
 
@@ -142,6 +142,12 @@ Workspace values: any `workspaces[].id` (defaults `'personal'` / `'work'` always
 - **v5.18.2** — JS touch detection: `body.touch-device` class with `!important` overrides forces mobile layout regardless of viewport. Solved a bug where the user's phone reported viewport >640px so the media query never fired. Added a small version stamp (`v · …px · touch:yes`) for debugging
 - **v5.18.3** — `workspaces` added to every export bundle + both import paths (restore + merge) so backups round-trip cleanly. Version-stamp update deferred to `window.load`
 - **v5.18.4** — Mobile UI overlap fixes: dropped `.mobile-nav` z-index from 380 → 100 so modals always sit above it; lifted toast / PWA install / PWA update / Shopping FAB above the bottom nav on touch devices
+- **v5.19.0** — Storage quota safety: introduced `lsSet()` wrapper around 34 `localStorage.setItem` sites; on `QuotaExceededError` shows a single-shot toast (was silent data loss before)
+- **v5.19.1** — Cleanup: workspace merge condition uses `Array.isArray(data.workspaces)` (was skipping empty arrays); fixed `ai-key-input` focus to use `querySelector('.ai-insight-key-input')` (the broken id never existed)
+- **v5.19.2** — Universal Esc-key modal close: extended the keydown handler to call all 24 close functions (was 7); every modal now closes on Esc
+- **v5.19.3** — Manual PWA install button in Settings → App section: handles 3 states (already installed / `beforeinstallprompt` available / not available → OS-specific instructions). Resets the 7-day dismissed cooldown on tap. Auto-updates on `appinstalled` event.
+- **v5.19.4** — Theme audit (read-only Explore-agent report; informed v5.19.5)
+- **v5.19.5** — Theme unification: added `--radius-sm: 4px`, `--radius-md: 8px`, `--shadow-lg`; routed 65 hardcoded `border-radius:8px`/`4px` instances through the new variables. Pixel-identical render. Future radius/shadow tweaks now one-line.
 
 Deploy note: `index.html` was brought up to v5.17+ parity via a dedicated commit ("Deploy v5.17 to index.html (mobile nav fix)") so the installed PWA at `/lifeos/` picks up all mobile-nav + workspace-lists work.
 

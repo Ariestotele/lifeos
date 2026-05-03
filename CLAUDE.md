@@ -13,7 +13,7 @@ Vanilla JS, HTML/CSS, `localStorage`, Chart.js CDN. No frameworks. The entire JS
 
 ## Current version
 
-**v5.19.5** (theme unification refactor — final phase of the v5.19 series).
+**v5.19.7** (monthly bill reset window = 10 days before due date).
 
 ## Workflow preferences
 
@@ -148,6 +148,8 @@ Workspace values: any `workspaces[].id` (defaults `'personal'` / `'work'` always
 - **v5.19.3** — Manual PWA install button in Settings → App section: handles 3 states (already installed / `beforeinstallprompt` available / not available → OS-specific instructions). Resets the 7-day dismissed cooldown on tap. Auto-updates on `appinstalled` event.
 - **v5.19.4** — Theme audit (read-only Explore-agent report; informed v5.19.5)
 - **v5.19.5** — Theme unification: added `--radius-sm: 4px`, `--radius-md: 8px`, `--shadow-lg`; routed 65 hardcoded `border-radius:8px`/`4px` instances through the new variables. Pixel-identical render. Future radius/shadow tweaks now one-line.
+- **v5.19.6** — Perf pass: killed `backdrop-filter` blurs on touch devices (mobile-nav, all modal backdrops, sidebar overlay, task panel tint, banners). Three stacked blur layers were causing modal-open jank on phone GPUs. Compensated with slightly more opaque solid backgrounds. Desktop unchanged.
+- **v5.19.7** — Monthly bill reset window: `isPaidThisCycle` for monthly bills now rolls over `RESET_LEAD_DAYS` (=10) days before each bill's own `dueDay`, not on the 1st of the next calendar month. Bills without a `dueDay` keep the old calendar-month fallback. Other cycles unchanged.
 
 Deploy note: `index.html` was brought up to v5.17+ parity via a dedicated commit ("Deploy v5.17 to index.html (mobile nav fix)") so the installed PWA at `/lifeos/` picks up all mobile-nav + workspace-lists work.
 

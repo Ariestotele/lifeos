@@ -1,8 +1,8 @@
-// LifeOS service worker v5.19.6
+// LifeOS service worker v5.19.7
 // HTML navigations: network-first (always fresh when online, cache fallback offline).
 // Other assets: cache-first with background refresh.
 // IMPORTANT: still bump CACHE on every release -- it's the invalidation key.
-const CACHE = 'lifeos-v5.19.6';
+const CACHE = 'lifeos-v5.19.7';
 const CORE = [
   './',
   './index.html',

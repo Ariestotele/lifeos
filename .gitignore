@@ -1,0 +1,18 @@
+# LifeOS .gitignore
+# Restore-point snapshots are no longer committed -- git history covers them.
+# If you create one locally for a major release, it stays out of git.
+life_manager_before_*.html
+life_manager*.html.bak
+*.bak
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+
+# Local build output (when v5.20 lands)
+node_modules/
+dist/

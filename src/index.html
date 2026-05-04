@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+<title>LifeOS</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzFhMWQyNCIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzBjMGQxMCIvPjwvbGluZWFyR3JhZGllbnQ+PGxpbmVhckdyYWRpZW50IGlkPSJiYXIiIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjN0FCNUU4Ii8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjNEE4RUNDIi8+PC9saW5lYXJHcmFkaWVudD48bGluZWFyR3JhZGllbnQgaWQ9InJpbmciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjN0FCNUU4Ii8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjM0E2RkE4Ii8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTUiIGZpbGw9InVybCgjYmcpIi8+PHJlY3QgeD0iMTQ3IiB5PSIxMjIiIHdpZHRoPSIzNiIgaGVpZ2h0PSIyNjgiIHJ4PSIxOCIgZmlsbD0idXJsKCNiYXIpIi8+PGNpcmNsZSBjeD0iMzAwIiBjeT0iMjU2IiByPSI4MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ1cmwoI3JpbmcpIiBzdHJva2Utd2lkdGg9IjM2Ii8+PGNpcmNsZSBjeD0iMTk1IiBjeT0iMjU2IiByPSI4IiBmaWxsPSIjN0FCNUU4IiBvcGFjaXR5PSIwLjg1Ii8+PC9zdmc+">
+<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiTGlmZU9TIiwic2hvcnRfbmFtZSI6IkxpZmVPUyIsImRlc2NyaXB0aW9uIjoiUGVyc29uYWwgcHJvZHVjdGl2aXR5IE9TIFx1MjAxNCB0YXNrcywgYmlsbHMsIG5vdGVzLCBnb2FscywgYWNjb3VudHMsIGFuZCBtb3JlIiwic3RhcnRfdXJsIjoiLi8iLCJzY29wZSI6Ii4vIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJvcmllbnRhdGlvbiI6ImFueSIsImJhY2tncm91bmRfY29sb3IiOiIjMGMwZDEwIiwidGhlbWVfY29sb3IiOiIjMGMwZDEwIiwiY2F0ZWdvcmllcyI6WyJwcm9kdWN0aXZpdHkiLCJ1dGlsaXRpZXMiLCJsaWZlc3R5bGUiXSwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QjRiV3h1Y3owaWFIUjBjRG92TDNkM2R5NTNNeTV2Y21jdk1qQXdNQzl6ZG1jaUlIWnBaWGRDYjNnOUlqQWdNQ0ExTVRJZ05URXlJajQ4WkdWbWN6NDhiR2x1WldGeVIzSmhaR2xsYm5RZ2FXUTlJbUpuSWlCNE1UMGlNQ0lnZVRFOUlqQWlJSGd5UFNJd0lpQjVNajBpTVNJK1BITjBiM0FnYjJabWMyVjBQU0l3SlNJZ2MzUnZjQzFqYjJ4dmNqMGlJekZoTVdReU5DSXZQanh6ZEc5d0lHOW1abk5sZEQwaU1UQXdKU0lnYzNSdmNDMWpiMnh2Y2owaUl6QmpNR1F4TUNJdlBqd3ZiR2x1WldGeVIzSmhaR2xsYm5RK1BHeHBibVZoY2tkeVlXUnBaVzUwSUdsa1BTSmlZWElpSUhneFBTSXdJaUI1TVQwaU1DSWdlREk5SWpBaUlIa3lQU0l4SWo0OGMzUnZjQ0J2Wm1aelpYUTlJakFsSWlCemRHOXdMV052Ykc5eVBTSWpOMEZDTlVVNElpOCtQSE4wYjNBZ2IyWm1jMlYwUFNJeE1EQWxJaUJ6ZEc5d0xXTnZiRzl5UFNJak5FRTRSVU5ESWk4K1BDOXNhVzVsWVhKSGNtRmthV1Z1ZEQ0OGJHbHVaV0Z5UjNKaFpHbGxiblFnYVdROUluSnBibWNpSUhneFBTSXdJaUI1TVQwaU1DSWdlREk5SWpFaUlIa3lQU0l4SWo0OGMzUnZjQ0J2Wm1aelpYUTlJakFsSWlCemRHOXdMV052Ykc5eVBTSWpOMEZDTlVVNElpOCtQSE4wYjNBZ2IyWm1jMlYwUFNJeE1EQWxJaUJ6ZEc5d0xXTnZiRzl5UFNJak0wRTJSa0U0SWk4K1BDOXNhVzVsWVhKSGNtRmthV1Z1ZEQ0OEwyUmxabk0rUEhKbFkzUWdkMmxrZEdnOUlqVXhNaUlnYUdWcFoyaDBQU0kxTVRJaUlISjRQU0l4TVRVaUlHWnBiR3c5SW5WeWJDZ2pZbWNwSWk4K1BISmxZM1FnZUQwaU1UUTNJaUI1UFNJeE1qSWlJSGRwWkhSb1BTSXpOaUlnYUdWcFoyaDBQU0l5TmpnaUlISjRQU0l4T0NJZ1ptbHNiRDBpZFhKc0tDTmlZWElwSWk4K1BHTnBjbU5zWlNCamVEMGlNekF3SWlCamVUMGlNalUySWlCeVBTSTRNQ0lnWm1sc2JEMGlibTl1WlNJZ2MzUnliMnRsUFNKMWNtd29JM0pwYm1jcElpQnpkSEp2YTJVdGQybGtkR2c5SWpNMklpOCtQR05wY21Oc1pTQmplRDBpTVRrMUlpQmplVDBpTWpVMklpQnlQU0k0SWlCbWFXeHNQU0lqTjBGQ05VVTRJaUJ2Y0dGamFYUjVQU0l3TGpnMUlpOCtQQzl6ZG1jKyIsInNpemVzIjoiYW55IiwidHlwZSI6ImltYWdlL3N2Zyt4bWwiLCJwdXJwb3NlIjoiYW55In0seyJzcmMiOiJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUI0Yld4dWN6MGlhSFIwY0RvdkwzZDNkeTUzTXk1dmNtY3ZNakF3TUM5emRtY2lJSFpwWlhkQ2IzZzlJakFnTUNBMU1USWdOVEV5SWo0OFpHVm1jejQ4YkdsdVpXRnlSM0poWkdsbGJuUWdhV1E5SW0xaVp5SWdlREU5SWpBaUlIa3hQU0l3SWlCNE1qMGlNQ0lnZVRJOUlqRWlQanh6ZEc5d0lHOW1abk5sZEQwaU1DVWlJSE4wYjNBdFkyOXNiM0k5SWlNeFlURmtNalFpTHo0OGMzUnZjQ0J2Wm1aelpYUTlJakV3TUNVaUlITjBiM0F0WTI5c2IzSTlJaU13WXpCa01UQWlMejQ4TDJ4cGJtVmhja2R5WVdScFpXNTBQanhzYVc1bFlYSkhjbUZrYVdWdWRDQnBaRDBpYldKaGNpSWdlREU5SWpBaUlIa3hQU0l3SWlCNE1qMGlNQ0lnZVRJOUlqRWlQanh6ZEc5d0lHOW1abk5sZEQwaU1DVWlJSE4wYjNBdFkyOXNiM0k5SWlNM1FVSTFSVGdpTHo0OGMzUnZjQ0J2Wm1aelpYUTlJakV3TUNVaUlITjBiM0F0WTI5c2IzSTlJaU0wUVRoRlEwTWlMejQ4TDJ4cGJtVmhja2R5WVdScFpXNTBQanhzYVc1bFlYSkhjbUZrYVdWdWRDQnBaRDBpYlhKcGJtY2lJSGd4UFNJd0lpQjVNVDBpTUNJZ2VESTlJakVpSUhreVBTSXhJajQ4YzNSdmNDQnZabVp6WlhROUlqQWxJaUJ6ZEc5d0xXTnZiRzl5UFNJak4wRkNOVVU0SWk4K1BITjBiM0FnYjJabWMyVjBQU0l4TURBbElpQnpkRzl3TFdOdmJHOXlQU0lqTTBFMlJrRTRJaTgrUEM5c2FXNWxZWEpIY21Ga2FXVnVkRDQ4TDJSbFpuTStQSEpsWTNRZ2QybGtkR2c5SWpVeE1pSWdhR1ZwWjJoMFBTSTFNVElpSUdacGJHdzlJblZ5YkNnamJXSm5LU0l2UGp4eVpXTjBJSGc5SWpFNE5DSWdlVDBpTVRZeUlpQjNhV1IwYUQwaU1qa2lJR2hsYVdkb2REMGlNakUwSWlCeWVEMGlNVFF1TlNJZ1ptbHNiRDBpZFhKc0tDTnRZbUZ5S1NJdlBqeGphWEpqYkdVZ1kzZzlJak13TmlJZ1kzazlJakkyT1NJZ2NqMGlOalFpSUdacGJHdzlJbTV2Ym1VaUlITjBjbTlyWlQwaWRYSnNLQ050Y21sdVp5a2lJSE4wY205clpTMTNhV1IwYUQwaU1qa2lMejQ4WTJseVkyeGxJR040UFNJeU1qSWlJR041UFNJeU5qa2lJSEk5SWpZdU5DSWdabWxzYkQwaUl6ZEJRalZGT0NJZ2IzQmhZMmwwZVQwaU1DNDROU0l2UGp3dmMzWm5QZz09Iiwic2l6ZXMiOiJhbnkiLCJ0eXBlIjoiaW1hZ2Uvc3ZnK3htbCIsInB1cnBvc2UiOiJtYXNrYWJsZSJ9XX0=">
+<meta name="theme-color" content="#0c0d10">
+<meta name="color-scheme" content="dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LifeOS">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzFhMWQyNCIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzBjMGQxMCIvPjwvbGluZWFyR3JhZGllbnQ+PGxpbmVhckdyYWRpZW50IGlkPSJiYXIiIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjN0FCNUU4Ii8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjNEE4RUNDIi8+PC9saW5lYXJHcmFkaWVudD48bGluZWFyR3JhZGllbnQgaWQ9InJpbmciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjN0FCNUU4Ii8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjM0E2RkE4Ii8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTUiIGZpbGw9InVybCgjYmcpIi8+PHJlY3QgeD0iMTQ3IiB5PSIxMjIiIHdpZHRoPSIzNiIgaGVpZ2h0PSIyNjgiIHJ4PSIxOCIgZmlsbD0idXJsKCNiYXIpIi8+PGNpcmNsZSBjeD0iMzAwIiBjeT0iMjU2IiByPSI4MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ1cmwoI3JpbmcpIiBzdHJva2Utd2lkdGg9IjM2Ii8+PGNpcmNsZSBjeD0iMTk1IiBjeT0iMjU2IiByPSI4IiBmaWxsPSIjN0FCNUU4IiBvcGFjaXR5PSIwLjg1Ii8+PC9zdmc+">
+<link rel="mask-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzFhMWQyNCIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzBjMGQxMCIvPjwvbGluZWFyR3JhZGllbnQ+PGxpbmVhckdyYWRpZW50IGlkPSJiYXIiIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjN0FCNUU4Ii8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjNEE4RUNDIi8+PC9saW5lYXJHcmFkaWVudD48bGluZWFyR3JhZGllbnQgaWQ9InJpbmciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjN0FCNUU4Ii8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjM0E2RkE4Ii8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTUiIGZpbGw9InVybCgjYmcpIi8+PHJlY3QgeD0iMTQ3IiB5PSIxMjIiIHdpZHRoPSIzNiIgaGVpZ2h0PSIyNjgiIHJ4PSIxOCIgZmlsbD0idXJsKCNiYXIpIi8+PGNpcmNsZSBjeD0iMzAwIiBjeT0iMjU2IiByPSI4MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ1cmwoI3JpbmcpIiBzdHJva2Utd2lkdGg9IjM2Ii8+PGNpcmNsZSBjeD0iMTk1IiBjeT0iMjU2IiByPSI4IiBmaWxsPSIjN0FCNUU4IiBvcGFjaXR5PSIwLjg1Ii8+PC9zdmc+" color="#4A8ECC">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:opsz,wght@9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>/*<!--CSS-->*/</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
+
+<div class="app" id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-icon" style="width:28px;height:28px;background:transparent;box-shadow:none;border-radius:0;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" style="display:block"><defs><linearGradient id="sb-bar" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7AB5E8"/><stop offset="100%" stop-color="#4A8ECC"/></linearGradient><linearGradient id="sb-ring" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7AB5E8"/><stop offset="100%" stop-color="#3A6FA8"/></linearGradient></defs><rect x="11" y="9" width="3" height="22" rx="1.5" fill="url(#sb-bar)"/><circle cx="24" cy="20" r="6.5" fill="none" stroke="url(#sb-ring)" stroke-width="2.8"/><circle cx="15.5" cy="20" r="0.9" fill="#7AB5E8" opacity="0.9"/></svg></div>
+        <div class="logo-text-wrap">
+          <span class="logo-text">LifeOS<span style="color:var(--accent);text-shadow:0 0 10px rgba(74,142,204,.5)">.</span></span>
+          <span class="logo-sub">Personal OS</span>
+        </div>
+      </div>
+      <button class="sidebar-toggle" onclick="toggleSidebar()" id="sidebar-btn" title="Toggle sidebar">&#8592;</button>
+    </div>
+    <button class="nav-item" id="nav-dashboard" onclick="switchPage('dashboard')" style="margin-bottom:4px"><span class="nav-icon">&#9632;</span><span class="nav-label"> Dashboard</span></button>
+    <div id="nav-sections-wrap"></div>
+    <div class="sidebar-section">Settings</div>
+    <button class="nav-item" onclick="openSettingsModal()"><span class="nav-icon">&#9881;</span><span class="nav-label"> Settings</span></button>
+    <button class="nav-item" onclick="asSetup()" title="Quick save to file"><span class="nav-icon">&#128190;</span><span class="nav-label"> Quick save</span></button>
+    <div style="display:none">
+      <div class="as-dot" id="as-dot"></div>
+      <span id="as-status-text">Not set up</span>
+      <div id="as-file-row"></div>
+      <div id="as-file-name"></div>
+      <button id="as-setup-btn" onclick="asSetup()"></button>
+    </div>
+    <div id="ver-panel" style="display:none"></div>
+    <div class="sidebar-bottom">
+      <button id="nav-save-order-btn" onclick="navSaveOrder()" style="display:none;width:100%;height:30px;border-radius:7px;border:none;background:var(--positive);color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);margin-bottom:6px;transition:opacity .15s">&#10003; Save order</button>
+      <div style="font-size:10px;color:var(--text3);text-align:center;padding:4px 0;font-family:var(--mono)" id="app-version-label">v<span id="app-ver-num"></span></div>
+    </div>
+  <div class="sidebar-resize-handle" id="sidebar-resize-handle"></div>
+  </aside>
+  <input type="file" id="import-input" accept=".json" style="display:none" onchange="importJSON(event)">
+
+  <main class="main">
+    <!-- Bill reminders banner — injected by checkReminders() on load -->
+    <div id="reminder-banner-wrap"></div>
+    <!-- Dashboard page -->
+    <div id="page-dashboard" style="display:none">
+      <div class="db-header-row">
+        <div class="db-greeting" id="db-greeting" style="margin-bottom:0;flex:1"></div>
+        <button class="db-edit-toggle-btn" id="db-edit-btn" onclick="dbToggleEditMode()">&#9998; Customise</button>
+      </div>
+      <div class="db-edit-bar" id="db-edit-bar">
+        <span class="db-edit-bar-label">&#9998; Drag to reorder &nbsp;&middot;&nbsp; click eye to show/hide</span>
+        <button class="db-edit-done-btn" onclick="dbToggleEditMode()">&#10003; Done</button>
+      </div>
+      <div class="db-grid" id="db-grid"></div>
+    </div>
+
+    <!-- Active page -->
+    <div id="page-active">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Monthly Expenses</div>
+          <div class="page-sub" id="page-sub"></div>
+        </div>
+        <div class="header-actions">
+          <button class="btn primary" onclick="openModal()">+ Add new</button>
+        </div>
+      </div>
+      <div class="metrics" id="metrics"></div>
+      <div id="trial-wrap"></div>
+      <div id="upcoming-wrap"></div>
+      <div class="toolbar">
+        <div class="search-wrap">
+          <span class="search-icon">&#8981;</span>
+          <input id="search" type="text" placeholder="Search&#8230; (press N to add)" oninput="render()">
+        </div>
+        <select class="sort-select" id="sort" onchange="render()">
+          <option value="due">Sort: Due date</option>
+          <option value="amount-desc">Sort: Highest</option>
+          <option value="amount-asc">Sort: Lowest</option>
+          <option value="name">Sort: Name</option>
+          <option value="default">Sort: Added</option>
+        </select>
+      </div>
+      <div class="filter-row" id="filters"></div>
+      <div class="items" id="items"></div>
+    </div>
+
+    <!-- Tabby page -->
+    <div id="page-tabby" style="display:none">
+      <div class="page-header">
+        <div><div class="page-title">Tabby</div><div class="page-sub">4-instalment purchase tracker</div></div>
+        <div class="header-actions"><button class="btn primary" onclick="openTabbyModal()">+ Add purchase</button></div>
+      </div>
+      <div class="metrics" id="tabby-metrics"></div>
+      <div id="tabby-list"></div>
+    </div>
+
+    <!-- Trials page -->
+    <div id="page-trials" style="display:none">
+      <div class="page-header">
+        <div><div class="page-title">Free trials</div><div class="page-sub">Track trials before they convert</div></div>
+        <div class="header-actions"><button class="btn primary" onclick="openModal(null,true)">+ Add trial</button></div>
+      </div>
+      <div id="trials-list"></div>
+    </div>
+
+    <!-- History page -->
+    <div id="page-history" style="display:none">
+      <div class="page-header"><div><div class="page-title">Payment history</div><div class="page-sub">All recorded payments</div></div></div>
+      <div id="history-list"></div>
+    </div>
+
+    <!-- Insights page -->
+    <div id="page-insights" style="display:none">
+      <div class="page-header"><div><div class="page-title">Insights</div><div class="page-sub">Spending breakdown</div></div></div>
+      <div id="insights-content"></div>
+    </div>
+
+    <!-- Calculator page -->
+    <div id="page-calc" style="display:none">
+      <div class="page-header">
+        <div><div class="page-title">Calculator</div><div class="page-sub">Estimate subscription costs over time</div></div>
+      </div>
+      <div class="calc-tabs">
+        <button class="calc-tab active" id="ctab-cost" onclick="switchCalcTab('cost')">Cost over time</button>
+        <button class="calc-tab" id="ctab-compare" onclick="switchCalcTab('compare')">Compare subs</button>
+        <button class="calc-tab" id="ctab-worth" onclick="switchCalcTab('worth')">Is it worth it?</button>
+      </div>
+
+      <!-- Cost over time -->
+      <div id="calc-cost">
+        <div class="calc-grid">
+          <div class="calc-card">
+            <div class="calc-section-title">Subscription</div>
+            <div class="calc-field">
+              <label>Pick from your subs or enter manually</label>
+              <select id="cc-pick" onchange="calcPickSub()">
+                <option value="">&#8212; Enter manually &#8212;</option>
+              </select>
+            </div>
+            <div class="calc-field"><label>Name</label><input id="cc-name" type="text" placeholder="e.g. Netflix" oninput="calcCost()"></div>
+            <div class="fields-row">
+              <div class="calc-field"><label>Amount (AED)</label><input id="cc-amount" type="number" min="0" step="0.01" placeholder="0.00" oninput="calcCost()"></div>
+              <div class="calc-field"><label>Billing cycle</label>
+                <select id="cc-cycle" onchange="calcCost()">
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="quarterly">Quarterly</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="calc-card">
+            <div class="calc-section-title">Duration</div>
+            <div class="calc-field"><label>How long will you use it?</label>
+              <select id="cc-unit" onchange="calcCost()">
+                <option value="months">Months</option>
+                <option value="years">Years</option>
+              </select>
+            </div>
+            <div class="calc-field">
+              <div class="calc-slider-wrap">
+                <input type="range" id="cc-duration" min="1" max="60" value="12" oninput="calcCost()">
+                <span class="calc-slider-val" id="cc-duration-val">12</span>
+              </div>
+            </div>
+            <div class="calc-field"><label>Usage per month (hours)</label>
+              <div class="calc-slider-wrap">
+                <input type="range" id="cc-usage" min="1" max="200" value="20" oninput="calcCost()">
+                <span class="calc-slider-val" id="cc-usage-val">20</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="calc-card full" style="margin-bottom:16px">
+          <div class="calc-section-title">Results</div>
+          <div class="calc-result-grid" id="cc-results"></div>
+        </div>
+        <div class="calc-card full">
+          <div class="calc-section-title">Breakdown</div>
+          <div id="cc-breakdown"></div>
+        </div>
+      </div>
+
+      <!-- Compare subs -->
+      <div id="calc-compare" style="display:none">
+        <div class="calc-card full" style="margin-bottom:16px">
+          <div class="calc-section-title">Your active subscriptions &#8212; ranked by monthly cost</div>
+          <div id="cmp-list"></div>
+        </div>
+        <div class="calc-card full">
+          <div class="calc-section-title">Custom comparison &#8212; add up to 4 options</div>
+          <div id="cmp-custom-inputs" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:12px"></div>
+          <div id="cmp-custom-results"></div>
+        </div>
+      </div>
+
+      <!-- Worth it? -->
+      <div id="calc-worth" style="display:none">
+        <div class="calc-grid">
+          <div class="calc-card">
+            <div class="calc-section-title">What you're paying</div>
+            <div class="calc-field">
+              <label>Pick from your subs or enter manually</label>
+              <select id="wt-pick" onchange="worthPickSub()">
+                <option value="">&#8212; Enter manually &#8212;</option>
+              </select>
+            </div>
+            <div class="fields-row">
+              <div class="calc-field"><label>Amount (AED)</label><input id="wt-amount" type="number" min="0" step="0.01" placeholder="0.00" oninput="calcWorth()"></div>
+              <div class="calc-field"><label>Cycle</label>
+                <select id="wt-cycle" onchange="calcWorth()">
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="quarterly">Quarterly</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="calc-card">
+            <div class="calc-section-title">How much you use it</div>
+            <div class="calc-field"><label>Times used per month</label>
+              <div class="calc-slider-wrap">
+                <input type="range" id="wt-uses" min="1" max="120" value="10" oninput="calcWorth()">
+                <span class="calc-slider-val" id="wt-uses-val">10</span>
+              </div>
+            </div>
+            <div class="calc-field"><label>Minutes per use</label>
+              <div class="calc-slider-wrap">
+                <input type="range" id="wt-mins" min="5" max="240" step="5" value="30" oninput="calcWorth()">
+                <span class="calc-slider-val" id="wt-mins-val">30</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="calc-card full">
+          <div class="calc-section-title">Verdict</div>
+          <div id="wt-results"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tasks page -->
+    <div id="page-tasks" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Tasks</div>
+          <div class="page-sub" id="tasks-sub"></div>
+        </div>
+        <div class="header-actions">
+          <button class="btn" onclick="exportTasksCSV()">&#8599; Export CSV</button>
+          <button class="btn primary" onclick="openTaskModal()">+ Add task</button>
+        </div>
+      </div>
+      <!-- Workspace tabs -->
+
+      <div class="tk-layout">
+        <!-- Tint overlay -->
+        <div class="tk-panel-tint" id="tk-panel-tint" onclick="closeTkModal()"></div>
+        <!-- List column -->
+        <div class="tk-main-col" id="tk-main-col">
+          <div class="metrics" id="tasks-metrics"></div>
+          <div class="toolbar">
+            <div class="search-wrap">
+              <span class="search-icon">&#8981;</span>
+              <input id="tk-search" type="text" placeholder="Search tasks&#8230; (press T to add)" oninput="renderTasks()">
+            </div>
+            <select class="sort-select" id="tk-sort" onchange="renderTasks()">
+              <option value="urgency">Sort: Urgency</option>
+              <option value="created">Sort: Recent</option>
+              <option value="due">Sort: Due date</option>
+              <option value="priority">Sort: Priority</option>
+              <option value="name">Sort: Name</option>
+              <option value="starred">Sort: Starred</option>
+            </select>
+          </div>
+          <div id="tk-metrics" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:1rem"></div>
+          <div class="filter-row" id="tk-filters" style="flex-wrap:wrap;gap:6px;align-items:center"></div>
+          <div id="tk-list" style="display:flex;flex-direction:column;gap:7px;margin-top:4px"></div>
+        </div>
+        <!-- Side panel -->
+        <div class="tk-panel" id="tk-panel">
+          <div class="tk-panel-inner">
+            <div class="tk-panel-header">
+              <div class="tk-panel-title" id="tk-modal-title">Add task</div>
+              <button class="modal-close-btn" onclick="closeTkModal()">&#10005;</button>
+            </div>
+            <div class="field"><label>Title</label><input id="tk-title" type="text" placeholder="What needs to be done?" autocomplete="off" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();saveTask();}"></div>
+            <div class="field"><label>Notes</label><textarea id="tk-notes" placeholder="Details, links, context&#8230;" style="height:72px"></textarea></div>
+            <div class="fields-row">
+              <div class="field"><label>Priority</label>
+                <select id="tk-priority">
+                  <option value="none">&#8212; None</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="urgent">Urgent</option>
+                </select>
+              </div>
+              <div class="field"><label>Due date</label><input id="tk-due" type="date"></div>
+            </div>
+            <div class="fields-row">
+              <div class="field"><label>Workspace</label>
+                <select id="tk-workspace-sel"></select>
+              </div>
+              <div class="field"><label>List</label>
+                <select id="tk-list-sel"></select>
+              </div>
+            </div>
+            <div class="field"><label>Tags (comma separated)</label><input id="tk-tags" type="text" placeholder="e.g. review, urgent"></div>
+            <!-- Subtasks -->
+            <div class="field">
+              <label>Subtasks</label>
+              <div id="tk-sub-list" style="margin-bottom:6px"></div>
+              <button type="button" class="btn" style="font-size:12px;height:30px;width:100%;justify-content:center" onclick="addSubtaskRow()">&#65291; Add subtask</button>
+            </div>
+            <div class="field"><label>Color</label><div class="color-dots" id="tk-color-picker"></div></div>
+            <div style="display:flex;gap:8px;margin-top:1.25rem">
+              <button class="btn" style="flex:1;justify-content:center" onclick="closeTkModal()">Cancel</button>
+              <button class="btn primary" style="flex:2;justify-content:center" onclick="saveTask()">Save task</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Goals page -->
+    <div id="page-goals" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Goals</div>
+          <div class="page-sub" id="goals-sub">Track what you're working toward</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn primary" onclick="openGoalModal()">+ Add goal</button>
+        </div>
+      </div>
+      <div class="metrics" id="goals-metrics"></div>
+      <div class="filter-row" id="gl-filters" style="margin-bottom:16px"></div>
+      <div id="gl-list"></div>
+    </div>
+    <!-- Calendar page -->
+    <div id="page-calendar" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Calendar</div>
+          <div class="page-sub">Bills, tasks &amp; goal deadlines at a glance</div>
+        </div>
+      </div>
+      <!-- Legend -->
+      <div class="cal-legend">
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--amber)"></div>Bill due</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--purple)"></div>Task deadline</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#1faa7e"></div>Goal deadline</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#E05252"></div>Overdue</div>
+      </div>
+      <div class="cal-shell" id="cal-shell">
+        <div id="cal-main">
+          <div class="cal-nav">
+            <div class="cal-month-title" id="cal-month-title"></div>
+            <div class="cal-nav-btns">
+              <button class="cal-today-btn" onclick="calGoToday()">Today</button>
+              <button class="cal-arrow" onclick="calPrev()">&#8592;</button>
+              <button class="cal-arrow" onclick="calNext()">&#8594;</button>
+            </div>
+          </div>
+          <div class="cal-grid-wrap">
+            <div class="cal-weekdays">
+              <div class="cal-wday">Sun</div><div class="cal-wday">Mon</div><div class="cal-wday">Tue</div>
+              <div class="cal-wday">Wed</div><div class="cal-wday">Thu</div><div class="cal-wday">Fri</div><div class="cal-wday">Sat</div>
+            </div>
+            <div class="cal-days" id="cal-days"></div>
+          </div>
+        </div>
+        <!-- Day detail drawer — below calendar, full width -->
+        <div class="cal-panel" id="cal-panel">
+          <div style="padding:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <div>
+                <div class="cal-panel-date" id="cal-panel-date"></div>
+                <div class="cal-panel-sub" id="cal-panel-sub"></div>
+              </div>
+              <button class="icon-btn" onclick="calClosePanel()" title="Close">&#10005;</button>
+            </div>
+            <div id="cal-panel-content"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes page -->
+    <div id="page-notes" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Notes</div>
+          <div class="page-sub" id="qn-sub">Quick capture, tagged and searchable</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn primary" onclick="openNoteModal()">+ New note</button>
+        </div>
+      </div>
+      <div class="qn-toolbar">
+        <div class="qn-search-wrap">
+          <span class="qn-search-icon">&#8981;</span>
+          <input id="qn-search" type="text" placeholder="Search notes&#8230;" oninput="renderNotes()">
+        </div>
+        <select class="sort-select" id="qn-sort" onchange="renderNotes()">
+          <option value="updated">Sort: Recent</option>
+          <option value="created">Sort: Created</option>
+          <option value="title">Sort: Title</option>
+        </select>
+      </div>
+      <div class="qn-tag-bar" id="qn-tag-bar"></div>
+      <div id="qn-grid"></div>
+    </div>
+
+    <!-- Loans & EMI page -->
+    <div id="page-loans" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Loans &amp; EMI</div>
+          <div class="page-sub" id="emi-sub">Track your instalment loans and debt burden</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn primary" onclick="openLoanModal()">+ Add loan</button>
+        </div>
+      </div>
+      <div class="metrics" id="emi-metrics"></div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+        <select class="sort-select" id="ln-sort" onchange="renderLoans()" style="flex:1;min-width:160px">
+          <option value="urgency">Sort: Urgency</option>
+          <option value="balance">Sort: Balance</option>
+          <option value="emi">Sort: EMI</option>
+          <option value="name">Sort: Name</option>
+          <option value="added">Sort: Added</option>
+        </select>
+        <select class="sort-select" id="ln-filter" onchange="renderLoans()">
+          <option value="all">All loans</option>
+          <option value="active">Active only</option>
+          <option value="paidoff">Paid off only</option>
+          <option value="personal">Personal</option>
+          <option value="car">Car</option>
+          <option value="mortgage">Mortgage</option>
+          <option value="friendly">Friendly debt</option>
+        </select>
+      </div>
+      <div id="emi-upcoming" style="margin-bottom:1rem"></div>
+      <div id="emi-list"></div>
+    </div>
+
+    <!-- Receivables page -->
+    <div id="page-receivables" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Receivables</div>
+          <div class="page-sub" id="recv-sub">Money owed to you</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn primary" onclick="openRecvModal()">+ Add receivable</button>
+        </div>
+      </div>
+      <div class="metrics" id="recv-metrics"></div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+        <select class="sort-select" id="recv-sort" onchange="renderReceivables()" style="flex:1;min-width:160px">
+          <option value="urgency">Sort: Urgency</option>
+          <option value="amount">Sort: Amount</option>
+          <option value="name">Sort: Name</option>
+          <option value="added">Sort: Added</option>
+        </select>
+        <select class="sort-select" id="recv-filter" onchange="renderReceivables()">
+          <option value="all">All</option>
+          <option value="pending">Pending</option>
+          <option value="collected">Collected</option>
+          <option value="person">Person</option>
+          <option value="work">Work / Company</option>
+        </select>
+      </div>
+      <div id="recv-list"></div>
+    </div>
+
+    <!-- Accounts page -->
+    <div id="page-accounts" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Accounts</div>
+          <div class="page-sub" id="ac-sub">Your financial accounts at a glance</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn primary" onclick="openAccountModal()">+ Add account</button>
+        </div>
+      </div>
+      <div class="metrics" id="ac-metrics"></div>
+      <div class="ac-filter-row">
+        <div class="ac-search-wrap">
+          <span class="ac-search-icon">&#8981;</span>
+          <input id="ac-search" type="text" placeholder="Search accounts&#8230;" oninput="renderAccounts()">
+        </div>
+        <select class="sort-select" id="ac-sort" onchange="renderAccounts()">
+          <option value="balance">Sort: Balance</option>
+          <option value="name">Sort: Name</option>
+          <option value="updated">Sort: Updated</option>
+        </select>
+      </div>
+      <div id="ac-groups"></div>
+    </div>
+
+    <!-- Net Worth page -->
+    <div id="page-shopping" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Shopping</div>
+          <div class="page-sub" id="shop-sub">Your wishlist &amp; shopping items</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn" onclick="openShCollModal()">+ New collection</button>
+          <button class="btn primary" onclick="openShopModal()">+ Add item</button>
+        </div>
+      </div>
+      <div id="shop-metrics" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:1.25rem"></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem" id="shop-filters"></div>
+      <div id="shop-list"></div>
+    </div>
+
+    <div id="page-links" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Links</div>
+          <div class="page-sub" id="links-sub">Your quick-access dashboard</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn" onclick="openLinkGroupModal()">+ New group</button>
+          <button class="btn primary" onclick="openLinkModal()">+ Add link</button>
+        </div>
+      </div>
+      <div id="links-search-row" style="margin-bottom:1rem">
+        <input id="links-search" type="text" placeholder="Search links..." class="modal-input" style="width:100%;max-width:360px" oninput="renderLinks()">
+      </div>
+      <div id="links-grid"></div>
+    </div>
+
+    <div id="page-networth" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Net Worth</div>
+          <div class="page-sub" id="nw-sub">Assets minus liabilities</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn primary" onclick="nwTakeSnapshot()">&#9998; Save snapshot</button>
+        </div>
+      </div>
+      <div id="nw-hero"></div>
+      <div class="nw-snapshot-bar">
+        <span style="font-size:11px;color:var(--text3);white-space:nowrap">&#9662; Snapshot note</span>
+        <input id="nw-snap-note" type="text" placeholder="e.g. End of March, after bonus&#8230;" maxlength="60">
+        <button class="nw-snap-btn" onclick="nwTakeSnapshot()">Save now</button>
+      </div>
+      <div class="nw-section-grid" id="nw-sections"></div>
+      <div class="nw-chart-card" id="nw-chart-card">
+        <div class="nw-chart-head">
+          <div class="nw-chart-title">Net worth over time</div>
+          <div style="font-size:11px;color:var(--text3)" id="nw-chart-sub"></div>
+        </div>
+        <div style="position:relative;height:200px"><canvas id="nwTrendChart"></canvas></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Mobile bottom nav (shown only on phones via CSS media query) -->
+<nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
+  <button class="mobile-nav-btn" onclick="openMobileSidebar()" aria-label="Menu">
+    <svg class="mnav-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+    <span>Menu</span>
+  </button>
+  <button class="mobile-nav-btn" id="mnav-dashboard" onclick="switchPage('dashboard')" aria-label="Dashboard">
+    <svg class="mnav-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+    <span>Home</span>
+  </button>
+  <button class="mobile-nav-add" onclick="handleMobileAdd()" aria-label="Add">
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+  <button class="mobile-nav-btn" id="mnav-tasks" onclick="switchPage('tasks')" aria-label="Tasks">
+    <svg class="mnav-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <span>Tasks</span>
+  </button>
+  <button class="mobile-nav-btn" id="mnav-active" onclick="switchPage('active')" aria-label="Bills">
+    <svg class="mnav-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="7" y1="15" x2="11" y2="15"/></svg>
+    <span>Bills</span>
+  </button>
+</nav>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span id="toast-msg"></span>
+  <button class="toast-undo" id="toast-undo" style="display:none" onclick="undoDelete()">Undo</button>
+</div>
+
+<!-- Tabby modal -->
+<div class="modal-backdrop" id="tabby-modal" style="display:none">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title" id="tabby-modal-title">Add Tabby purchase</div>
+    <div class="tabby-modal-section">
+      <div style="font-size:11px;color:var(--amber);margin-bottom:10px;letter-spacing:.02em">Tabby splits the total into 4 equal monthly instalments</div>
+      <div class="field"><label>Item / purchase name</label><input id="t-name" type="text" placeholder="e.g. iPhone 16, Sony headphones" autocomplete="off"></div>
+      <div class="fields-row">
+        <div class="field"><label>Total amount (AED)</label><input id="t-total" type="number" min="0" step="0.01" placeholder="0.00" oninput="previewInstalments()"></div>
+        <div class="field"><label>First payment date</label><input id="t-start" type="date" oninput="previewInstalments()"></div>
+      </div>
+      <div id="t-preview" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:4px"></div>
+    </div>
+    <div class="fields-row">
+      <div class="field"><label>Category</label>
+        <select id="t-cat">
+          <option value="Electronics">Electronics</option>
+          <option value="Fashion">Fashion</option>
+          <option value="Home">Home</option>
+          <option value="Health">Health & Beauty</option>
+          <option value="Travel">Travel</option>
+          <option value="Food">Food & Dining</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Color</label><div class="color-dots" id="tabby-color-picker" style="margin-top:10px"></div></div>
+    </div>
+    <div class="field"><label>Notes (optional)</label><textarea id="t-notes" placeholder="e.g. order number, store, delivery date&#8230;"></textarea></div>
+    <div class="field"><label>Pay from account (optional)</label><select id="t-pay-account"><option value="">-- No account --</option></select></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeTabbyModal()">Cancel</button>
+      <button class="btn primary" onclick="saveTabbyItem()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Entry modal -->
+<div class="modal-backdrop" id="modal" style="display:none">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title" id="modal-title">Add entry</div>
+    <div class="field"><label>Name</label><input id="f-name" type="text" placeholder="e.g. Netflix, Rent, Spotify" autocomplete="off"></div>
+    <div class="fields-row">
+      <div class="field"><label>Amount (AED)</label><input id="f-amount" type="number" min="0" step="0.01" placeholder="0.00"></div>
+      <div class="field"><label>Billing cycle</label>
+        <select id="f-cycle">
+          <option value="monthly">Monthly</option>
+          <option value="yearly">Yearly</option>
+          <option value="weekly">Weekly</option>
+          <option value="quarterly">Quarterly</option>
+          <option value="once">One-time</option>
+        </select>
+      </div>
+    </div>
+    <div class="fields-row">
+      <div class="field"><label>Category</label>
+        <select id="f-cat">
+          <option value="Streaming">Streaming</option>
+          <option value="Utilities">Utilities</option>
+          <option value="Software">Software</option>
+          <option value="Food">Food & Dining</option>
+          <option value="Housing">Housing</option>
+          <option value="Health">Health</option>
+          <option value="Transport">Transport</option>
+          <option value="Finance">Finance</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Due day of month</label><input id="f-due" type="number" min="1" max="31" placeholder="1&#8211;31"></div>
+    </div>
+    <div class="field"><label>Notes (optional)</label><textarea id="f-notes" placeholder="e.g. account email, login URL, contract details&#8230;"></textarea></div>
+    <div class="field"><label>Status</label>
+      <select id="f-status"><option value="active">Active</option><option value="paused">Paused</option></select>
+    </div>
+    <div class="field"><label>Pay from account (optional)</label><select id="f-pay-account"><option value="">— No account —</option></select></div>
+    <!-- Trial section -->
+    <div class="toggle-row">
+      <input type="checkbox" class="toggle-check" id="f-trial" onchange="toggleTrialFields()">
+      <label for="f-trial">This is a free trial</label>
+    </div>
+    <div id="trial-fields" style="display:none">
+      <div class="trial-section">
+        <div class="field" style="margin-bottom:0">
+          <label>Trial end date</label>
+          <input id="f-trial-end" type="date">
+        </div>
+      </div>
+    </div>
+    <div class="field"><label>Color</label><div class="color-dots" id="color-picker"></div></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn primary" onclick="saveItem()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lists modal -->
+<div class="modal-backdrop" id="lists-modal" style="display:none" onclick="if(event.target===this)closeListsModal()">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-title">Manage lists</div>
+    <div id="lists-manage-content" style="min-height:40px"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+      <input id="new-list-input" type="text" placeholder="New list name&#8230;" style="flex:1;min-width:140px;height:34px;background:var(--surface2);border:0.5px solid var(--border2);border-radius:var(--radius-md);color:var(--text);padding:0 10px;font-size:13px;font-family:var(--font);outline:none;transition:border-color .18s" onkeydown="if(event.key==='Enter')addList()">
+      <select id="new-list-workspace" title="List workspace" style="height:34px;background:var(--surface2);border:0.5px solid var(--border2);border-radius:var(--radius-md);color:var(--text);padding:0 8px;font-size:12px;font-family:var(--font);outline:none"></select>
+      <button class="btn primary" onclick="addList()">Add</button>
+    </div>
+    <div style="margin-top:12px;padding-top:10px;border-top:0.5px solid var(--border)">
+      <button class="btn" style="width:100%;justify-content:center;font-size:12px" onclick="closeListsModal();openWsFixModal()" title="Reclassify legacy tasks">&#128736; Fix task workspaces</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn primary" onclick="closeListsModal()">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Manage workspaces modal -->
+<div class="modal-backdrop" id="workspaces-modal" style="display:none" onclick="if(event.target===this)closeWorkspacesModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:440px">
+    <div class="modal-header">
+      <div class="modal-title">Manage workspaces</div>
+      <button class="modal-close-btn" onclick="closeWorkspacesModal()">&#10005;</button>
+    </div>
+    <div id="workspaces-manage-content" style="min-height:40px"></div>
+    <div style="margin-top:14px">
+      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-weight:600">Add new</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <input id="new-ws-emoji" type="text" placeholder="&#127968;" maxlength="4" title="Emoji" style="width:44px;height:34px;text-align:center;background:var(--surface2);border:0.5px solid var(--border2);border-radius:var(--radius-md);color:var(--text);font-size:16px;outline:none">
+        <input id="new-ws-name" type="text" placeholder="Workspace name" style="flex:1;min-width:120px;height:34px;background:var(--surface2);border:0.5px solid var(--border2);border-radius:var(--radius-md);color:var(--text);padding:0 10px;font-size:13px;font-family:var(--font);outline:none" onkeydown="if(event.key==='Enter')addWorkspace()">
+        <input id="new-ws-color" type="color" value="#4A8ECC" title="Color" style="width:40px;height:34px;padding:2px;background:var(--surface2);border:0.5px solid var(--border2);border-radius:var(--radius-md);cursor:pointer">
+        <button class="btn primary" onclick="addWorkspace()">Add</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn primary" onclick="closeWorkspacesModal()">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Workspace fix modal -->
+<div class="modal-backdrop" id="ws-fix-modal" style="display:none" onclick="if(event.target===this)closeWsFixModal()">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-title">Fix task workspaces</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:10px;line-height:1.5">Tasks created before v5.16 may have their workspace saved incorrectly. Update any wrong ones here, then apply.</div>
+    <div id="ws-fix-content" style="max-height:420px;overflow:auto;border:0.5px solid var(--border);border-radius:var(--radius-md);padding:4px 6px;background:var(--surface)"></div>
+    <div style="font-size:11px;color:var(--text3);margin-top:8px" id="ws-fix-count">No changes</div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeWsFixModal()">Cancel</button>
+      <button class="btn primary" onclick="applyWsFix()">Apply changes</button>
+    </div>
+  </div>
+</div>
+
+<script>/*<!--JS-->*/</script>
+
+<!-- Shopping modal -->
+<div class="modal-backdrop" id="shop-modal" style="display:none" onclick="if(event.target===this)closeShopModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:500px">
+
+    <div class="modal-header">
+      <div class="modal-title" id="shop-modal-title">Add item</div>
+      <button class="modal-close-btn" onclick="closeShopModal()">&#10005;</button>
+    </div>
+
+    <!-- Extract panel -->
+    <div style="background:var(--surface2);border:0.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">&#10024; Auto-fill from product page</div>
+      <div style="display:flex;background:var(--surface3);border-radius:var(--radius-md);padding:2px;margin-bottom:10px">
+        <button id="sh-tab-url"   onclick="shSwitchTab('url')"   style="flex:1;height:30px;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.15);transition:all .15s">&#128279; From URL</button>
+        <button id="sh-tab-paste" onclick="shSwitchTab('paste')" style="flex:1;height:30px;border:none;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);background:transparent;color:var(--text3);transition:all .15s">&#128196; Paste text</button>
+      </div>
+      <div id="sh-mode-url">
+        <div style="display:flex;gap:6px">
+          <input id="sh-url" type="url" placeholder="https://..." style="flex:1;font-size:12px" oninput="shUrlChanged()">
+          <button class="shop-extract-btn" id="sh-extract-btn" onclick="shExtractFromUrl()" disabled style="flex-shrink:0">&#10024; Extract</button>
+        </div>
+        <div style="font-size:10px;color:var(--text3);margin-top:5px;line-height:1.4">Needs Cloudflare proxy in Settings &mdash; or switch to Paste text (works on any site).</div>
+      </div>
+      <div id="sh-mode-paste" style="display:none">
+        <textarea id="sh-paste-text" placeholder="Go to the product page &#8594; Ctrl+A, Ctrl+C &#8594; paste here" style="height:80px;font-size:12px;width:100%;box-sizing:border-box;resize:vertical;line-height:1.5"></textarea>
+        <button class="shop-extract-btn" id="sh-paste-extract-btn" onclick="shExtractFromPaste()" style="margin-top:7px;width:100%;height:34px">&#10024; Extract product info</button>
+      </div>
+      <div id="sh-extract-status" style="font-size:11px;color:var(--positive);margin-top:7px;min-height:16px;font-weight:500"></div>
+    </div>
+
+    <!-- Image preview (shown after successful extraction) -->
+    <div id="sh-image-preview" style="display:none;margin-bottom:14px;border-radius:10px;overflow:hidden;border:0.5px solid var(--border)">
+      <img id="sh-image-thumb" src="" alt="" style="width:100%;max-height:180px;object-fit:cover;display:block">
+      <input id="sh-image" type="hidden" value="">
+    </div>
+
+    <div class="field">
+      <label>Item name</label>
+      <input id="sh-name" type="text" placeholder="e.g. Dresser with mirror, Sony WH-1000XM5" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Description <span style="font-weight:400;color:var(--text3)">(optional)</span></label>
+      <textarea id="sh-desc" placeholder="Key features, colour, dimensions, why you want it..." style="height:56px"></textarea>
+    </div>
+    <div class="fields-row">
+      <div class="field"><label>Price (AED)</label><input id="sh-price" type="number" min="0" step="0.01" placeholder="0.00"></div>
+      <div class="field"><label>Store</label><input id="sh-store" type="text" placeholder="Amazon, Noon, IKEA..."></div>
+    </div>
+    <div class="fields-row">
+      <div class="field"><label>Category</label>
+        <select id="sh-cat">
+          <option value="Electronics">Electronics</option>
+          <option value="Fashion">Fashion</option>
+          <option value="Home">Home</option>
+          <option value="Health">Health &amp; Beauty</option>
+          <option value="Food">Food &amp; Grocery</option>
+          <option value="Books">Books &amp; Media</option>
+          <option value="Sports">Sports &amp; Outdoors</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Priority</label>
+        <select id="sh-priority">
+          <option value="normal">Normal</option>
+          <option value="high">High priority</option>
+          <option value="low">Someday</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>Collection</label>
+      <select id="sh-item-coll"><option value="">-- No collection --</option></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeShopModal()">Cancel</button>
+      <button class="btn primary" onclick="saveShopItem()">Save item</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Settings modal -->
+<div class="settings-modal-backdrop" id="settings-modal" style="display:none" onclick="if(event.target===this)closeSettingsModal()">
+  <div class="settings-modal" onclick="event.stopPropagation()">
+
+    <div class="settings-modal-head">
+      <div class="settings-modal-title">&#9881; Settings</div>
+      <button class="modal-close-btn" onclick="closeSettingsModal()">&#10005;</button>
+    </div>
+
+    <!-- Billing cycle -->
+    <div class="settings-section">
+      <div class="settings-section-title">Billing cycle</div>
+      <div class="settings-row">
+        <div class="settings-label">Cycle starts on day</div>
+        <div class="settings-field-row" style="margin-top:4px">
+          <input id="cycle-day-input" type="number" min="1" max="28" value="1" class="settings-input" style="width:72px;flex:none"
+            oninput="this.value=Math.min(28,Math.max(1,parseInt(this.value)||1))">
+          <span style="font-size:12px;color:var(--text3)">of each month</span>
+          <button onclick="saveCycleDay()" class="settings-save-btn">Save</button>
+        </div>
+        <div id="cycle-label-preview" class="settings-hint" style="margin-top:4px"></div>
+      </div>
+    </div>
+
+    <!-- Auto-save -->
+    <div class="settings-section">
+      <div class="settings-section-title">Auto-save</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div class="as-dot" id="settings-as-dot"></div>
+        <span id="settings-as-status-text" style="font-size:12px;color:var(--text2);flex:1">Not set up</span>
+      </div>
+      <button class="settings-action-btn" onclick="asSetup();closeSettingsModal()">
+        <div class="settings-action-icon" style="background:rgba(74,142,204,.15)">&#128194;</div>
+        <span>Choose save file</span>
+      </button>
+    </div>
+
+    <!-- Backup -->
+    <div class="settings-section">
+      <div class="settings-section-title">Backup</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <button class="settings-action-btn" onclick="exportJSON();closeSettingsModal()">
+          <div class="settings-action-icon" style="background:rgba(31,170,126,.15)">&#8595;</div>
+          <div><div>Backup data</div><div style="font-size:10px;color:var(--text3);margin-top:1px">Download full .json backup</div></div>
+        </button>
+        <button class="settings-action-btn" onclick="closeSettingsModal();document.getElementById('import-input').click()">
+          <div class="settings-action-icon" style="background:rgba(201,138,26,.15)">&#8593;</div>
+          <div><div>Restore backup</div><div style="font-size:10px;color:var(--text3);margin-top:1px">Import from a .json file</div></div>
+        </button>
+        <button class="settings-action-btn" onclick="exportCSV();closeSettingsModal()">
+          <div class="settings-action-icon" style="background:rgba(155,127,232,.15)">&#8599;</div>
+          <div><div>Export CSV</div><div style="font-size:10px;color:var(--text3);margin-top:1px">Bills &amp; payments spreadsheet</div></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- App install -->
+    <div class="settings-section">
+      <div class="settings-section-title">App</div>
+      <button id="settings-install-btn" class="settings-action-btn" onclick="settingsInstallApp()">
+        <div class="settings-action-icon" style="background:rgba(74,142,204,.15)">&#128241;</div>
+        <div><div id="settings-install-label">Install LifeOS</div><div id="settings-install-sub" style="font-size:10px;color:var(--text3);margin-top:1px">Add to home screen for offline access</div></div>
+      </button>
+    </div>
+
+    <!-- Data versions -->
+    <div class="settings-section">
+      <div class="settings-section-title">Data versions</div>
+      <div style="display:flex;gap:7px;margin-bottom:10px">
+        <button class="settings-action-btn" style="flex:1;height:34px" onclick="toggleSettingsVerPanel()" id="settings-ver-btn">
+          <div class="settings-action-icon" style="background:rgba(74,142,204,.12);width:24px;height:24px;border-radius:6px;font-size:11px">&#9719;</div>
+          <span style="font-size:12px">View snapshots</span>
+        </button>
+        <button class="settings-action-btn" style="flex:1;height:34px" onclick="verManualCheckpoint()">
+          <div class="settings-action-icon" style="background:rgba(224,82,82,.12);width:24px;height:24px;border-radius:6px;font-size:11px">&#128204;</div>
+          <span style="font-size:12px">Save checkpoint</span>
+        </button>
+      </div>
+      <div id="settings-ver-panel" style="display:none"></div>
+    </div>
+
+    <!-- Layout -->
+    <div class="settings-section">
+      <div class="settings-section-title">Layout</div>
+      <button class="settings-action-btn" onclick="navToggleEditMode()" id="nav-edit-btn">
+        <div class="settings-action-icon" style="background:rgba(201,138,26,.15)">&#9998;</div>
+        <div><div>Reorder tabs</div><div style="font-size:10px;color:var(--text3)">Drag to rearrange the sidebar</div></div>
+      </button>
+    </div>
+
+    <!-- AI insights -->
+    <div class="settings-section">
+      <div class="settings-section-title">AI insights</div>
+      <div class="settings-row">
+        <div class="settings-label">Proxy URL</div>
+        <div class="settings-field-row" style="margin-top:4px">
+          <input id="ai-proxy-input" type="text" placeholder="https://your-worker.workers.dev" class="settings-input">
+          <button onclick="saveProxyUrl()" class="settings-save-btn">Save</button>
+        </div>
+        <div class="settings-hint" style="margin-top:4px">Required for GitHub Pages — handles API calls server-side.</div>
+      </div>
+      <div class="settings-row" style="margin-top:10px">
+        <div class="settings-label">API key <span style="font-size:10px;color:var(--text3);font-weight:400">(direct mode only)</span></div>
+        <div class="settings-field-row" style="margin-top:4px">
+          <input id="ai-key-input-settings" type="password" placeholder="sk-ant-..." class="settings-input">
+          <button onclick="aiSaveKeyFromSettings()" class="settings-save-btn">Save</button>
+        </div>
+        <div class="settings-hint" style="margin-top:4px">Only needed without a proxy. Stored in your browser only.</div>
+      </div>
+    </div>
+
+    <!-- GitHub Deploy -->
+    <div class="settings-section">
+      <div class="settings-section-title">GitHub deploy</div>
+      <div class="settings-row">
+        <div class="settings-label">Repository</div>
+        <div class="settings-field-row" style="margin-top:4px">
+          <input id="gh-repo-input" type="text" placeholder="username/repo" class="settings-input">
+          <button onclick="ghSaveRepo()" class="settings-save-btn">Save</button>
+        </div>
+        <div class="settings-hint" style="margin-top:4px">e.g. Ariestotele/lifeos</div>
+      </div>
+      <div class="settings-row" style="margin-top:10px">
+        <div class="settings-label">Personal access token
+          <span id="gh-token-status" style="margin-left:8px;font-size:10px;padding:2px 7px;border-radius:var(--radius-sm);font-weight:500;display:none"></span>
+        </div>
+        <div class="settings-field-row" style="margin-top:4px">
+          <input id="gh-token-input" type="password" placeholder="ghp_..." class="settings-input">
+          <button onclick="ghSaveToken()" class="settings-save-btn">Save</button>
+        </div>
+        <div class="settings-hint" style="margin-top:4px">Needs <b>repo</b> scope. Stored in your browser only.</div>
+      </div>
+      <div style="margin-top:12px">
+        <button class="settings-action-btn" onclick="ghConfirmDeploy()" id="gh-deploy-btn">
+          <div class="settings-action-icon" style="background:rgba(31,170,126,.15)">&#8599;</div>
+          <div><div>Push to GitHub</div><div style="font-size:10px;color:var(--text3);margin-top:1px" id="gh-deploy-status">Deploy index.html to your repo</div></div>
+        </button>
+      </div>
+      <!-- Confirm row — hidden until button clicked -->
+      <div id="gh-confirm-row" style="display:none;margin-top:8px;padding:10px 12px;background:var(--amber-dim);border:0.5px solid var(--amber-border);border-radius:var(--radius-md)">
+        <div style="font-size:12px;color:var(--amber);font-weight:600;margin-bottom:8px">&#9888; Push to GitHub?</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:10px">This will overwrite <b>index.html</b> in <span id="gh-confirm-repo" style="font-family:var(--mono)"></span> on branch <b>main</b>.</div>
+        <div style="display:flex;gap:8px">
+          <button onclick="ghDeploy()" style="flex:1;height:32px;border-radius:7px;border:none;background:var(--positive);color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)">&#10003; Yes, push</button>
+          <button onclick="ghCancelDeploy()" style="flex:1;height:32px;border-radius:7px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);font-size:12px;cursor:pointer;font-family:var(--font)">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Shopping collection modal -->
+<div class="modal-backdrop" id="sh-coll-modal" style="display:none" onclick="if(event.target===this)closeShCollModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:420px">
+    <div class="modal-header">
+      <div class="modal-title" id="sh-coll-modal-title">New collection</div>
+      <button class="modal-close-btn" onclick="closeShCollModal()">&#10005;</button>
+    </div>
+    <div class="field"><label>Collection name *</label><input id="sh-coll-name" type="text" placeholder="e.g. Living Room, Gym Gear, Wishlist..." autocomplete="off"></div>
+    <div class="field"><label>Search / reference URL (optional)</label><input id="sh-coll-url" type="url" placeholder="https://amazon.ae/s?k=..."></div>
+    <div class="field"><label>Description (optional)</label><input id="sh-coll-desc" type="text" placeholder="What is this collection for?"></div>
+    <div class="field"><label>Colour</label>
+      <div id="sh-coll-color-picker" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeShCollModal()">Cancel</button>
+      <button class="btn primary" onclick="saveShColl()">Save</button>
+    </div>
+  </div>
+</div>
+<!-- Add Link modal -->
+<div class="modal-backdrop" id="link-modal" style="display:none" onclick="if(event.target===this)closeLinkModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
+    <div class="modal-header">
+      <div class="modal-title" id="link-modal-title">Add link</div>
+      <button class="modal-close-btn" onclick="closeLinkModal()">&#10005;</button>
+    </div>
+    <!-- Drag & drop zone -->
+    <div id="lk-drop-zone" style="border:1.5px dashed var(--border2);border-radius:10px;padding:14px;text-align:center;margin-bottom:14px;transition:all .18s;cursor:pointer;font-size:12px;color:var(--text3)" ondragover="lkDragOver(event)" ondragleave="lkDragLeave(event)" ondrop="lkDrop(event)" onclick="document.getElementById('lk-file-input').click()">
+      <div style="font-size:20px;margin-bottom:4px">&#128193;</div>
+      <div>Drag a file here <span style="color:var(--text3)">or</span> <span style="color:var(--accent);cursor:pointer">click to browse</span></div>
+      <div style="font-size:10px;color:var(--text3);margin-top:3px">Auto-fills name and icon — paste the file path below</div>
+    </div>
+    <input type="file" id="lk-file-input" style="display:none" onchange="lkFileSelected(this)">
+    <div class="fields-row">
+      <div class="field" style="flex:0 0 64px"><label>Icon</label><input id="lk-emoji" type="text" placeholder="&#127760;" style="font-size:22px;text-align:center;padding:4px" maxlength="4"></div>
+      <div class="field" style="flex:1"><label>Title *</label><input id="lk-title" type="text" placeholder="e.g. Gmail, GitHub, Jira..." autocomplete="off"></div>
+    </div>
+    <div class="field">
+      <label>URL or file path *</label>
+      <div style="display:flex;gap:7px">
+        <input id="lk-url" type="text" placeholder="https://... or file:///C:/path/to/file" style="flex:1">
+        <button onclick="document.getElementById('lk-file-input').click()" class="settings-save-btn" title="Browse for file" style="white-space:nowrap">&#128193; Browse</button>
+      </div>
+      <div id="lk-path-hint" style="font-size:10px;color:var(--amber);margin-top:4px;display:none">&#9432; Browser security hides the full path — paste it manually above if needed</div>
+    </div>
+    <div class="field"><label>Description (optional)</label><input id="lk-desc" type="text" placeholder="What is this link for?"></div>
+    <div class="fields-row">
+      <div class="field"><label>Group</label>
+        <select id="lk-group"><option value="">-- No group --</option></select>
+      </div>
+      <div class="field"><label>Colour accent</label>
+        <div id="lk-color-picker" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeLinkModal()">Cancel</button>
+      <button class="btn primary" onclick="saveLinkItem()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Link Group modal -->
+<div class="modal-backdrop" id="link-group-modal" style="display:none" onclick="if(event.target===this)closeLinkGroupModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title" id="link-group-modal-title">New group</div>
+      <button class="modal-close-btn" onclick="closeLinkGroupModal()">&#10005;</button>
+    </div>
+    <div class="field"><label>Group name *</label><input id="lg-name" type="text" placeholder="e.g. Work, Personal, Dev tools..." autocomplete="off"></div>
+    <div class="field"><label>Description (optional)</label><input id="lg-desc" type="text" placeholder="What's in this group?"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeLinkGroupModal()">Cancel</button>
+      <button class="btn primary" onclick="saveLinkGroup()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Link viewer modal -->
+<div class="link-viewer-backdrop" id="link-viewer" style="display:none" onclick="if(event.target===this)closeLinkViewer()">
+  <div class="link-viewer-modal" onclick="event.stopPropagation()">
+    <div class="link-viewer-bar">
+      <span class="link-viewer-emoji" id="lv-emoji">🔗</span>
+      <span class="link-viewer-title" id="lv-title"></span>
+      <span class="link-viewer-url" id="lv-url"></span>
+      <a id="lv-open-tab" href="#" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent);white-space:nowrap;text-decoration:none;padding:4px 8px;border:0.5px solid var(--accent-border);border-radius:5px;background:var(--accent-dim)">&#8599; Open in tab</a>
+      <button class="modal-close-btn" onclick="closeLinkViewer()">&#10005;</button>
+    </div>
+    <iframe class="link-viewer-iframe" id="lv-iframe" src="" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy"></iframe>
+  </div>
+</div>
+
+<!-- Keyboard shortcuts modal -->
+<div class="modal-backdrop" id="shortcuts-modal" style="display:none" onclick="if(event.target===this)closeShortcutsModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:480px">
+    <div class="modal-header">
+      <div class="modal-title">Keyboard shortcuts</div>
+      <button class="modal-close-btn" onclick="closeShortcutsModal()">&#10005;</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <div>
+        <div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Global</div>
+        <div class="kbd-row"><span>Open this panel</span><span class="kbd-keys"><kbd>?</kbd></span></div>
+         <div class="kbd-row"><span>Open global search</span><span class="kbd-keys"><kbd>Ctrl</kbd>+<kbd>K</kbd> <span style="opacity:.5">or</span> <kbd>/</kbd></span></div>
+        <div class="kbd-row"><span>New bill</span><span class="kbd-keys"><kbd>N</kbd></span></div>
+        <div class="kbd-row"><span>Close any modal/panel</span><span class="kbd-keys"><kbd>Esc</kbd></span></div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Tasks page</div>
+        <div class="kbd-row"><span>New task</span><span class="kbd-keys"><kbd>T</kbd></span></div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">In search palette</div>
+        <div class="kbd-row"><span>Move selection</span><span class="kbd-keys"><kbd>&#8593;</kbd> <kbd>&#8595;</kbd></span></div>
+        <div class="kbd-row"><span>Open selected result</span><span class="kbd-keys"><kbd>Enter</kbd></span></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-top:18px;text-align:center">Shortcuts are disabled while typing in inputs.</div>
+  </div>
+</div>
+
+<!-- Restore modal -->
+<div class="modal-backdrop" id="restore-modal" style="display:none" onclick="if(event.target===this)closeRestoreModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
+    <div class="modal-header">
+      <div class="modal-title">Restore backup</div>
+      <button class="modal-close-btn" onclick="closeRestoreModal()">&#10005;</button>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:6px" id="restore-modal-meta"></div>
+      <div style="font-size:12px;color:var(--text3)" id="restore-modal-counts"></div>
+    </div>
+    <div style="background:var(--amber-dim);border:0.5px solid var(--amber-border);border-radius:var(--radius-md);padding:10px 14px;margin-bottom:16px">
+      <div style="font-size:12px;color:var(--amber);font-weight:600;margin-bottom:4px">&#9888; How do you want to restore?</div>
+      <div style="font-size:11px;color:var(--text3)"><strong style="color:var(--text2)">Replace</strong> — overwrites all current data with the backup.<br><strong style="color:var(--text2)">Merge</strong> — adds backup items without removing your existing data.</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeRestoreModal()">Cancel</button>
+      <button class="btn" onclick="applyRestore('merge')" style="border-color:var(--accent-border);color:var(--accent)">Merge</button>
+      <button class="btn primary" onclick="applyRestore('replace')">Replace all</button>
+    </div>
+  </div>
+</div>
+
+<!-- Floating collections panel -->
+<button class="sh-coll-fab" id="sh-coll-fab" onclick="toggleShCollPanel()" title="Collections" style="display:none"><span style="font-size:14px;font-weight:700;letter-spacing:-.02em">&#9776;</span></button>
+<div class="sh-coll-panel" id="sh-coll-panel">
+  <div class="sh-coll-panel-head">
+    <span style="display:flex;align-items:center;gap:7px"><span style="width:14px;height:11px;border:1.5px solid currentColor;border-top:none;border-radius:0 0 3px 3px;position:relative;display:inline-block;margin-top:3px"><span style="position:absolute;top:-5px;left:-1px;width:6px;height:5px;border:1.5px solid currentColor;border-bottom:none;border-radius:2px 2px 0 0;background:var(--surface2)"></span></span>Collections</span>
+    <button class="modal-close-btn" onclick="toggleShCollPanel()">&#10005;</button>
+  </div>
+  <div id="sh-coll-panel-items"></div>
+</div>
+
+
+<!-- Loan / EMI modal -->
+<div class="modal-backdrop" id="loan-modal" style="display:none" onclick="if(event.target===this)closeLoanModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:520px">
+    <div class="modal-header">
+      <div class="modal-title" id="loan-modal-title">Add loan</div>
+      <button class="modal-close-btn" onclick="closeLoanModal()">&#10005;</button>
+    </div>
+    <div class="field"><label>Loan name</label><input id="ln-name" type="text" placeholder="e.g. Car loan, Personal loan" autocomplete="off"></div>
+    <div class="fields-row">
+      <div class="field"><label>Type</label>
+        <select id="ln-type" onchange="lnTypeChange()">
+          <option value="personal">Personal</option>
+          <option value="car">Car</option>
+          <option value="mortgage">Mortgage</option>
+          <option value="education">Education</option>
+          <option value="business">Business</option>
+          <option value="friendly">Friendly debt</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Lender / Bank</label><input id="ln-lender" type="text" placeholder="e.g. ADCB, FAB" autocomplete="off"></div>
+    </div>
+    <div class="fields-row">
+      <div class="field"><label>Principal (AED)</label><input id="ln-principal" type="number" min="0" step="0.01" placeholder="0.00" oninput="lnCalcEMI()"></div>
+      <div class="field" id="ln-rate-field"><label>Annual rate (%)</label><input id="ln-rate" type="number" min="0" step="0.01" placeholder="0.00" oninput="lnCalcEMI()"></div>
+    </div>
+    <div class="fields-row" id="ln-tenure-row">
+      <div class="field"><label>Tenure (months)</label><input id="ln-tenure" type="number" min="1" step="1" placeholder="12" oninput="lnCalcEMI()"></div>
+      <div class="field"><label>Start date</label><input id="ln-start" type="date"></div>
+    </div>
+    <div class="field" id="ln-duedate-row" style="display:none">
+      <label>Repay by (optional)</label><input id="ln-duedate" type="date">
+    </div>
+    <div class="field" style="display:none">
+      <label>Lent on</label><input id="ln-start-friendly" type="date">
+    </div>
+    <div class="fields-row">
+      <div class="field"><label>EMI override (optional)</label><input id="ln-emi-override" type="number" min="0" step="0.01" placeholder="Auto-calculated"></div>
+      <div class="field"><label>Amount paid so far (AED)</label><input id="ln-paid" type="number" min="0" step="0.01" placeholder="0.00"></div>
+    </div>
+    <div id="ln-preview" style="display:none;background:var(--surface2);border:0.5px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px">
+      <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">EMI preview</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
+        <div><div style="font-size:10px;color:var(--text3)">Monthly EMI</div><div style="font-size:15px;font-weight:600;font-family:var(--mono);color:var(--red)" id="ln-prev-emi">AED 0</div></div>
+        <div><div style="font-size:10px;color:var(--text3)">Total interest</div><div style="font-size:15px;font-weight:600;font-family:var(--mono);color:var(--amber)" id="ln-prev-int">AED 0</div></div>
+        <div><div style="font-size:10px;color:var(--text3)">Total payable</div><div style="font-size:15px;font-weight:600;font-family:var(--mono)" id="ln-prev-tot">AED 0</div></div>
+      </div>
+    </div>
+    <div class="field"><label>Notes (optional)</label><input id="ln-notes" type="text" placeholder="Any details..." autocomplete="off"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeLoanModal()">Cancel</button>
+      <button class="btn primary" onclick="saveLoan()">Save loan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Goal modal -->
+<div class="modal-backdrop" id="goal-modal" style="display:none" onclick="if(event.target===this)closeGoalModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:520px">
+    <div class="modal-header">
+      <div class="modal-title" id="goal-modal-title">Add goal</div>
+      <button class="modal-close-btn" onclick="closeGoalModal()">&#10005;</button>
+    </div>
+    <div class="field"><label>Goal title</label><input id="gl-title" type="text" placeholder="e.g. Save for a car, Run a marathon" autocomplete="off"></div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:8px">Emoji</label>
+      <div id="gl-emoji-grid" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+    </div>
+    <div class="fields-row">
+      <div class="field"><label>Category</label>
+        <select id="gl-cat" onchange="glCatChange()">
+          <option value="financial">&#128176; Financial</option>
+          <option value="personal">&#127775; Personal</option>
+        </select>
+      </div>
+      <div class="field"><label>Subcategory</label><select id="gl-subcat"></select></div>
+    </div>
+    <div class="fields-row">
+      <div class="field"><label>Type</label>
+        <select id="gl-type" onchange="glTypeChange()">
+          <option value="amount">Amount target</option>
+          <option value="milestone">Milestones</option>
+        </select>
+      </div>
+      <div class="field"><label>Deadline (optional)</label><input id="gl-deadline" type="date"></div>
+    </div>
+    <div id="gl-amount-fields">
+      <div class="fields-row">
+        <div class="field"><label>Target (AED)</label><input id="gl-target" type="number" min="0" step="1" placeholder="0"></div>
+        <div class="field"><label>Current (AED)</label><input id="gl-current" type="number" min="0" step="1" placeholder="0"></div>
+      </div>
+    </div>
+    <div id="gl-milestone-fields" style="display:none">
+      <div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Milestones</div>
+      <div id="gl-ms-inputs"></div>
+      <button class="btn secondary" onclick="addMsInput()" style="margin-top:4px;height:32px;font-size:12px">+ Add milestone</button>
+    </div>
+    <div class="field"><label>Notes (optional)</label><input id="gl-notes" type="text" placeholder="Any details..." autocomplete="off"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeGoalModal()">Cancel</button>
+      <button class="btn primary" onclick="saveGoal()">Save goal</button>
+    </div>
+  </div>
+</div>
+
+<!-- Goal log progress modal -->
+<div class="modal-backdrop" id="goal-log-modal" style="display:none" onclick="if(event.target===this)closeGoalLogModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title" id="goal-log-title">Update progress</div>
+      <button class="modal-close-btn" onclick="closeGoalLogModal()">&#10005;</button>
+    </div>
+    <div id="goal-log-body"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeGoalLogModal()">Cancel</button>
+      <button class="btn primary" onclick="saveGoalLog()">Save progress</button>
+    </div>
+  </div>
+</div>
+
+<!-- Account modal -->
+<div class="modal-backdrop" id="account-modal" style="display:none" onclick="if(event.target===this)closeAccountModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:480px">
+    <div class="modal-header">
+      <div class="modal-title" id="account-modal-title">Add account</div>
+      <button class="modal-close-btn" onclick="closeAccountModal()">&#10005;</button>
+    </div>
+    <div class="field"><label>Account name</label><input id="ac-name" type="text" placeholder="e.g. ADCB Savings, Emirates NBD" autocomplete="off"></div>
+    <div class="fields-row">
+      <div class="field"><label>Type</label>
+        <select id="ac-type" onchange="acTypeChange()">
+          <option value="savings">&#128176; Savings</option>
+          <option value="current">&#127974; Current</option>
+          <option value="cash">&#128181; Cash</option>
+          <option value="investment">&#128200; Investment</option>
+          <option value="crypto">&#128142; Crypto</option>
+          <option value="gold">&#129351; Gold</option>
+          <option value="fixeddeposit">&#128274; Fixed Deposit</option>
+          <option value="other">&#128203; Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Bank / Institution</label><input id="ac-bank" type="text" placeholder="e.g. ADCB, Wio" autocomplete="off"></div>
+    </div>
+    <div class="fields-row">
+      <div class="field"><label>Balance (AED)</label><input id="ac-balance" type="number" min="0" step="0.01" placeholder="0.00"></div>
+      <div class="field"><label>Currency</label>
+        <select id="ac-currency">
+          <option value="AED">AED</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+          <option value="GBP">GBP</option>
+          <option value="INR">INR</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="field" id="ac-rate-field"><label>Interest rate (% p.a.)</label><input id="ac-rate" type="number" min="0" step="0.01" placeholder="0.00"></div>
+    <div class="fields-row">
+      <div class="field"><label>Maturity date</label><input id="ac-maturity" type="date"></div>
+      <div class="field"><label>Account number (last 4)</label><input id="ac-acnum" type="text" placeholder="e.g. 1234" maxlength="4"></div>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:8px">Colour</label>
+      <div id="ac-color-picker" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+    </div>
+    <div class="field"><label>Notes (optional)</label><input id="ac-notes" type="text" placeholder="Any details..." autocomplete="off"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeAccountModal()">Cancel</button>
+      <button class="btn primary" onclick="saveAccount()">Save account</button>
+    </div>
+  </div>
+</div>
+
+<!-- Account balance history modal -->
+<div class="modal-backdrop" id="ac-history-modal" style="display:none" onclick="if(event.target===this)closeAcHistoryModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:420px">
+    <div class="modal-header">
+      <div class="modal-title" id="ac-history-title">Balance history</div>
+      <button class="modal-close-btn" onclick="closeAcHistoryModal()">&#10005;</button>
+    </div>
+    <div id="ac-history-content" style="max-height:60vh;overflow-y:auto"></div>
+    <div class="modal-actions">
+      <button class="btn primary" onclick="closeAcHistoryModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Note modal -->
+<div class="modal-backdrop" id="note-modal" style="display:none" onclick="if(event.target===this)closeNoteModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:500px">
+    <div class="modal-header">
+      <div class="modal-title">Note</div>
+      <button class="modal-close-btn" onclick="closeNoteModal()">&#10005;</button>
+    </div>
+    <input id="qn-modal-title" type="text" placeholder="Title..." autocomplete="off" style="width:100%;border:none;background:transparent;font-size:17px;font-weight:500;color:var(--text);font-family:var(--font);outline:none;margin-bottom:10px;padding:0;display:block">
+    <textarea id="qn-modal-body" placeholder="Write your note..." style="width:100%;min-height:120px;background:var(--surface2);border:0.5px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-family:var(--font);padding:10px 12px;outline:none;resize:vertical;line-height:1.6;display:block"></textarea>
+    <div style="margin-top:10px">
+      <div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Colour</div>
+      <div id="qn-color-picker" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Tags</div>
+      <div id="qn-modal-tags-wrap" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-md);padding:6px 10px;min-height:36px">
+        <input id="qn-tag-input" type="text" placeholder="Add tag, press Enter..." style="border:none;background:transparent;color:var(--text);font-size:12px;font-family:var(--font);outline:none;min-width:80px;flex:1">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeNoteModal()">Cancel</button>
+      <button class="btn primary" onclick="saveNote()">Save note</button>
+    </div>
+  </div>
+</div>
+
+<!-- Global search palette -->
+<div class="modal-backdrop" id="search-modal" style="display:none;align-items:flex-start;padding-top:80px" onclick="if(event.target===this)closeSearchModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:640px;padding:0;overflow:hidden">
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:0.5px solid var(--border)">
+      <span style="font-size:16px;color:var(--text3);line-height:1">&#128269;</span>
+      <input id="gs-input" type="text" placeholder="Search everything... (tasks, notes, bills, loans, goals, accounts, links, shopping...)" autocomplete="off" oninput="runGlobalSearch(this.value)" onkeydown="gsKeydown(event)" style="flex:1;border:none;background:transparent;font-size:15px;color:var(--text);font-family:var(--font);outline:none;padding:0">
+      <kbd style="font-family:var(--mono);font-size:10px;color:var(--text3);background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:2px 6px">ESC</kbd>
+    </div>
+    <div id="gs-results" style="max-height:60vh;overflow-y:auto;padding:6px 0">
+      <div id="gs-empty" style="padding:30px 16px;text-align:center;color:var(--text3);font-size:13px">
+        Type to search across all your data.<br>
+        <span style="font-size:11px;opacity:.7;margin-top:6px;display:inline-block">Tip: <kbd style="font-family:var(--mono);background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:1px 5px">&#8593;&#8595;</kbd> navigate &middot; <kbd style="font-family:var(--mono);background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:1px 5px">Enter</kbd> open</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PWA install prompt banner (Android Chrome shows beforeinstallprompt) -->
+<div class="pwa-install-banner" id="pwa-install-banner">
+  <div class="pwa-msg">Install <b>LifeOS</b> on your home screen for offline access and a native-app feel.</div>
+  <button onclick="pwaInstall()">Install</button>
+  <button class="dismiss" onclick="pwaDismissInstall()">Later</button>
+</div>
+
+<!-- PWA update available banner -->
+<div class="pwa-update-banner" id="pwa-update-banner">
+  <div class="pwa-msg">A new version is ready.</div>
+  <button onclick="pwaApplyUpdate()">Reload</button>
+</div>
+
+<!-- Receivable modal -->
+<div class="modal-backdrop" id="recv-modal" style="display:none" onclick="if(event.target===this)closeRecvModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
+    <div class="modal-header">
+      <div class="modal-title" id="recv-modal-title">Add receivable</div>
+      <button class="modal-close-btn" onclick="closeRecvModal()">&#10005;</button>
+    </div>
+    <div class="field"><label>Description</label><input id="rv-name" type="text" placeholder="e.g. Rent from Ahmed, Expense reimbursement" autocomplete="off"></div>
+    <div class="fields-row">
+      <div class="field"><label>Amount (AED)</label><input id="rv-amount" type="number" min="0" step="0.01" placeholder="0.00"></div>
+      <div class="field"><label>Type</label>
+        <select id="rv-type">
+          <option value="person">&#129309; Person</option>
+          <option value="work">&#127970; Work / Company</option>
+          <option value="other">&#9679; Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>From (name)</label><input id="rv-from" type="text" placeholder="Who owes you?" autocomplete="off"></div>
+    <div class="fields-row">
+      <div class="field"><label>Date lent</label><input id="rv-date" type="date"></div>
+      <div class="field"><label>Due date (optional)</label><input id="rv-due" type="date"></div>
+    </div>
+    <div class="field"><label>Notes (optional)</label><input id="rv-notes" type="text" placeholder="Any details..." autocomplete="off"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeRecvModal()">Cancel</button>
+      <button class="btn primary" onclick="saveRecv()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="version-stamp">v?</div>
+</body>
+</html>

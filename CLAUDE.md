@@ -8,14 +8,24 @@ Personal productivity PWA. Single-file HTML app, deployed to GitHub Pages at `ar
 lifeos/
 ├── CLAUDE.md                 # this file -- read first
 ├── README.md
-├── index.html                # deploy target -- byte-identical to life_manager.html
-├── life_manager.html         # working file -- edit this
-├── service-worker.js         # PWA SW at root for full-site scope
+├── build.js                  # combines src/ -> deployable HTML; auto-bumps SW cache
+├── src/                      # SOURCE FILES (edit these from v5.20+)
+│   ├── index.html            # template with /*<!--CSS-->*/ /*<!--JS-->*/ markers
+│   ├── styles.css            # plain CSS
+│   └── app.js                # plain JS (was previously base64-encoded inline)
+├── index.html                # BUILD OUTPUT, do not edit; byte-identical to life_manager.html
+├── life_manager.html         # BUILD OUTPUT, do not edit; same content as index.html
+├── service-worker.js         # PWA SW; `const CACHE` is auto-bumped by build.js
 ├── gptlife_manager.html      # legacy stub, unused
 └── bills-backup-*.json       # personal data export, do not modify
 ```
 
-Restore-point HTMLs (`life_manager_before_*.html`) are **no longer committed** — git history covers them. Only create a local snapshot for major (v5.X) releases, and delete it after the PR merges. The `.gitignore` enforces this.
+**Edit workflow (v5.20+):**
+1. Edit `src/app.js`, `src/styles.css`, or `src/index.html` (the template).
+2. Run `node build.js` — produces fresh `index.html` + `life_manager.html` and bumps `const CACHE` in `service-worker.js` from a content hash.
+3. Commit `src/`, the two HTMLs, and `service-worker.js` together.
+
+Restore-point HTMLs (`life_manager_before_*.html`) are no longer committed — git history covers them. The `.gitignore` enforces this.
 
 ## Live URLs
 
@@ -24,11 +34,11 @@ Restore-point HTMLs (`life_manager_before_*.html`) are **no longer committed** �
 
 ## Tech stack
 
-Vanilla JS, HTML/CSS, `localStorage`, Chart.js CDN. No frameworks. The entire JS block is base64-encoded via `eval(atob('...'))`. All non-ASCII must be escaped as `\uXXXX` (with surrogate pairs for codepoints above U+FFFF) before encoding. Always run `node --check` on the decoded JS before saving.
+Vanilla JS, HTML/CSS, `localStorage`, Chart.js CDN. No frameworks. From v5.20 onward the JS is plain UTF-8 inlined as `<script>...</script>` (no more base64 / `eval(atob(...))` / `\uXXXX` escapes). Always run `node --check src/app.js` before building.
 
 ## Current version
 
-**v5.19.7** (monthly bill reset window = 10 days before due date).
+**v5.20.0** (source split + plaintext build pipeline).
 
 ## Workflow preferences
 
@@ -52,20 +62,18 @@ git fetch origin main && git reset --hard origin/main && git push --force-with-l
 - `service-worker.js` at repo root.
 - Repo: `Ariestotele/lifeos`. Dev branch: `claude/continue-project-lts6k`.
 
-## Core editing rules (base64 JS block)
+## Core editing rules (post-v5.20 source split)
 
-The entire JS is wrapped as `eval(atob('…'))`. For every edit:
+1. Edit `src/app.js`, `src/styles.css`, or `src/index.html` (template) directly with `Edit` — no decode/encode dance.
+2. Run `node --check src/app.js` before building.
+3. Use `data-id` attributes on `onclick` handlers (avoids quote-escaping bugs).
+4. Bump `APP_VERSION` (in `src/app.js`) on every visible change.
+5. Surgical edits only — never rewrite large sections unless necessary.
+6. Run `node build.js` — generates `index.html` + `life_manager.html` (byte-identical) and auto-bumps `const CACHE` in `service-worker.js` from the content hash. Manual cache bumps are no longer required.
+7. Commit `src/` + both HTMLs + `service-worker.js` together.
+8. Restore points — **only for major (v5.X) releases**, kept local, deleted after merge: `cp life_manager.html life_manager_before_<feature>.html`. Skipped for sub-minor releases (git history is enough).
 
-1. Restore point — **only for major (v5.X) releases**, kept local, deleted after merge: `cp life_manager.html life_manager_before_<feature>.html`. Skipped for sub-minor releases (git history is enough).
-2. Decode base64 → modify JS.
-3. Run `node --check` on the decoded JS before re-encoding.
-4. Escape non-ASCII with `\uXXXX` (BMP) or surrogate pairs (astral / emoji) before re-encoding.
-5. Use `data-id` attributes on `onclick` handlers (avoids quote-escaping bugs).
-6. Bump `APP_VERSION` on every change.
-7. Surgical edits only — never rewrite large sections unless necessary.
-8. Atomic writes — Python transform script with `sub_unique` style asserts; every assertion must pass before any `f.write()` / `os.replace()`.
-9. Update **both** `life_manager.html` and `index.html` (byte-identical) in the same commit.
-10. **Bump `service-worker.js` `CACHE` constant on every visible release** (e.g. `'lifeos-v5.18'` → `'lifeos-v5.19'`). The SW is cache-first; if `CACHE` doesn't change, installed PWAs keep serving the old HTML even after the new HTML is in cache. Skipping this silently breaks every fix for installed users.
+Build-time guards in `build.js` reject any `src/app.js` containing `</script>` or `<!--`, and any `src/styles.css` containing `</style>`. If a guard fires, fix the source instead of bypassing.
 
 ## Architecture
 
@@ -165,6 +173,7 @@ Workspace values: any `workspaces[].id` (defaults `'personal'` / `'work'` always
 - **v5.19.5** — Theme unification: added `--radius-sm: 4px`, `--radius-md: 8px`, `--shadow-lg`; routed 65 hardcoded `border-radius:8px`/`4px` instances through the new variables. Pixel-identical render. Future radius/shadow tweaks now one-line.
 - **v5.19.6** — Perf pass: killed `backdrop-filter` blurs on touch devices (mobile-nav, all modal backdrops, sidebar overlay, task panel tint, banners). Three stacked blur layers were causing modal-open jank on phone GPUs. Compensated with slightly more opaque solid backgrounds. Desktop unchanged.
 - **v5.19.7** — Monthly bill reset window: `isPaidThisCycle` for monthly bills now rolls over `RESET_LEAD_DAYS` (=10) days before each bill's own `dueDay`, not on the 1st of the next calendar month. Bills without a `dueDay` keep the old calendar-month fallback. Other cycles unchanged.
+- **v5.20.0** — Source split: JS, CSS, and HTML template moved to `src/`; `build.js` (Node, no deps) inlines them as plaintext into `index.html` and `life_manager.html`. Drops the `eval(atob('…'))` wrapper and the `\uXXXX` escape dance entirely. `build.js` auto-bumps `service-worker.js` `const CACHE` from a content hash so the manual cache-bump rule is no longer needed. Build output ~129KB smaller than before because base64 + escapes are gone. Functionally identical to v5.19.7.
 
 Deploy note: `index.html` was brought up to v5.17+ parity via a dedicated commit ("Deploy v5.17 to index.html (mobile nav fix)") so the installed PWA at `/lifeos/` picks up all mobile-nav + workspace-lists work.
 

@@ -317,7 +317,15 @@
                   <option value="urgent">Urgent</option>
                 </select>
               </div>
-              <div class="field"><label>Due date</label><input id="tk-due" type="date"></div>
+              <div class="field"><label>Due date</label>
+                <div class="tk-quickdate">
+                  <button type="button" class="pill" onclick="tkSetDueOffset(0)">Today</button>
+                  <button type="button" class="pill" onclick="tkSetDueOffset(1)">Tomorrow</button>
+                  <button type="button" class="pill" onclick="tkSetDueFriday()">This Fri</button>
+                  <button type="button" class="pill" onclick="tkSetDueOffset(null)" title="Clear date">&#10005;</button>
+                </div>
+                <input id="tk-due" type="date">
+              </div>
             </div>
             <div class="fields-row">
               <div class="field"><label>Workspace</label>

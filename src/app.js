@@ -2,10 +2,11 @@
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.20.3';
+const APP_VERSION = '5.20.4';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
+const KEY_BUDGETS='lifeos_budgets';
 const KEY_TASKS='subtracker_tasks', KEY_TASK_HIST='subtracker_task_history', KEY_SHOPPING='lifeos_shopping', KEY_SH_LISTS='lifeos_sh_lists', KEY_LISTS='subtracker_lists', KEY_GOALS='subtracker_goals', KEY_NOTES='subtracker_notes', KEY_LOANS='subtracker_loans', KEY_ACCOUNTS='subtracker_accounts', KEY_NW='subtracker_networth', KEY_RECV='subtracker_receivables';
 
 let items=[], payments=[], tabbyItems=[], editId=null, tabbyEditId=null, tabbyColor=COLORS[4];
@@ -28,6 +29,7 @@ let loans=[], lnEditId=null;
 let receivables=[], rvEditId=null;
 let accounts=[], acEditId=null, acSelectedColor='#4A8ECC';
 let nwHistory=[];
+let budgets={};
 const AC_TYPES={savings:{label:'Savings',icon:'\uD83D\uDCB0',group:'liquid'},current:{label:'Current',icon:'\uD83C\uDFE6',group:'liquid'},cash:{label:'Cash',icon:'\uD83D\uDCB5',group:'liquid'},investment:{label:'Investment',icon:'\uD83D\uDCC8',group:'investments'},crypto:{label:'Crypto',icon:'\uD83D\uDC8E',group:'investments'},gold:{label:'Gold',icon:'\uD83E\uDD47',group:'investments'},fixeddeposit:{label:'Fixed Deposit',icon:'\uD83D\uDD12',group:'fixed'},other:{label:'Other',icon:'\uD83D\uDCCB',group:'liquid'}};
 const AC_GROUPS={liquid:'Liquid / Cash',investments:'Investments',fixed:'Fixed / Term deposits'};
 const AC_COLORS=['#4A8ECC','#1D9E75','#C98A1A','#C46A8A','#7A74D4','#C95050','#C97840','#5DCAA5','#888880'];
@@ -69,6 +71,31 @@ function saveLoans(){lsSet(KEY_LOANS,JSON.stringify(loans));asAutoSave();}
 function saveReceivables(){lsSet(KEY_RECV,JSON.stringify(receivables));asAutoSave();}
 function saveAccounts(){lsSet(KEY_ACCOUNTS,JSON.stringify(accounts));asAutoSave();}
 function saveNetWorth(){lsSet(KEY_NW,JSON.stringify(nwHistory));}
+/* Budgets per bill category (v5.20.4). Stored as a flat map { cat: monthlyCap }. */
+function saveBudgets(){lsSet(KEY_BUDGETS,JSON.stringify(budgets));asAutoSave&&asAutoSave();}
+function getBudget(cat){var v=budgets[cat];return (typeof v==='number'&&v>0)?v:0;}
+function setBudget(cat,n){
+  if(!cat) return;
+  var v=parseFloat(n);
+  if(isNaN(v)||v<=0) delete budgets[cat]; else budgets[cat]=v;
+  saveBudgets();
+}
+function getCategorySpent(cat){
+  // Sum payments in the current cycle for items in this category.
+  var ids=new Set(items.filter(function(i){return i.cat===cat;}).map(function(i){return i.id;}));
+  return payments.filter(function(p){return p.itemId && ids.has(p.itemId) && inCycle(p.date);})
+    .reduce(function(s,p){return s+(parseFloat(p.amount)||0);},0);
+}
+function getBudgetCategories(){
+  // Known categories from CATCOLORS in their declared order, then any cat
+  // actually used on a bill that isn't in CATCOLORS.
+  var known=Object.keys(CATCOLORS);
+  var combined=known.slice();
+  items.forEach(function(i){
+    if(i.cat && combined.indexOf(i.cat)<0) combined.push(i.cat);
+  });
+  return combined;
+}
 
 
 
@@ -427,6 +454,8 @@ function loadData(){
   try{const d=localStorage.getItem(KEY_NW);if(d)nwHistory=JSON.parse(d);}catch(e){nwHistory=[];}
   try{const d=localStorage.getItem(KEY_WORKSPACES);if(d)workspaces=JSON.parse(d);}catch(e){workspaces=[];}
   if(!Array.isArray(workspaces)||!workspaces.length){workspaces=JSON.parse(JSON.stringify(WS_DEFAULTS));saveWorkspaces();}
+  try{const d=localStorage.getItem(KEY_BUDGETS);if(d)budgets=JSON.parse(d);}catch(e){budgets={};}
+  if(!budgets || typeof budgets!=='object' || Array.isArray(budgets)) budgets={};
   render();
   switchPage('dashboard');
   setTimeout(verSnapshot, 500); // snapshot initial state on load
@@ -1915,7 +1944,7 @@ document.getElementById('tabby-modal').addEventListener('click',e=>{if(e.target=
 
 function exportJSON(){
   if(!items.length&&!payments.length&&!tabbyItems.length&&!tasks.length){toast('Nothing to back up yet');return;}
-  const data=JSON.stringify({items,payments,tabbyItems,tasks,taskHistory,shopping,shCollections,links,linkGroups,lists,workspaces,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),dbCollapsed:JSON.parse(localStorage.getItem('lifeos_db_collapsed')||'{}'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),proxyUrl:localStorage.getItem(AI_PROXY_STORE)||'',exportedAt:new Date().toISOString()},null,2);
+  const data=JSON.stringify({items,payments,tabbyItems,tasks,taskHistory,shopping,shCollections,links,linkGroups,lists,workspaces,goals,notes,loans,receivables,accounts,nwHistory,budgets,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),dbCollapsed:JSON.parse(localStorage.getItem('lifeos_db_collapsed')||'{}'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),proxyUrl:localStorage.getItem(AI_PROXY_STORE)||'',exportedAt:new Date().toISOString()},null,2);
   const d=new Date();
   const filename='bills-backup-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'.json';
   verSnapshot(true);
@@ -1982,13 +2011,14 @@ function applyRestore(mode){
     linkGroups=data.linkGroups||[];
     lists=data.lists||[];
     workspaces=(data.workspaces&&data.workspaces.length)?data.workspaces:JSON.parse(JSON.stringify(WS_DEFAULTS));
+    budgets=(data.budgets && typeof data.budgets==='object' && !Array.isArray(data.budgets)) ? data.budgets : {};
     goals=data.goals||[];
     notes=data.notes||[];
     loans=data.loans||[];
     accounts=data.accounts||[];
     nwHistory=data.nwHistory||[];
     receivables=data.receivables||[];
-    saveData();saveTasks();saveTaskHistory();saveShopping();saveShCollections();saveLinks();saveLinkGroups();saveLists();saveWorkspaces();saveGoals();saveNotes();saveLoans();saveReceivables();saveAccounts();saveNetWorth();
+    saveData();saveTasks();saveTaskHistory();saveShopping();saveShCollections();saveLinks();saveLinkGroups();saveLists();saveWorkspaces();saveBudgets();saveGoals();saveNotes();saveLoans();saveReceivables();saveAccounts();saveNetWorth();
     if(data.dbLayout)  localStorage.setItem(DB_LAYOUT_KEY,  JSON.stringify(data.dbLayout));
     if(data.dbCollapsed) localStorage.setItem('lifeos_db_collapsed', JSON.stringify(data.dbCollapsed));
     if(data.navLayout) localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(data.navLayout));
@@ -2050,7 +2080,7 @@ loadProxyUrl();
     // Merge taskHistory
     const thIds=new Set((data.taskHistory||[]).map(t=>t.id));
     taskHistory=[...(data.taskHistory||[]),...taskHistory.filter(t=>!thIds.has(t.id))];
-    saveData();saveTasks();saveTaskHistory();saveShopping();saveShCollections();saveLinks();saveLinkGroups();saveLists();saveWorkspaces();saveGoals();saveNotes();saveLoans();saveReceivables();saveAccounts();saveNetWorth();
+    saveData();saveTasks();saveTaskHistory();saveShopping();saveShCollections();saveLinks();saveLinkGroups();saveLists();saveWorkspaces();saveBudgets();saveGoals();saveNotes();saveLoans();saveReceivables();saveAccounts();saveNetWorth();
     // Merge layouts: only apply from backup if local layout is empty
     if(data.dbLayout  && !localStorage.getItem(DB_LAYOUT_KEY))  localStorage.setItem(DB_LAYOUT_KEY,  JSON.stringify(data.dbLayout));
     if(data.dbCollapsed && !localStorage.getItem('lifeos_db_collapsed')) localStorage.setItem('lifeos_db_collapsed', JSON.stringify(data.dbCollapsed));
@@ -3622,8 +3652,8 @@ const DB_WIDGETS = [
   { id:'week',        cols:3, render: dbWidgetWeek        },
   { id:'networth',  cols:1, render: dbWidgetNetWorth    },
   { id:'aiinsight', cols:3, render: dbWidgetAIInsight   },
+  { id:'budget',    cols:1, render: dbWidgetBudget      },
   /* \u2500\u2500 Future widgets plug in here \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-     { id:'budget',   cols:1, render: dbWidgetBudget      },
      { id:'habits',   cols:1, render: dbWidgetHabits      },
      \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 ];
@@ -3957,6 +3987,43 @@ function dbWidgetGoals(el){
   }).join('');
 }
 
+/* Widget: Budgets per bill category (v5.20.4) */
+function dbWidgetBudget(el){
+  dbCard(el,{icon:'&#129534;',title:'Budgets',headColor:'rgba(31,170,126,.08)'});
+  var body=document.getElementById('dbwb-budget');
+  if(!body) return;
+  var entries=Object.keys(budgets).map(function(cat){
+    var cap=getBudget(cat);
+    if(!cap) return null;
+    var spent=getCategorySpent(cat);
+    var pct=cap>0?Math.round(spent/cap*100):0;
+    return {cat:cat,cap:cap,spent:spent,pct:pct};
+  }).filter(Boolean);
+  if(!entries.length){
+    body.innerHTML='<div class="db-empty" style="text-align:center;padding:14px 0">'+
+      '<div style="margin-bottom:6px">No budgets set</div>'+
+      '<button class="db-link" onclick="openSettingsModal();setTimeout(function(){var s=document.getElementById(\'budgets-section\');if(s)s.scrollIntoView({behavior:\'smooth\',block:\'start\'});},150)">Set per-category caps in Settings &rarr;</button>'+
+      '</div>';
+    return;
+  }
+  // Sort: highest % used first so the most-pressing budgets bubble up.
+  entries.sort(function(a,b){return b.pct-a.pct;});
+  body.innerHTML=entries.map(function(e){
+    var color=CATCOLORS[e.cat]||'#888';
+    var statusCls=e.pct>=100?'over':e.pct>=80?'warn':'ok';
+    var barWidth=Math.min(100,e.pct);
+    return '<div class="db-budget-row">'+
+      '<div class="db-budget-head">'+
+        '<span class="db-budget-dot" style="background:'+color+'"></span>'+
+        '<span class="db-budget-name">'+esc(e.cat)+'</span>'+
+        '<span class="db-budget-amt">AED '+Math.round(e.spent).toLocaleString()+' / '+Math.round(e.cap).toLocaleString()+'</span>'+
+        '<span class="db-budget-pct '+statusCls+'">'+e.pct+'%</span>'+
+      '</div>'+
+      '<div class="db-budget-bar"><div class="db-budget-fill '+statusCls+'" style="width:'+barWidth+'%;background:'+color+'"></div></div>'+
+    '</div>';
+  }).join('');
+}
+
 /* \u2500\u2500 Widget: 14-day strip \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 function dbWidgetWeek(el){
   dbCard(el,{icon:'&#9744;',title:'Next 14 days',footerLink:'Calendar',footerPage:'calendar',headColor:'rgba(74,142,204,.07)'});
@@ -4070,7 +4137,7 @@ async function asWriteFile(){
   asDot('busy');
   try{
     const payload = JSON.stringify(
-      {items,payments,tabbyItems,tasks,taskHistory,shopping,shCollections,links,linkGroups,lists,workspaces,goals,notes,loans,receivables,accounts,nwHistory,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),dbCollapsed:JSON.parse(localStorage.getItem('lifeos_db_collapsed')||'{}'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),proxyUrl:localStorage.getItem(AI_PROXY_STORE)||'',savedAt:new Date().toISOString()},
+      {items,payments,tabbyItems,tasks,taskHistory,shopping,shCollections,links,linkGroups,lists,workspaces,goals,notes,loans,receivables,accounts,nwHistory,budgets,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),dbCollapsed:JSON.parse(localStorage.getItem('lifeos_db_collapsed')||'{}'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),proxyUrl:localStorage.getItem(AI_PROXY_STORE)||'',savedAt:new Date().toISOString()},
       null, 2
     );
     const writable = await _asFileHandle.createWritable();
@@ -5124,7 +5191,7 @@ function verSnapshot(force, autoLabel){
     if(!force && versions.length && versions[0].hash === hash) return;
 
     const payload = JSON.stringify(
-      {items,payments,tabbyItems,tasks,taskHistory,shopping,shCollections,links,linkGroups,lists,workspaces,goals,notes,loans,receivables,accounts,nwHistory,
+      {items,payments,tabbyItems,tasks,taskHistory,shopping,shCollections,links,linkGroups,lists,workspaces,goals,notes,loans,receivables,accounts,nwHistory,budgets,
        dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),dbCollapsed:JSON.parse(localStorage.getItem('lifeos_db_collapsed')||'{}'),
        navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),
        cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),
@@ -5276,6 +5343,7 @@ function verRestore(idx){
     linkGroups  = data.linkGroups  || [];
     lists       = data.lists       || [];
     workspaces  = (data.workspaces&&data.workspaces.length)?data.workspaces:JSON.parse(JSON.stringify(WS_DEFAULTS));
+    budgets     = (data.budgets && typeof data.budgets==='object' && !Array.isArray(data.budgets)) ? data.budgets : {};
     goals       = data.goals       || [];
     notes       = data.notes       || [];
     loans       = data.loans       || [];
@@ -5294,6 +5362,7 @@ function verRestore(idx){
     lsSet(KEY_SH_LISTS,JSON.stringify(shCollections));
     lsSet(KEY_LISTS,JSON.stringify(lists));
     lsSet(KEY_WORKSPACES,JSON.stringify(workspaces));
+    lsSet(KEY_BUDGETS,JSON.stringify(budgets));
     lsSet(KEY_GOALS,JSON.stringify(goals));
     lsSet(KEY_NOTES,JSON.stringify(notes));
     lsSet(KEY_LOANS,JSON.stringify(loans));
@@ -6474,9 +6543,30 @@ function openSettingsModal(){
   if(dot&&srcDot) dot.className = srcDot.className;
   if(txt&&srcTxt) txt.textContent = srcTxt.textContent;
   updateSettingsInstallState();
+  renderBudgetsSettings();
 }
 function closeSettingsModal(){
   document.getElementById('settings-modal').style.display='none';
+}
+/* Budgets settings UI (v5.20.4) */
+function renderBudgetsSettings(){
+  var el=document.getElementById('budgets-list');
+  if(!el) return;
+  var cats=getBudgetCategories();
+  el.innerHTML=cats.map(function(cat){
+    var color=CATCOLORS[cat]||'#888';
+    var cur=getBudget(cat);
+    return '<div class="settings-budget-row">'+
+      '<span class="db-budget-dot" style="background:'+color+'"></span>'+
+      '<span class="settings-budget-name">'+esc(cat)+'</span>'+
+      '<input type="number" min="0" step="1" inputmode="numeric" class="settings-input settings-budget-input" data-cat="'+esc(cat)+'" value="'+(cur||'')+'" placeholder="—" oninput="setBudgetFromInput(this)">'+
+      '<span class="settings-budget-suffix">AED</span>'+
+      '</div>';
+  }).join('');
+}
+function setBudgetFromInput(input){
+  if(!input||!input.dataset)return;
+  setBudget(input.dataset.cat,input.value);
 }
 function settingsInstallApp(){
   if(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches){

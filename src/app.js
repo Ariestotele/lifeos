@@ -2,7 +2,7 @@
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.20.2';
+const APP_VERSION = '5.20.3';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -100,6 +100,25 @@ function tkAddToList(listId){
    - tkToggleSubtasks(id): expand/collapse the subtask list on a card.
    - tkToggleSubtask(taskId, subId): flip a single subtask done state.
    Both re-render only the affected card via outerHTML, not the whole list. */
+/* Quick-date buttons on the task modal (v5.20.3).
+   tkSetDueOffset(N): today + N days (N=0 -> today, N=1 -> tomorrow, null -> clear).
+   tkSetDueFriday(): next Friday (or +7 if today is Friday). */
+function tkSetDueOffset(days){
+  var inp = document.getElementById('tk-due');
+  if(!inp) return;
+  if(days === null){ inp.value = ''; return; }
+  var d = new Date();
+  d.setDate(d.getDate() + days);
+  inp.value = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function tkSetDueFriday(){
+  var d = new Date();
+  // JS getDay: Sun=0..Sat=6. Friday=5.
+  var diff = (5 - d.getDay() + 7) % 7;
+  if(diff === 0) diff = 7; // already Friday -> next Friday
+  tkSetDueOffset(diff);
+}
+
 function tkToggleSubtasks(taskId){
   // v5.20.2: default is expanded. We persist '0' for *explicitly collapsed*
   // tasks; absence of the key means default (= expanded).

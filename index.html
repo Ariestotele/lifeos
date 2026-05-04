@@ -249,6 +249,9 @@ body{
 .sort-select option{background:var(--surface2)}
 .filter-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
 .pill{font-size:12px;padding:4px 11px;border-radius:99px;border:0.5px solid var(--border2);background:transparent;cursor:pointer;color:var(--text2);transition:all .18s;font-family:var(--font)}
+/* v5.20.3: quick-date buttons row in the task modal */
+.tk-quickdate{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px}
+.tk-quickdate .pill{font-size:11px;padding:3px 9px;line-height:1.4}
 .pill:hover{border-color:var(--border3);color:var(--text)}
 .pill.active{background:var(--text);color:var(--bg);border-color:var(--text)}
 .items{display:flex;flex-direction:column;gap:7px}
@@ -2024,7 +2027,15 @@ body.touch-device #version-stamp{bottom:auto;top:4px;left:auto;right:4px}
                   <option value="urgent">Urgent</option>
                 </select>
               </div>
-              <div class="field"><label>Due date</label><input id="tk-due" type="date"></div>
+              <div class="field"><label>Due date</label>
+                <div class="tk-quickdate">
+                  <button type="button" class="pill" onclick="tkSetDueOffset(0)">Today</button>
+                  <button type="button" class="pill" onclick="tkSetDueOffset(1)">Tomorrow</button>
+                  <button type="button" class="pill" onclick="tkSetDueFriday()">This Fri</button>
+                  <button type="button" class="pill" onclick="tkSetDueOffset(null)" title="Clear date">&#10005;</button>
+                </div>
+                <input id="tk-due" type="date">
+              </div>
             </div>
             <div class="fields-row">
               <div class="field"><label>Workspace</label>
@@ -2477,7 +2488,7 @@ body.touch-device #version-stamp{bottom:auto;top:4px;left:auto;right:4px}
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.20.2';
+const APP_VERSION = '5.20.3';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -2575,6 +2586,25 @@ function tkAddToList(listId){
    - tkToggleSubtasks(id): expand/collapse the subtask list on a card.
    - tkToggleSubtask(taskId, subId): flip a single subtask done state.
    Both re-render only the affected card via outerHTML, not the whole list. */
+/* Quick-date buttons on the task modal (v5.20.3).
+   tkSetDueOffset(N): today + N days (N=0 -> today, N=1 -> tomorrow, null -> clear).
+   tkSetDueFriday(): next Friday (or +7 if today is Friday). */
+function tkSetDueOffset(days){
+  var inp = document.getElementById('tk-due');
+  if(!inp) return;
+  if(days === null){ inp.value = ''; return; }
+  var d = new Date();
+  d.setDate(d.getDate() + days);
+  inp.value = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function tkSetDueFriday(){
+  var d = new Date();
+  // JS getDay: Sun=0..Sat=6. Friday=5.
+  var diff = (5 - d.getDay() + 7) % 7;
+  if(diff === 0) diff = 7; // already Friday -> next Friday
+  tkSetDueOffset(diff);
+}
+
 function tkToggleSubtasks(taskId){
   // v5.20.2: default is expanded. We persist '0' for *explicitly collapsed*
   // tasks; absence of the key means default (= expanded).

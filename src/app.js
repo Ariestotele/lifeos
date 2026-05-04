@@ -2,7 +2,7 @@
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.19.7';
+const APP_VERSION = '5.20.1';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -94,6 +94,40 @@ function tkAddToList(listId){
     var sel=document.getElementById('tk-list-sel');
     if(sel)sel.value=listId;
   },80);
+}
+
+/* Inline subtask quick-toggle on task cards (v5.20.1).
+   - tkToggleSubtasks(id): expand/collapse the subtask list on a card.
+   - tkToggleSubtask(taskId, subId): flip a single subtask done state.
+   Both re-render only the affected card via outerHTML, not the whole list. */
+function tkToggleSubtasks(taskId){
+  var key='lifeos_tk_exp_'+taskId;
+  if(localStorage.getItem(key)==='1') localStorage.removeItem(key);
+  else lsSet(key,'1');
+  var t=tasks.find(function(x){return x.id===taskId;});
+  if(!t) return;
+  var el=document.getElementById('task-'+taskId);
+  if(el){
+    var wrap=document.createElement('div');
+    wrap.innerHTML=renderTaskCard(t);
+    var fresh=wrap.firstElementChild;
+    if(fresh) el.replaceWith(fresh);
+  }
+}
+function tkToggleSubtask(taskId, subId){
+  var t=tasks.find(function(x){return x.id===taskId;});
+  if(!t || !t.subtasks) return;
+  var s=t.subtasks.find(function(x){return x.id===subId;});
+  if(!s) return;
+  s.done=!s.done;
+  saveTasks();
+  var el=document.getElementById('task-'+taskId);
+  if(el){
+    var wrap=document.createElement('div');
+    wrap.innerHTML=renderTaskCard(t);
+    var fresh=wrap.firstElementChild;
+    if(fresh) el.replaceWith(fresh);
+  }
 }
 
 function tkAddWithTag(tagName){
@@ -2679,10 +2713,32 @@ function renderTaskCard(t){
   var svgDup='<svg viewBox="0 0 12 12" width="9" height="9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="1" width="7" height="7" rx="1"/><rect x="1" y="4" width="7" height="7" rx="1"/></svg>';
   var svgDel='<svg viewBox="0 0 12 12" width="9" height="9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h8M5 3V2h2v1M4 3l.5 6.5h3L8 3"/></svg>';
   var tagsHtml=(t.tags||[]).filter(Boolean).map(function(tag){return '<span class="tk-tag">#'+esc(tag.trim())+'</span>';}).join('');
-  var subtaskBar=totalSubs?
-    '<div class="tk-card-subrow"><span class="tk-card-sublabel">'+doneSubs+'/'+totalSubs+'</span>'+
-    '<div class="tk-card-subbar-wrap"><div class="tk-card-subbar-fill" style="width:'+Math.round(doneSubs/totalSubs*100)+'%;background:'+barColor+'"></div></div>'+
-    '<span class="tk-card-sublabel">subtasks</span></div>':'';
+  var subtaskBar='';
+  if(totalSubs){
+    var expanded = localStorage.getItem('lifeos_tk_exp_'+t.id)==='1';
+    var arrow = expanded ? '▾' : '▸';
+    var pct = Math.round(doneSubs/totalSubs*100);
+    subtaskBar =
+      '<div class="tk-card-subrow tk-card-subrow-clickable" data-id="'+t.id+'" onclick="tkToggleSubtasks(this.dataset.id)">'+
+        '<span class="tk-card-sub-arrow">'+arrow+'</span>'+
+        '<span class="tk-card-sublabel">'+doneSubs+'/'+totalSubs+'</span>'+
+        '<div class="tk-card-subbar-wrap"><div class="tk-card-subbar-fill" style="width:'+pct+'%;background:'+barColor+'"></div></div>'+
+        '<span class="tk-card-sublabel">subtasks</span>'+
+      '</div>';
+    if(expanded){
+      var disabled = t.done ? ' disabled' : '';
+      subtaskBar += '<div class="tk-card-sub-list">'+
+        (t.subtasks||[]).map(function(s){
+          return '<label class="tk-card-sub-row'+(s.done?' done':'')+'">'+
+            '<input type="checkbox" class="tk-card-sub-cb"'+(s.done?' checked':'')+disabled+
+              ' data-tid="'+t.id+'" data-sid="'+s.id+'"'+
+              ' onclick="event.stopPropagation();tkToggleSubtask(this.dataset.tid,this.dataset.sid)">'+
+            '<span class="tk-card-sub-text">'+esc(s.title||'')+'</span>'+
+          '</label>';
+        }).join('')+
+      '</div>';
+    }
+  }
   var notesHtml=t.notes?'<div class="tk-card-notes">'+esc(t.notes)+'</div>':'';
   var actionsHtml=t.done?'':
     '<div class="tk-card-actions">'+

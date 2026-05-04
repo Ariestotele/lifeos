@@ -814,6 +814,18 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:v
 .tk-card-subbar-wrap{flex:1;height:3px;background:var(--border);border-radius:99px;overflow:hidden}
 .tk-card-subbar-fill{height:100%;border-radius:99px}
 .tk-card-sublabel{font-size:11px;color:var(--text3);flex-shrink:0}
+/* v5.20.1: expandable subtask list on task cards */
+.tk-card-subrow-clickable{cursor:pointer;user-select:none;-webkit-user-select:none}
+.tk-card-subrow-clickable:hover{opacity:.85}
+.tk-card-sub-arrow{font-size:9px;color:var(--text3);display:inline-block;flex-shrink:0;width:10px;text-align:center}
+.tk-card-sub-list{display:flex;flex-direction:column;gap:2px;margin:6px 0 4px;padding:6px 8px;background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm)}
+.tk-card-sub-row{display:flex;align-items:center;gap:8px;padding:4px 2px;font-size:12px;color:var(--text);cursor:pointer;border-radius:var(--radius-sm);transition:background .12s;line-height:1.3}
+.tk-card-sub-row:hover{background:var(--surface3)}
+.tk-card-sub-row.done .tk-card-sub-text{text-decoration:line-through;color:var(--text3)}
+.tk-card-sub-cb{accent-color:var(--accent);width:14px;height:14px;cursor:pointer;flex-shrink:0;margin:0}
+.tk-card-sub-cb:disabled{opacity:.6;cursor:not-allowed}
+.tk-card-sub-text{flex:1;word-break:break-word}
+@media(hover:none),(max-width:640px){.tk-card-sub-cb{width:18px;height:18px}.tk-card-sub-row{padding:6px 2px;font-size:13px}}
 .tk-card-notes{font-size:11px;color:var(--text3);font-style:italic;border-top:0.5px solid var(--border);padding-top:4px;margin-top:3px;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .tk-card-actions{display:flex;gap:4px;margin-top:5px;border-top:0.5px solid var(--border);padding-top:4px}
 .tk-ibtn{width:20px;height:20px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--surface);color:var(--text3);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;flex-shrink:0}

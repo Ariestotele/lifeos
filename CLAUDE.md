@@ -2,6 +2,21 @@
 
 Personal productivity PWA. Single-file HTML app, deployed to GitHub Pages at `ariestotele.github.io/lifeos/`.
 
+## Repo layout
+
+```
+lifeos/
+├── CLAUDE.md                 # this file -- read first
+├── README.md
+├── index.html                # deploy target -- byte-identical to life_manager.html
+├── life_manager.html         # working file -- edit this
+├── service-worker.js         # PWA SW at root for full-site scope
+├── gptlife_manager.html      # legacy stub, unused
+└── bills-backup-*.json       # personal data export, do not modify
+```
+
+Restore-point HTMLs (`life_manager_before_*.html`) are **no longer committed** — git history covers them. Only create a local snapshot for major (v5.X) releases, and delete it after the PR merges. The `.gitignore` enforces this.
+
 ## Live URLs
 
 - Default / installed PWA: https://ariestotele.github.io/lifeos/ (serves `index.html`)
@@ -41,7 +56,7 @@ git fetch origin main && git reset --hard origin/main && git push --force-with-l
 
 The entire JS is wrapped as `eval(atob('…'))`. For every edit:
 
-1. Restore point: `cp life_manager.html life_manager_before_<feature>.html`.
+1. Restore point — **only for major (v5.X) releases**, kept local, deleted after merge: `cp life_manager.html life_manager_before_<feature>.html`. Skipped for sub-minor releases (git history is enough).
 2. Decode base64 → modify JS.
 3. Run `node --check` on the decoded JS before re-encoding.
 4. Escape non-ASCII with `\uXXXX` (BMP) or surrogate pairs (astral / emoji) before re-encoding.

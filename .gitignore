@@ -3,6 +3,7 @@
 # If you create one locally for a major release, it stays out of git.
 life_manager_before_*.html
 life_manager*.html.bak
+service-worker_before_*.js
 *.bak
 
 # OS / editor noise

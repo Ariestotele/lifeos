@@ -690,7 +690,12 @@
           <option value="Other">Other</option>
         </select>
       </div>
-      <div class="field"><label>Due day of month</label><input id="f-due" type="number" min="1" max="31" placeholder="1&#8211;31"></div>
+      <div class="field"><label>Due day of month</label>
+        <div class="b-due-wrap">
+          <input id="f-due" type="number" min="1" max="31" placeholder="1&#8211;31">
+          <button type="button" class="b-due-picker-btn" onclick="openDayPicker('f-due')" title="Pick day">&#128197;</button>
+        </div>
+      </div>
     </div>
     <div class="field"><label>Notes (optional)</label><textarea id="f-notes" placeholder="e.g. account email, login URL, contract details&#8230;"></textarea></div>
     <div class="field"><label>Status</label>
@@ -1136,6 +1141,18 @@
       </div>
     </div>
     <div style="font-size:11px;color:var(--text3);margin-top:18px;text-align:center">Shortcuts are disabled while typing in inputs.</div>
+  </div>
+</div>
+
+<!-- Day-of-month picker (v5.20.9) -->
+<div class="modal-backdrop" id="day-picker" style="display:none;z-index:700" onclick="if(event.target===this && !_bdMdInside)closeDayPicker()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:340px">
+    <div class="modal-header">
+      <div class="modal-title">Pick a day</div>
+      <button class="modal-close-btn" onclick="closeDayPicker()">&#10005;</button>
+    </div>
+    <div id="day-picker-grid" class="day-picker-grid"></div>
+    <div class="day-picker-foot">Days 29-31 are skipped on shorter months.</div>
   </div>
 </div>
 

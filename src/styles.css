@@ -1610,6 +1610,21 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:v
 /* v5.20.7: sub-section divider inside the Paid column (One-time payments group) */
 .bills-subsection-head{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin:14px 0 8px;padding-top:10px;border-top:0.5px dashed var(--border)}
 .bills-subsection-head:first-child{margin-top:0;padding-top:0;border-top:none}
+/* v5.20.9: day-of-month picker on the bill modal dueDay field */
+.b-due-wrap{display:flex;gap:6px;align-items:stretch}
+.b-due-wrap input{flex:1;min-width:0}
+.b-due-picker-btn{flex-shrink:0;height:auto;padding:0 12px;border:0.5px solid var(--border2);background:var(--surface2);color:var(--text2);border-radius:var(--radius-md);font-size:16px;cursor:pointer;transition:all .15s}
+.b-due-picker-btn:hover{background:var(--surface3);color:var(--text);border-color:var(--border3)}
+.day-picker-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:6px 0 10px}
+.day-picker-cell{height:36px;font-size:13px;border:0.5px solid var(--border);background:var(--surface2);color:var(--text);border-radius:var(--radius-sm);cursor:pointer;font-family:var(--mono);transition:all .12s;padding:0}
+.day-picker-cell:hover{background:var(--surface3);border-color:var(--border2)}
+.day-picker-cell.selected{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700}
+.day-picker-cell.partial{opacity:.55}
+.day-picker-cell.partial.selected{opacity:1}
+.day-picker-foot{font-size:10px;color:var(--text3);text-align:center;margin-top:2px}
+@media (max-width:640px), (pointer:coarse){
+  .day-picker-cell{height:44px;font-size:14px}
+}
 .bill-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:11px 13px;margin-bottom:7px;border-left:3px solid #888;transition:border-color .15s,transform .15s}
 .bill-card:last-child{margin-bottom:0}
 .bill-card:hover{border-color:var(--border2);transform:translateY(-1px)}

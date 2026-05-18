@@ -909,6 +909,10 @@
           <div class="settings-action-icon" style="background:rgba(155,127,232,.15)">&#8599;</div>
           <div><div>Export CSV</div><div style="font-size:10px;color:var(--text3);margin-top:1px">Bills &amp; payments spreadsheet</div></div>
         </button>
+        <button class="settings-action-btn settings-action-danger" onclick="openClearDataModal()">
+          <div class="settings-action-icon" style="background:rgba(224,82,82,.15);color:var(--red)">&#9888;</div>
+          <div><div style="color:var(--red)">Clear all data</div><div style="font-size:10px;color:var(--text3);margin-top:1px">Wipe everything from this browser. Backup .json files stay untouched.</div></div>
+        </button>
       </div>
     </div>
 
@@ -1132,6 +1136,29 @@
       </div>
     </div>
     <div style="font-size:11px;color:var(--text3);margin-top:18px;text-align:center">Shortcuts are disabled while typing in inputs.</div>
+  </div>
+</div>
+
+<!-- Clear all data modal (v5.20.5) -->
+<div class="modal-backdrop" id="clear-data-modal" style="display:none" onclick="if(event.target===this)closeClearDataModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:440px">
+    <div class="modal-header">
+      <div class="modal-title" style="color:var(--red)">&#9888; Clear all data</div>
+      <button class="modal-close-btn" onclick="closeClearDataModal()">&#10005;</button>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.5;margin-bottom:12px">This wipes everything stored in this browser &mdash; bills, payments, tasks, notes, accounts, everything. Your <b>exported backup .json files are not touched</b>; you can restore from one any time.</div>
+    <div style="background:var(--red-dim);border:0.5px solid var(--red-border);border-radius:var(--radius-md);padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--red);line-height:1.6">
+      <div style="font-weight:600;margin-bottom:4px">Will be deleted from this browser:</div>
+      <div id="clear-data-stats"></div>
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:10px;line-height:1.5">Preferences (cycle day, AI key, dashboard layout, theme) stay intact.</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:6px">Type <b style="font-family:var(--mono);color:var(--red)">DELETE</b> to confirm:</div>
+    <input id="clear-data-confirm" type="text" autocomplete="off" spellcheck="false" oninput="updateClearDataBtn()" style="width:100%;height:36px;background:var(--surface2);border:0.5px solid var(--border2);border-radius:var(--radius-md);color:var(--red);padding:0 12px;font-size:14px;font-family:var(--mono);text-align:center;letter-spacing:.15em;outline:none;text-transform:uppercase" placeholder="DELETE">
+    <div class="modal-actions" style="gap:6px">
+      <button class="btn" onclick="exportJSON()" title="Download a backup before deleting">&#8595; Backup first</button>
+      <button class="btn" onclick="closeClearDataModal()">Cancel</button>
+      <button id="clear-data-go" class="btn" disabled style="background:var(--red);color:#fff;border-color:var(--red);opacity:.5" onclick="confirmClearAllData()">Delete everything</button>
+    </div>
   </div>
 </div>
 

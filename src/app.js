@@ -2,7 +2,7 @@
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.20.6';
+const APP_VERSION = '5.20.7';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -882,7 +882,15 @@ function render(){
   const unpaidMo=visUnpaid.reduce((s,i)=>s+(i._tabby?i.amount:toMonthly(i.amount,i.cycle)),0);
   const paidMo=visPaid.reduce((s,i)=>s+(i._tabby?i.amount:toMonthly(i.amount,i.cycle)),0);
   const unpaidHTML=visUnpaid.map(item=>item._tabby?renderTabbyActiveItem(item):renderItemCard(item,ymCur)).join('');
-  const paidHTML2=visPaid.map(item=>item._tabby?renderTabbyActiveItem(item):renderItemCard(item,ymCur)).join('');
+  // v5.20.7: split the paid column so one-time bills get their own visual group below recurring ones.
+  const paidRecurring = visPaid.filter(i => i._tabby || i.cycle !== 'once');
+  const paidOnce      = visPaid.filter(i => !i._tabby && i.cycle === 'once');
+  const paidRecHTML   = paidRecurring.map(item=>item._tabby?renderTabbyActiveItem(item):renderItemCard(item,ymCur)).join('');
+  const paidOnceHTML  = paidOnce.map(item=>renderItemCard(item,ymCur)).join('');
+  const paidHTML2     = paidRecHTML
+    + (paidOnce.length
+        ? '<div class="bills-subsection-head">One-time payments <span style="color:var(--text3);margin-left:4px">'+paidOnce.length+'</span></div>'+paidOnceHTML
+        : '');
   document.getElementById('items').innerHTML=
     '<div class="bills-two-col">'+
       '<div class="bills-col">'+
@@ -928,11 +936,15 @@ function renderItem(item,ym){
   }
   const resetDateStr=`${resetDate.getDate()} ${MONTHS[resetDate.getMonth()]}`;
   const resetLabel=daysUntilReset===0?`resets today (${resetDateStr})`:daysUntilReset===1?`resets tomorrow (${resetDateStr})`:`resets in ${daysUntilReset}d &#183; ${resetDateStr}`;
-  const paidMeta=paidNow
-    ? `<span class="sep">&#183;</span><span style="color:var(--positive);font-size:11px">resets in ${daysUntilReset===0?'today':daysUntilReset===1?'1d':daysUntilReset+'d'}</span>`
-    : lastPaid
-      ? `<span class="sep">&#183;</span><span style="color:var(--text3);font-size:11px">last paid ${formatShortDate(lastPaid.date)}</span>`
-      : '';
+  const paidMeta = item.cycle==='once'
+    ? (lastPaid
+        ? `<span class="sep">&#183;</span><span style="color:var(--positive);font-size:11px">paid ${formatShortDate(lastPaid.date)}</span>`
+        : '')
+    : paidNow
+      ? `<span class="sep">&#183;</span><span style="color:var(--positive);font-size:11px">resets in ${daysUntilReset===0?'today':daysUntilReset===1?'1d':daysUntilReset+'d'}</span>`
+      : lastPaid
+        ? `<span class="sep">&#183;</span><span style="color:var(--text3);font-size:11px">last paid ${formatShortDate(lastPaid.date)}</span>`
+        : '';
   const resetChip='';
   return `<div class="item${isP?' paused':''}${item.isTrial?' trial-item':''}" id="bill-${item.id}">
     <div class="item-dot" style="background:${color}"></div>
@@ -981,8 +993,14 @@ function renderItemCard(item,ym){
   if(linkedAc) meta+='<span class="bill-sep">&middot;</span><span class="bill-card-account">&#8594; '+esc(linkedAc.name)+'</span>';
   if(showDue)  meta+='<span class="bill-sep">&middot;</span><span class="item-due '+due.cls+'">'+due.label+'</span>';
   if(!isP&&!item.isTrial){
-    if(paidNow)        meta+='<span class="bill-sep">&middot;</span><span style="color:var(--positive);font-size:11px">resets in '+(dur<=0?'today':dur+'d')+'</span>';
-    else if(lastPaid)  meta+='<span class="bill-sep">&middot;</span><span style="color:var(--text3);font-size:11px">last paid '+formatShortDate(lastPaid.date)+'</span>';
+    if(item.cycle==='once'){
+      // One-time bills never reset; show the paid date if any.
+      if(lastPaid) meta+='<span class="bill-sep">&middot;</span><span style="color:var(--positive);font-size:11px">paid '+formatShortDate(lastPaid.date)+'</span>';
+    } else if(paidNow){
+      meta+='<span class="bill-sep">&middot;</span><span style="color:var(--positive);font-size:11px">resets in '+(dur<=0?'today':dur+'d')+'</span>';
+    } else if(lastPaid){
+      meta+='<span class="bill-sep">&middot;</span><span style="color:var(--text3);font-size:11px">last paid '+formatShortDate(lastPaid.date)+'</span>';
+    }
   }
 
   // Badges

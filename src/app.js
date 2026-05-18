@@ -2,7 +2,7 @@
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.20.7';
+const APP_VERSION = '5.20.8';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -1670,7 +1670,7 @@ function showPayFromPopup(item){
         <button class="pay-skip-btn" onclick="confirmPayFrom('${item.id}',true)">Mark paid without deducting</button>
       </div>
     </div>`;
-  popup.addEventListener('click',function(e){if(e.target===popup)popup.remove();});
+  popup.addEventListener('click',function(e){if(e.target===popup && !_bdMdInside)popup.remove();});
   document.body.appendChild(popup);
   window._payItemId=item.id;
   window._paySelectedAcId=defaultAcId||(activeAccounts[0]?activeAccounts[0].id:'');
@@ -1961,7 +1961,7 @@ function saveTabbyItem(){
   toast(wasEditing?`Updated ${name}`:`Added ${name}`);
 }
 
-document.getElementById('tabby-modal').addEventListener('click',e=>{if(e.target===document.getElementById('tabby-modal'))closeTabbyModal();});
+document.getElementById('tabby-modal').addEventListener('click',e=>{if(e.target===document.getElementById('tabby-modal') && !_bdMdInside)closeTabbyModal();});
 
 function exportJSON(){
   if(!items.length&&!payments.length&&!tabbyItems.length&&!tasks.length){toast('Nothing to back up yet');return;}
@@ -2443,6 +2443,23 @@ function renderCalcPage(){
 function openShortcutsModal(){var m=document.getElementById('shortcuts-modal');if(m)m.style.display='flex';}
 function closeShortcutsModal(){var m=document.getElementById('shortcuts-modal');if(m)m.style.display='none';}
 
+/* v5.20.8: drag-out-of-modal close fix.
+   When the user starts a press INSIDE a modal (selecting text, etc.) and the
+   mouseup lands on the backdrop, the click event fires on the backdrop and
+   the existing inline `onclick="if(event.target===this)closeX()"` handlers
+   would close the modal. Track where the mousedown landed and skip the close
+   if it started inside the modal content. */
+var _bdMdInside = false;
+document.addEventListener('mousedown', function(e){
+  var t = e.target;
+  if(!t || !t.closest){ _bdMdInside = false; return; }
+  // Any LifeOS overlay surface that has a .modal/.settings-modal/.link-viewer-modal child.
+  var bd = t.closest('.modal-backdrop, .settings-modal-backdrop, .pay-popup-backdrop, .link-viewer-backdrop, .paid-breakdown-modal');
+  if(!bd){ _bdMdInside = false; return; }
+  // Mousedown directly on the backdrop = real outside-press. Mousedown on a child = inside-press.
+  _bdMdInside = (t !== bd);
+}, true);
+
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){closeSearchModal();closeShortcutsModal();closeModal();closeTkModal();closeListsModal();closeSettingsModal();closeLinkViewer();closeTabbyModal();closeRestoreModal();closeWorkspacesModal();closeWsFixModal();closeGoalModal();closeGoalLogModal();closeNoteModal();closeLoanModal();closeAcHistoryModal();closeAccountModal();closeRecvModal();closeShopModal();closeShCollModal();closeLinkModal();closeLinkGroupModal();closePaidBreakdown();closeClearDataModal();closeMobileSidebar();return;}
   const active=document.activeElement;
@@ -2454,7 +2471,7 @@ document.addEventListener('keydown',e=>{
   if(!typing&&e.key==='?'){e.preventDefault();openShortcutsModal();}
 });
 
-document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal();});
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal') && !_bdMdInside)closeModal();});
 
 /* \u2501\u2501 Task Manager \u2501\u2501 */
 function saveTasks(){lsSet(KEY_TASKS,JSON.stringify(tasks));asAutoSave();}

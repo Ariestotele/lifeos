@@ -2452,7 +2452,7 @@ body.touch-device #version-stamp{bottom:auto;top:4px;left:auto;right:4px}
 </div>
 
 <!-- Lists modal -->
-<div class="modal-backdrop" id="lists-modal" style="display:none" onclick="if(event.target===this)closeListsModal()">
+<div class="modal-backdrop" id="lists-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeListsModal()">
   <div class="modal" style="max-width:360px">
     <div class="modal-title">Manage lists</div>
     <div id="lists-manage-content" style="min-height:40px"></div>
@@ -2471,7 +2471,7 @@ body.touch-device #version-stamp{bottom:auto;top:4px;left:auto;right:4px}
 </div>
 
 <!-- Manage workspaces modal -->
-<div class="modal-backdrop" id="workspaces-modal" style="display:none" onclick="if(event.target===this)closeWorkspacesModal()">
+<div class="modal-backdrop" id="workspaces-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeWorkspacesModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:440px">
     <div class="modal-header">
       <div class="modal-title">Manage workspaces</div>
@@ -2494,7 +2494,7 @@ body.touch-device #version-stamp{bottom:auto;top:4px;left:auto;right:4px}
 </div>
 
 <!-- Workspace fix modal -->
-<div class="modal-backdrop" id="ws-fix-modal" style="display:none" onclick="if(event.target===this)closeWsFixModal()">
+<div class="modal-backdrop" id="ws-fix-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeWsFixModal()">
   <div class="modal" style="max-width:520px">
     <div class="modal-title">Fix task workspaces</div>
     <div style="font-size:12px;color:var(--text3);margin-bottom:10px;line-height:1.5">Tasks created before v5.16 may have their workspace saved incorrectly. Update any wrong ones here, then apply.</div>
@@ -2511,7 +2511,7 @@ body.touch-device #version-stamp{bottom:auto;top:4px;left:auto;right:4px}
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.20.7';
+const APP_VERSION = '5.20.8';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -4179,7 +4179,7 @@ function showPayFromPopup(item){
         <button class="pay-skip-btn" onclick="confirmPayFrom('${item.id}',true)">Mark paid without deducting</button>
       </div>
     </div>`;
-  popup.addEventListener('click',function(e){if(e.target===popup)popup.remove();});
+  popup.addEventListener('click',function(e){if(e.target===popup && !_bdMdInside)popup.remove();});
   document.body.appendChild(popup);
   window._payItemId=item.id;
   window._paySelectedAcId=defaultAcId||(activeAccounts[0]?activeAccounts[0].id:'');
@@ -4470,7 +4470,7 @@ function saveTabbyItem(){
   toast(wasEditing?`Updated ${name}`:`Added ${name}`);
 }
 
-document.getElementById('tabby-modal').addEventListener('click',e=>{if(e.target===document.getElementById('tabby-modal'))closeTabbyModal();});
+document.getElementById('tabby-modal').addEventListener('click',e=>{if(e.target===document.getElementById('tabby-modal') && !_bdMdInside)closeTabbyModal();});
 
 function exportJSON(){
   if(!items.length&&!payments.length&&!tabbyItems.length&&!tasks.length){toast('Nothing to back up yet');return;}
@@ -4952,6 +4952,23 @@ function renderCalcPage(){
 function openShortcutsModal(){var m=document.getElementById('shortcuts-modal');if(m)m.style.display='flex';}
 function closeShortcutsModal(){var m=document.getElementById('shortcuts-modal');if(m)m.style.display='none';}
 
+/* v5.20.8: drag-out-of-modal close fix.
+   When the user starts a press INSIDE a modal (selecting text, etc.) and the
+   mouseup lands on the backdrop, the click event fires on the backdrop and
+   the existing inline `onclick="if(event.target===this)closeX()"` handlers
+   would close the modal. Track where the mousedown landed and skip the close
+   if it started inside the modal content. */
+var _bdMdInside = false;
+document.addEventListener('mousedown', function(e){
+  var t = e.target;
+  if(!t || !t.closest){ _bdMdInside = false; return; }
+  // Any LifeOS overlay surface that has a .modal/.settings-modal/.link-viewer-modal child.
+  var bd = t.closest('.modal-backdrop, .settings-modal-backdrop, .pay-popup-backdrop, .link-viewer-backdrop, .paid-breakdown-modal');
+  if(!bd){ _bdMdInside = false; return; }
+  // Mousedown directly on the backdrop = real outside-press. Mousedown on a child = inside-press.
+  _bdMdInside = (t !== bd);
+}, true);
+
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){closeSearchModal();closeShortcutsModal();closeModal();closeTkModal();closeListsModal();closeSettingsModal();closeLinkViewer();closeTabbyModal();closeRestoreModal();closeWorkspacesModal();closeWsFixModal();closeGoalModal();closeGoalLogModal();closeNoteModal();closeLoanModal();closeAcHistoryModal();closeAccountModal();closeRecvModal();closeShopModal();closeShCollModal();closeLinkModal();closeLinkGroupModal();closePaidBreakdown();closeClearDataModal();closeMobileSidebar();return;}
   const active=document.activeElement;
@@ -4963,7 +4980,7 @@ document.addEventListener('keydown',e=>{
   if(!typing&&e.key==='?'){e.preventDefault();openShortcutsModal();}
 });
 
-document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal();});
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal') && !_bdMdInside)closeModal();});
 
 /* \u2501\u2501 Task Manager \u2501\u2501 */
 function saveTasks(){lsSet(KEY_TASKS,JSON.stringify(tasks));asAutoSave();}
@@ -10557,7 +10574,7 @@ if(_vn) _vn.textContent = APP_VERSION;
 </script>
 
 <!-- Shopping modal -->
-<div class="modal-backdrop" id="shop-modal" style="display:none" onclick="if(event.target===this)closeShopModal()">
+<div class="modal-backdrop" id="shop-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeShopModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:500px">
 
     <div class="modal-header">
@@ -10637,7 +10654,7 @@ if(_vn) _vn.textContent = APP_VERSION;
 
 
 <!-- Settings modal -->
-<div class="settings-modal-backdrop" id="settings-modal" style="display:none" onclick="if(event.target===this)closeSettingsModal()">
+<div class="settings-modal-backdrop" id="settings-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeSettingsModal()">
   <div class="settings-modal" onclick="event.stopPropagation()">
 
     <div class="settings-modal-head">
@@ -10800,7 +10817,7 @@ if(_vn) _vn.textContent = APP_VERSION;
 </div>
 
 <!-- Shopping collection modal -->
-<div class="modal-backdrop" id="sh-coll-modal" style="display:none" onclick="if(event.target===this)closeShCollModal()">
+<div class="modal-backdrop" id="sh-coll-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeShCollModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:420px">
     <div class="modal-header">
       <div class="modal-title" id="sh-coll-modal-title">New collection</div>
@@ -10819,7 +10836,7 @@ if(_vn) _vn.textContent = APP_VERSION;
   </div>
 </div>
 <!-- Add Link modal -->
-<div class="modal-backdrop" id="link-modal" style="display:none" onclick="if(event.target===this)closeLinkModal()">
+<div class="modal-backdrop" id="link-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeLinkModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
     <div class="modal-header">
       <div class="modal-title" id="link-modal-title">Add link</div>
@@ -10861,7 +10878,7 @@ if(_vn) _vn.textContent = APP_VERSION;
 </div>
 
 <!-- Add Link Group modal -->
-<div class="modal-backdrop" id="link-group-modal" style="display:none" onclick="if(event.target===this)closeLinkGroupModal()">
+<div class="modal-backdrop" id="link-group-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeLinkGroupModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:400px">
     <div class="modal-header">
       <div class="modal-title" id="link-group-modal-title">New group</div>
@@ -10877,7 +10894,7 @@ if(_vn) _vn.textContent = APP_VERSION;
 </div>
 
 <!-- Link viewer modal -->
-<div class="link-viewer-backdrop" id="link-viewer" style="display:none" onclick="if(event.target===this)closeLinkViewer()">
+<div class="link-viewer-backdrop" id="link-viewer" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeLinkViewer()">
   <div class="link-viewer-modal" onclick="event.stopPropagation()">
     <div class="link-viewer-bar">
       <span class="link-viewer-emoji" id="lv-emoji">🔗</span>
@@ -10891,7 +10908,7 @@ if(_vn) _vn.textContent = APP_VERSION;
 </div>
 
 <!-- Keyboard shortcuts modal -->
-<div class="modal-backdrop" id="shortcuts-modal" style="display:none" onclick="if(event.target===this)closeShortcutsModal()">
+<div class="modal-backdrop" id="shortcuts-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeShortcutsModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:480px">
     <div class="modal-header">
       <div class="modal-title">Keyboard shortcuts</div>
@@ -10920,7 +10937,7 @@ if(_vn) _vn.textContent = APP_VERSION;
 </div>
 
 <!-- Clear all data modal (v5.20.5) -->
-<div class="modal-backdrop" id="clear-data-modal" style="display:none" onclick="if(event.target===this)closeClearDataModal()">
+<div class="modal-backdrop" id="clear-data-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeClearDataModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:440px">
     <div class="modal-header">
       <div class="modal-title" style="color:var(--red)">&#9888; Clear all data</div>
@@ -10943,7 +10960,7 @@ if(_vn) _vn.textContent = APP_VERSION;
 </div>
 
 <!-- Restore modal -->
-<div class="modal-backdrop" id="restore-modal" style="display:none" onclick="if(event.target===this)closeRestoreModal()">
+<div class="modal-backdrop" id="restore-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeRestoreModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
     <div class="modal-header">
       <div class="modal-title">Restore backup</div>
@@ -10977,7 +10994,7 @@ if(_vn) _vn.textContent = APP_VERSION;
 
 
 <!-- Loan / EMI modal -->
-<div class="modal-backdrop" id="loan-modal" style="display:none" onclick="if(event.target===this)closeLoanModal()">
+<div class="modal-backdrop" id="loan-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeLoanModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:520px">
     <div class="modal-header">
       <div class="modal-title" id="loan-modal-title">Add loan</div>
@@ -11033,7 +11050,7 @@ if(_vn) _vn.textContent = APP_VERSION;
 </div>
 
 <!-- Goal modal -->
-<div class="modal-backdrop" id="goal-modal" style="display:none" onclick="if(event.target===this)closeGoalModal()">
+<div class="modal-backdrop" id="goal-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeGoalModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:520px">
     <div class="modal-header">
       <div class="modal-title" id="goal-modal-title">Add goal</div>
@@ -11082,7 +11099,7 @@ if(_vn) _vn.textContent = APP_VERSION;
 </div>
 
 <!-- Goal log progress modal -->
-<div class="modal-backdrop" id="goal-log-modal" style="display:none" onclick="if(event.target===this)closeGoalLogModal()">
+<div class="modal-backdrop" id="goal-log-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeGoalLogModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:400px">
     <div class="modal-header">
       <div class="modal-title" id="goal-log-title">Update progress</div>
@@ -11097,7 +11114,7 @@ if(_vn) _vn.textContent = APP_VERSION;
 </div>
 
 <!-- Account modal -->
-<div class="modal-backdrop" id="account-modal" style="display:none" onclick="if(event.target===this)closeAccountModal()">
+<div class="modal-backdrop" id="account-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeAccountModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:480px">
     <div class="modal-header">
       <div class="modal-title" id="account-modal-title">Add account</div>
@@ -11150,7 +11167,7 @@ if(_vn) _vn.textContent = APP_VERSION;
 </div>
 
 <!-- Account balance history modal -->
-<div class="modal-backdrop" id="ac-history-modal" style="display:none" onclick="if(event.target===this)closeAcHistoryModal()">
+<div class="modal-backdrop" id="ac-history-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeAcHistoryModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:420px">
     <div class="modal-header">
       <div class="modal-title" id="ac-history-title">Balance history</div>
@@ -11164,7 +11181,7 @@ if(_vn) _vn.textContent = APP_VERSION;
 </div>
 
 <!-- Note modal -->
-<div class="modal-backdrop" id="note-modal" style="display:none" onclick="if(event.target===this)closeNoteModal()">
+<div class="modal-backdrop" id="note-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeNoteModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:500px">
     <div class="modal-header">
       <div class="modal-title">Note</div>
@@ -11190,7 +11207,7 @@ if(_vn) _vn.textContent = APP_VERSION;
 </div>
 
 <!-- Global search palette -->
-<div class="modal-backdrop" id="search-modal" style="display:none;align-items:flex-start;padding-top:80px" onclick="if(event.target===this)closeSearchModal()">
+<div class="modal-backdrop" id="search-modal" style="display:none;align-items:flex-start;padding-top:80px" onclick="if(event.target===this && !_bdMdInside)closeSearchModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:640px;padding:0;overflow:hidden">
     <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:0.5px solid var(--border)">
       <span style="font-size:16px;color:var(--text3);line-height:1">&#128269;</span>
@@ -11220,7 +11237,7 @@ if(_vn) _vn.textContent = APP_VERSION;
 </div>
 
 <!-- Receivable modal -->
-<div class="modal-backdrop" id="recv-modal" style="display:none" onclick="if(event.target===this)closeRecvModal()">
+<div class="modal-backdrop" id="recv-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeRecvModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
     <div class="modal-header">
       <div class="modal-title" id="recv-modal-title">Add receivable</div>

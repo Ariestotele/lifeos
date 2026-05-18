@@ -1607,6 +1607,9 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:v
 .bills-col-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:0.5px solid var(--border)}
 .bills-col-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)}
 .bills-col-sum{font-size:11px;color:var(--text3)}
+/* v5.20.7: sub-section divider inside the Paid column (One-time payments group) */
+.bills-subsection-head{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin:14px 0 8px;padding-top:10px;border-top:0.5px dashed var(--border)}
+.bills-subsection-head:first-child{margin-top:0;padding-top:0;border-top:none}
 .bill-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:11px 13px;margin-bottom:7px;border-left:3px solid #888;transition:border-color .15s,transform .15s}
 .bill-card:last-child{margin-bottom:0}
 .bill-card:hover{border-color:var(--border2);transform:translateY(-1px)}

@@ -719,7 +719,7 @@
 </div>
 
 <!-- Lists modal -->
-<div class="modal-backdrop" id="lists-modal" style="display:none" onclick="if(event.target===this)closeListsModal()">
+<div class="modal-backdrop" id="lists-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeListsModal()">
   <div class="modal" style="max-width:360px">
     <div class="modal-title">Manage lists</div>
     <div id="lists-manage-content" style="min-height:40px"></div>
@@ -738,7 +738,7 @@
 </div>
 
 <!-- Manage workspaces modal -->
-<div class="modal-backdrop" id="workspaces-modal" style="display:none" onclick="if(event.target===this)closeWorkspacesModal()">
+<div class="modal-backdrop" id="workspaces-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeWorkspacesModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:440px">
     <div class="modal-header">
       <div class="modal-title">Manage workspaces</div>
@@ -761,7 +761,7 @@
 </div>
 
 <!-- Workspace fix modal -->
-<div class="modal-backdrop" id="ws-fix-modal" style="display:none" onclick="if(event.target===this)closeWsFixModal()">
+<div class="modal-backdrop" id="ws-fix-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeWsFixModal()">
   <div class="modal" style="max-width:520px">
     <div class="modal-title">Fix task workspaces</div>
     <div style="font-size:12px;color:var(--text3);margin-bottom:10px;line-height:1.5">Tasks created before v5.16 may have their workspace saved incorrectly. Update any wrong ones here, then apply.</div>
@@ -777,7 +777,7 @@
 <script>/*<!--JS-->*/</script>
 
 <!-- Shopping modal -->
-<div class="modal-backdrop" id="shop-modal" style="display:none" onclick="if(event.target===this)closeShopModal()">
+<div class="modal-backdrop" id="shop-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeShopModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:500px">
 
     <div class="modal-header">
@@ -857,7 +857,7 @@
 
 
 <!-- Settings modal -->
-<div class="settings-modal-backdrop" id="settings-modal" style="display:none" onclick="if(event.target===this)closeSettingsModal()">
+<div class="settings-modal-backdrop" id="settings-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeSettingsModal()">
   <div class="settings-modal" onclick="event.stopPropagation()">
 
     <div class="settings-modal-head">
@@ -1020,7 +1020,7 @@
 </div>
 
 <!-- Shopping collection modal -->
-<div class="modal-backdrop" id="sh-coll-modal" style="display:none" onclick="if(event.target===this)closeShCollModal()">
+<div class="modal-backdrop" id="sh-coll-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeShCollModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:420px">
     <div class="modal-header">
       <div class="modal-title" id="sh-coll-modal-title">New collection</div>
@@ -1039,7 +1039,7 @@
   </div>
 </div>
 <!-- Add Link modal -->
-<div class="modal-backdrop" id="link-modal" style="display:none" onclick="if(event.target===this)closeLinkModal()">
+<div class="modal-backdrop" id="link-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeLinkModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
     <div class="modal-header">
       <div class="modal-title" id="link-modal-title">Add link</div>
@@ -1081,7 +1081,7 @@
 </div>
 
 <!-- Add Link Group modal -->
-<div class="modal-backdrop" id="link-group-modal" style="display:none" onclick="if(event.target===this)closeLinkGroupModal()">
+<div class="modal-backdrop" id="link-group-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeLinkGroupModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:400px">
     <div class="modal-header">
       <div class="modal-title" id="link-group-modal-title">New group</div>
@@ -1097,7 +1097,7 @@
 </div>
 
 <!-- Link viewer modal -->
-<div class="link-viewer-backdrop" id="link-viewer" style="display:none" onclick="if(event.target===this)closeLinkViewer()">
+<div class="link-viewer-backdrop" id="link-viewer" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeLinkViewer()">
   <div class="link-viewer-modal" onclick="event.stopPropagation()">
     <div class="link-viewer-bar">
       <span class="link-viewer-emoji" id="lv-emoji">🔗</span>
@@ -1111,7 +1111,7 @@
 </div>
 
 <!-- Keyboard shortcuts modal -->
-<div class="modal-backdrop" id="shortcuts-modal" style="display:none" onclick="if(event.target===this)closeShortcutsModal()">
+<div class="modal-backdrop" id="shortcuts-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeShortcutsModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:480px">
     <div class="modal-header">
       <div class="modal-title">Keyboard shortcuts</div>
@@ -1140,7 +1140,7 @@
 </div>
 
 <!-- Clear all data modal (v5.20.5) -->
-<div class="modal-backdrop" id="clear-data-modal" style="display:none" onclick="if(event.target===this)closeClearDataModal()">
+<div class="modal-backdrop" id="clear-data-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeClearDataModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:440px">
     <div class="modal-header">
       <div class="modal-title" style="color:var(--red)">&#9888; Clear all data</div>
@@ -1163,7 +1163,7 @@
 </div>
 
 <!-- Restore modal -->
-<div class="modal-backdrop" id="restore-modal" style="display:none" onclick="if(event.target===this)closeRestoreModal()">
+<div class="modal-backdrop" id="restore-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeRestoreModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
     <div class="modal-header">
       <div class="modal-title">Restore backup</div>
@@ -1197,7 +1197,7 @@
 
 
 <!-- Loan / EMI modal -->
-<div class="modal-backdrop" id="loan-modal" style="display:none" onclick="if(event.target===this)closeLoanModal()">
+<div class="modal-backdrop" id="loan-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeLoanModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:520px">
     <div class="modal-header">
       <div class="modal-title" id="loan-modal-title">Add loan</div>
@@ -1253,7 +1253,7 @@
 </div>
 
 <!-- Goal modal -->
-<div class="modal-backdrop" id="goal-modal" style="display:none" onclick="if(event.target===this)closeGoalModal()">
+<div class="modal-backdrop" id="goal-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeGoalModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:520px">
     <div class="modal-header">
       <div class="modal-title" id="goal-modal-title">Add goal</div>
@@ -1302,7 +1302,7 @@
 </div>
 
 <!-- Goal log progress modal -->
-<div class="modal-backdrop" id="goal-log-modal" style="display:none" onclick="if(event.target===this)closeGoalLogModal()">
+<div class="modal-backdrop" id="goal-log-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeGoalLogModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:400px">
     <div class="modal-header">
       <div class="modal-title" id="goal-log-title">Update progress</div>
@@ -1317,7 +1317,7 @@
 </div>
 
 <!-- Account modal -->
-<div class="modal-backdrop" id="account-modal" style="display:none" onclick="if(event.target===this)closeAccountModal()">
+<div class="modal-backdrop" id="account-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeAccountModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:480px">
     <div class="modal-header">
       <div class="modal-title" id="account-modal-title">Add account</div>
@@ -1370,7 +1370,7 @@
 </div>
 
 <!-- Account balance history modal -->
-<div class="modal-backdrop" id="ac-history-modal" style="display:none" onclick="if(event.target===this)closeAcHistoryModal()">
+<div class="modal-backdrop" id="ac-history-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeAcHistoryModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:420px">
     <div class="modal-header">
       <div class="modal-title" id="ac-history-title">Balance history</div>
@@ -1384,7 +1384,7 @@
 </div>
 
 <!-- Note modal -->
-<div class="modal-backdrop" id="note-modal" style="display:none" onclick="if(event.target===this)closeNoteModal()">
+<div class="modal-backdrop" id="note-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeNoteModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:500px">
     <div class="modal-header">
       <div class="modal-title">Note</div>
@@ -1410,7 +1410,7 @@
 </div>
 
 <!-- Global search palette -->
-<div class="modal-backdrop" id="search-modal" style="display:none;align-items:flex-start;padding-top:80px" onclick="if(event.target===this)closeSearchModal()">
+<div class="modal-backdrop" id="search-modal" style="display:none;align-items:flex-start;padding-top:80px" onclick="if(event.target===this && !_bdMdInside)closeSearchModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:640px;padding:0;overflow:hidden">
     <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:0.5px solid var(--border)">
       <span style="font-size:16px;color:var(--text3);line-height:1">&#128269;</span>
@@ -1440,7 +1440,7 @@
 </div>
 
 <!-- Receivable modal -->
-<div class="modal-backdrop" id="recv-modal" style="display:none" onclick="if(event.target===this)closeRecvModal()">
+<div class="modal-backdrop" id="recv-modal" style="display:none" onclick="if(event.target===this && !_bdMdInside)closeRecvModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
     <div class="modal-header">
       <div class="modal-title" id="recv-modal-title">Add receivable</div>

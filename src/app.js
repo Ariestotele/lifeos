@@ -2,7 +2,7 @@
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.20.8';
+const APP_VERSION = '5.20.9';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -2461,7 +2461,7 @@ document.addEventListener('mousedown', function(e){
 }, true);
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeSearchModal();closeShortcutsModal();closeModal();closeTkModal();closeListsModal();closeSettingsModal();closeLinkViewer();closeTabbyModal();closeRestoreModal();closeWorkspacesModal();closeWsFixModal();closeGoalModal();closeGoalLogModal();closeNoteModal();closeLoanModal();closeAcHistoryModal();closeAccountModal();closeRecvModal();closeShopModal();closeShCollModal();closeLinkModal();closeLinkGroupModal();closePaidBreakdown();closeClearDataModal();closeMobileSidebar();return;}
+  if(e.key==='Escape'){closeSearchModal();closeShortcutsModal();closeModal();closeTkModal();closeListsModal();closeSettingsModal();closeLinkViewer();closeTabbyModal();closeRestoreModal();closeWorkspacesModal();closeWsFixModal();closeGoalModal();closeGoalLogModal();closeNoteModal();closeLoanModal();closeAcHistoryModal();closeAccountModal();closeRecvModal();closeShopModal();closeShCollModal();closeLinkModal();closeLinkGroupModal();closePaidBreakdown();closeClearDataModal();closeDayPicker();closeMobileSidebar();return;}
   const active=document.activeElement;
   const typing=active&&(active.tagName==='INPUT'||active.tagName==='TEXTAREA'||active.tagName==='SELECT');
   if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();openSearchModal();return;}
@@ -6593,6 +6593,43 @@ function closeSettingsModal(){
    (cycle day, AI/GH tokens, dashboard layout, theme, etc.). The list
    of "tab data" keys is the same set used by exportJSON, so a Restore
    right after Clear puts the user back where they were. */
+/* Day-of-month picker popover (v5.20.9).
+   Reused by the bill modal's dueDay field. Tap a 1-31 cell -> sets the
+   bound input's value (and dispatches input event so any listener sees it).
+   Days 29-31 render dimmer with a footnote about shorter months. */
+var _dayPickerTarget = null;
+function openDayPicker(inputId){
+  _dayPickerTarget = inputId;
+  var inp = document.getElementById(inputId);
+  var cur = inp ? parseInt(inp.value)||0 : 0;
+  renderDayPickerGrid(cur);
+  document.getElementById('day-picker').style.display='flex';
+}
+function closeDayPicker(){
+  var m = document.getElementById('day-picker');
+  if(m) m.style.display='none';
+  _dayPickerTarget = null;
+}
+function renderDayPickerGrid(selected){
+  var grid = document.getElementById('day-picker-grid');
+  if(!grid) return;
+  var out = '';
+  for(var i=1; i<=31; i++){
+    var cls = 'day-picker-cell' + (i===selected ? ' selected' : '') + (i>28 ? ' partial' : '');
+    out += '<button type="button" class="'+cls+'" data-d="'+i+'" onclick="pickDay(this.dataset.d)">'+i+'</button>';
+  }
+  grid.innerHTML = out;
+}
+function pickDay(d){
+  var inp = _dayPickerTarget ? document.getElementById(_dayPickerTarget) : null;
+  if(inp){
+    inp.value = String(parseInt(d)||1);
+    try{ inp.dispatchEvent(new Event('input',{bubbles:true})); }catch(_){}
+    try{ inp.dispatchEvent(new Event('change',{bubbles:true})); }catch(_){}
+  }
+  closeDayPicker();
+}
+
 function openClearDataModal(){
   closeSettingsModal();
   renderClearDataStats();

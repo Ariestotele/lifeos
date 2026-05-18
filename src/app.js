@@ -2,7 +2,7 @@
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.20.4';
+const APP_VERSION = '5.20.5';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -2423,7 +2423,7 @@ function openShortcutsModal(){var m=document.getElementById('shortcuts-modal');i
 function closeShortcutsModal(){var m=document.getElementById('shortcuts-modal');if(m)m.style.display='none';}
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeSearchModal();closeShortcutsModal();closeModal();closeTkModal();closeListsModal();closeSettingsModal();closeLinkViewer();closeTabbyModal();closeRestoreModal();closeWorkspacesModal();closeWsFixModal();closeGoalModal();closeGoalLogModal();closeNoteModal();closeLoanModal();closeAcHistoryModal();closeAccountModal();closeRecvModal();closeShopModal();closeShCollModal();closeLinkModal();closeLinkGroupModal();closePaidBreakdown();closeMobileSidebar();return;}
+  if(e.key==='Escape'){closeSearchModal();closeShortcutsModal();closeModal();closeTkModal();closeListsModal();closeSettingsModal();closeLinkViewer();closeTabbyModal();closeRestoreModal();closeWorkspacesModal();closeWsFixModal();closeGoalModal();closeGoalLogModal();closeNoteModal();closeLoanModal();closeAcHistoryModal();closeAccountModal();closeRecvModal();closeShopModal();closeShCollModal();closeLinkModal();closeLinkGroupModal();closePaidBreakdown();closeClearDataModal();closeMobileSidebar();return;}
   const active=document.activeElement;
   const typing=active&&(active.tagName==='INPUT'||active.tagName==='TEXTAREA'||active.tagName==='SELECT');
   if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();openSearchModal();return;}
@@ -6548,6 +6548,91 @@ function openSettingsModal(){
 function closeSettingsModal(){
   document.getElementById('settings-modal').style.display='none';
 }
+
+/* Clear-all-data flow (v5.20.5).
+   Wipes every entity array + its localStorage key. Does NOT touch the
+   user's exported .json backup files, and does NOT touch preferences
+   (cycle day, AI/GH tokens, dashboard layout, theme, etc.). The list
+   of "tab data" keys is the same set used by exportJSON, so a Restore
+   right after Clear puts the user back where they were. */
+function openClearDataModal(){
+  closeSettingsModal();
+  renderClearDataStats();
+  var inp=document.getElementById('clear-data-confirm');
+  if(inp){ inp.value=''; }
+  updateClearDataBtn();
+  document.getElementById('clear-data-modal').style.display='flex';
+  setTimeout(function(){var i=document.getElementById('clear-data-confirm');if(i)i.focus();},80);
+}
+function closeClearDataModal(){
+  var m=document.getElementById('clear-data-modal');
+  if(m) m.style.display='none';
+  var inp=document.getElementById('clear-data-confirm');
+  if(inp) inp.value='';
+}
+function renderClearDataStats(){
+  var statsEl=document.getElementById('clear-data-stats');
+  if(!statsEl) return;
+  var parts=[];
+  function n(label, count){ if(count>0) parts.push(count+' '+label+(count!==1?'s':'')); }
+  n('bill', items.length);
+  n('payment', payments.length);
+  n('Tabby plan', tabbyItems.length);
+  n('task', tasks.length);
+  n('archived task', taskHistory.length);
+  n('list', lists.length);
+  n('shopping item', shopping.length);
+  n('shopping collection', shCollections.length);
+  n('link', links.length);
+  n('link group', linkGroups.length);
+  n('note', notes.length);
+  n('goal', goals.length);
+  n('loan', loans.length);
+  n('receivable', receivables.length);
+  n('account', accounts.length);
+  n('net-worth snapshot', nwHistory.length);
+  var budgetCount=Object.keys(budgets||{}).filter(function(k){return budgets[k]>0;}).length;
+  if(budgetCount) parts.push(budgetCount+' budget cap'+(budgetCount!==1?'s':''));
+  statsEl.innerHTML = parts.length ? parts.map(function(p){return '&middot; '+esc(p);}).join('<br>') : '<em>Nothing to delete.</em>';
+}
+function updateClearDataBtn(){
+  var inp=document.getElementById('clear-data-confirm');
+  var btn=document.getElementById('clear-data-go');
+  if(!inp||!btn) return;
+  var ok=(inp.value||'').trim().toUpperCase()==='DELETE';
+  btn.disabled=!ok;
+  btn.style.opacity=ok?'1':'.5';
+  btn.style.cursor=ok?'pointer':'not-allowed';
+}
+function confirmClearAllData(){
+  var inp=document.getElementById('clear-data-confirm');
+  if(!inp || (inp.value||'').trim().toUpperCase()!=='DELETE'){
+    toast('Type DELETE to confirm');
+    return;
+  }
+  // 1. Empty in-memory arrays/objects.
+  items=[]; payments=[]; tabbyItems=[];
+  tasks=[]; taskHistory=[]; lists=[];
+  shopping=[]; shCollections=[];
+  links=[]; linkGroups=[];
+  goals=[]; notes=[]; loans=[]; receivables=[]; accounts=[]; nwHistory=[];
+  budgets={};
+  // Workspaces can't be empty -- re-seed defaults.
+  workspaces=JSON.parse(JSON.stringify(WS_DEFAULTS));
+  // 2. Remove the tab-data localStorage keys.
+  [KEY_ITEMS,KEY_PAY,KEY_TABBY,KEY_TASKS,KEY_TASK_HIST,KEY_LISTS,
+   KEY_SHOPPING,KEY_SH_LISTS,KEY_LINKS,KEY_LINK_GROUPS,
+   KEY_GOALS,KEY_NOTES,KEY_LOANS,KEY_RECV,KEY_ACCOUNTS,KEY_NW,
+   KEY_BUDGETS].forEach(function(k){ try{ localStorage.removeItem(k); }catch(_){} });
+  // 3. Persist the fresh workspace defaults.
+  saveWorkspaces();
+  // 4. Refresh every UI surface.
+  closeClearDataModal();
+  render();
+  switchPage('dashboard');
+  toast('All data cleared');
+}
+
 /* Budgets settings UI (v5.20.4) */
 function renderBudgetsSettings(){
   var el=document.getElementById('budgets-list');

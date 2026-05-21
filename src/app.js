@@ -2,7 +2,7 @@
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.20.9';
+const APP_VERSION = '5.20.10';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -2792,9 +2792,9 @@ function renderTaskCard(t){
   var dueHtml=dl?'<span class="item-due'+(dl.cls?' '+dl.cls:'')+'">'+(dl.label)+'</span>':'';
   var doneSubs=(t.subtasks||[]).filter(function(s){return s.done;}).length;
   var totalSubs=(t.subtasks||[]).length;
-  var priColors={urgent:'#E05252',high:'#C98A1A',medium:'#7F77DD',low:'#4A8ECC',none:''};
-  var stripeColor=priColors[t.priority||'none']||'';
-  var stripeHtml=stripeColor?'<div class="tk-card-stripe" style="background:'+stripeColor+'"></div>':'';
+  // v5.20.10: priority now lives on the title color/weight, not a stripe.
+  var pri = t.priority||'none';
+  var titleCls = 'tk-card-title tk-card-title-'+pri;
   var wsCol=workspaceColor(t.workspace||'personal');
   var barColor=wsCol;
   var svgDone='<svg viewBox="0 0 12 12" width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1.5 6l3 3 6-5"/></svg>';
@@ -2842,11 +2842,10 @@ function renderTaskCard(t){
     '<div class="tk-card-check tk-card-check-done" data-id="'+t.id+'" onclick="toggleTaskDone(this.dataset.id)">&#10003;</div>':
     '<div class="tk-card-check" data-id="'+t.id+'" onclick="toggleTaskDone(this.dataset.id)"></div>';
   return '<div class="'+cardCls+'" id="task-'+t.id+'">'+
-    stripeHtml+
     '<div class="tk-card-top">'+
       '<div style="display:flex;gap:6px;align-items:flex-start;flex:1;min-width:0">'+
         checkHtml+
-        '<div class="tk-card-title">'+esc(t.title)+'</div>'+
+        '<div class="'+titleCls+'">'+esc(t.title)+'</div>'+
       '</div>'+
     '</div>'+
     '<div class="tk-card-meta">'+dueHtml+tagsHtml+'</div>'+

@@ -828,10 +828,17 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:v
 .tk-card{background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-md);padding:13px 10px 9px;position:relative;overflow:hidden}
 
 .tk-card-done{opacity:.45}
-.tk-card-stripe{position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius-md) 8px 0 0}
+/* v5.20.10: dropped .tk-card-stripe (top color bar). Priority now lives on the title. */
 .tk-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:5px}
-.tk-card-title{font-size:14px;font-weight:500;color:var(--text);line-height:1.4;word-break:break-word}
+.tk-card-title{font-size:14px;font-weight:500;color:var(--text);line-height:1.4;word-break:break-word;transition:color .12s}
+.tk-card-title-urgent{color:#E05252;font-weight:700}
+.tk-card-title-high{color:#E07040;font-weight:600}
+.tk-card-title-low{color:var(--text3);font-weight:400}
+/* .tk-card-title-medium and -none use the default styling above. */
 .tk-card-done .tk-card-title{text-decoration:line-through}
+.tk-card-done .tk-card-title-urgent,
+.tk-card-done .tk-card-title-high,
+.tk-card-done .tk-card-title-low{color:var(--text3);font-weight:500}
 .tk-card-meta{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-bottom:4px}
 .tk-card-subrow{display:flex;align-items:center;gap:5px;margin-bottom:4px}
 .tk-card-subbar-wrap{flex:1;height:3px;background:var(--border);border-radius:99px;overflow:hidden}

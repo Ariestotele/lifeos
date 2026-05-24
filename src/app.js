@@ -2,7 +2,7 @@
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.21.0';
+const APP_VERSION = '5.21.1';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -17,6 +17,8 @@ let tkFilterStatus='all', tkFilterPriority='all', tkFilterList='all', tkWorkspac
 // v5.21.0: how to group the Tasks page list ("by-date" | "by-workspace" | "flat") + hide-done toggle.
 let tkGroupMode = (function(){try{return localStorage.getItem('lifeos_tk_group')||'by-date';}catch(_){return 'by-date';}})();
 let tkHideDone  = (function(){try{return localStorage.getItem('lifeos_tk_hidedone')==='1';}catch(_){return false;}})();
+// v5.21.1: in by-date mode we show ONE bucket at a time. This is the active one.
+let tkDateBucket = (function(){try{return localStorage.getItem('lifeos_tk_bucket')||'today';}catch(_){return 'today';}})();
 const WS_DEFAULTS=[{id:'personal',name:'Personal',emoji:'\uD83D\uDC64',color:'#7F77DD'},{id:'work',name:'Work',emoji:'\uD83D\uDCBC',color:'#378ADD'}];
 let workspaces=[];
 let links=[], linkGroups=[];
@@ -269,6 +271,12 @@ function tkSetGroupMode(mode){
 function tkSetHideDone(checked){
   tkHideDone = !!checked;
   try{ if(checked) lsSet('lifeos_tk_hidedone','1'); else localStorage.removeItem('lifeos_tk_hidedone'); }catch(_){}
+  renderTasks();
+}
+function tkSetDateBucket(g){
+  if(['overdue','today','tomorrow','week','later','nodate','done'].indexOf(g)<0) g='today';
+  tkDateBucket = g;
+  try{ lsSet('lifeos_tk_bucket', g); }catch(_){}
   renderTasks();
 }
 function tkDateGroup(t){
@@ -2875,29 +2883,58 @@ function renderTasks(){
     container.innerHTML = vis.map(function(t){return renderTaskCard(t,{showWorkspace:true});}).join('');
   }
   else {
-    // by-date (default)
+    // by-date (default) -- v5.21.1: SINGLE BUCKET at a time, with pill nav above.
+    // Calmer for users prone to overwhelm; the buckets you're not on stay hidden.
     var buckets = {};
     _TK_DATE_GROUPS.forEach(function(g){ buckets[g] = []; });
     vis.forEach(function(t){ buckets[tkDateGroup(t)].push(t); });
-    var html = _TK_DATE_GROUPS.map(function(g){
-      var arr = buckets[g];
-      if(!arr.length) return '';
-      var label = _TK_DATE_LABELS[g];
-      var col   = _TK_DATE_COLORS[g];
-      var headStyle = 'background:'+col+'22;color:'+col+';border:0.5px solid '+col+'4d;border-bottom:none';
-      var countLabel = arr.length+' task'+(arr.length!==1?'s':'');
-      var cards = arr.map(function(t){return renderTaskCard(t,{showWorkspace:true});}).join('');
-      return '<div class="tk-section">'+
-        '<div class="tk-section-head" style="'+headStyle+'">'+
-          '<div class="tk-section-head-left">'+
-            '<span class="tk-section-dot" style="background:'+col+'"></span>'+esc(label)+
-          '</div>'+
-          '<span style="opacity:.6;font-size:11px;font-weight:400">'+countLabel+'</span>'+
-        '</div>'+
-        '<div class="tk-section-body">'+cards+'</div>'+
-      '</div>';
+
+    // Decide which bucket to display. Persisted preference, but skip done if hide-done is on.
+    var selectedBucket = tkDateBucket;
+    if(!buckets[selectedBucket]) selectedBucket = 'today';
+    if(selectedBucket === 'done' && tkHideDone) selectedBucket = 'today';
+
+    // Pill nav: hide a pill entirely if its bucket is empty AND it's not the currently-selected one,
+    // so the row stays compact. Overdue + the selected pill always render.
+    var pillsHtml = _TK_DATE_GROUPS.map(function(g){
+      var n = buckets[g].length;
+      if(g === 'done' && tkHideDone) return '';
+      if(n === 0 && g !== selectedBucket) return '';  // skip empty unless selected
+      var col = _TK_DATE_COLORS[g];
+      var lbl = _TK_DATE_LABELS[g];
+      var isSel = (g === selectedBucket);
+      var styleSel = isSel
+        ? 'background:'+col+';color:#000;border-color:'+col+';font-weight:600'
+        : 'background:'+col+'18;color:'+col+';border-color:'+col+'4d';
+      // Overdue pill always wears a red urgency border + dot even if not selected, so it's an alert.
+      var dot = (g === 'overdue' && n > 0)
+        ? '<span class="tk-bucket-pulse" style="background:'+col+'"></span>' : '';
+      return '<button class="tk-bucket-pill" onclick="tkSetDateBucket(\''+g+'\')" style="'+styleSel+'">'
+        + dot + esc(lbl) + ' <span class="tk-bucket-count">'+n+'</span></button>';
     }).join('');
-    container.innerHTML = html;
+
+    // The selected bucket's cards (or a warm empty state).
+    var arr = buckets[selectedBucket] || [];
+    var bodyHtml;
+    if(!arr.length){
+      var msgMap = {
+        today:    '✨ All clear today. Take a breath.',
+        tomorrow: 'Nothing for tomorrow yet.',
+        week:     'Nothing scheduled this week.',
+        later:    'Nothing scheduled for later.',
+        nodate:   'No undated tasks. Tidy.',
+        done:     'Nothing completed yet today.',
+        overdue:  '✨ No overdue tasks. Solid.'
+      };
+      bodyHtml = '<div class="tk-empty-warm"><div class="tk-empty-emoji">✨</div><div>'
+        + esc(msgMap[selectedBucket] || 'Nothing here.') + '</div></div>';
+    } else {
+      bodyHtml = arr.map(function(t){return renderTaskCard(t,{showWorkspace:true});}).join('');
+    }
+
+    container.innerHTML =
+      '<div class="tk-bucket-nav">' + pillsHtml + '</div>' +
+      '<div class="tk-bucket-body">' + bodyHtml + '</div>';
   }
 }
 function toggleBasement(id){

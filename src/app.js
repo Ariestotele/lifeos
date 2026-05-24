@@ -2,7 +2,7 @@
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.20.10';
+const APP_VERSION = '5.21.0';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -14,6 +14,9 @@ let filterCat='All', selectedColor=COLORS[0];
 let currentPage='active', toastTimer=null, deletedItem=null, deletedPayments=[];
 let tasks=[], lists=[], tkEditId=null, deletedTask=null, tkSelectedColor=COLORS[0];
 let tkFilterStatus='all', tkFilterPriority='all', tkFilterList='all', tkWorkspace='personal';
+// v5.21.0: how to group the Tasks page list ("by-date" | "by-workspace" | "flat") + hide-done toggle.
+let tkGroupMode = (function(){try{return localStorage.getItem('lifeos_tk_group')||'by-date';}catch(_){return 'by-date';}})();
+let tkHideDone  = (function(){try{return localStorage.getItem('lifeos_tk_hidedone')==='1';}catch(_){return false;}})();
 const WS_DEFAULTS=[{id:'personal',name:'Personal',emoji:'\uD83D\uDC64',color:'#7F77DD'},{id:'work',name:'Work',emoji:'\uD83D\uDCBC',color:'#378ADD'}];
 let workspaces=[];
 let links=[], linkGroups=[];
@@ -177,6 +180,112 @@ function tkToggleSubtask(taskId, subId){
     if(fresh) el.replaceWith(fresh);
   }
 }
+
+/* v5.21.0: Tasks tab Phase 1 helpers.
+   - tkQuickAdd: parses the quick-add input and creates a task in one keystroke.
+     Supported tokens (consumed from the title):
+       today | tom | tomorrow | mon..sun (full or 3-letter)  -> dueDate
+       !urgent | !high | !medium | !med | !low               -> priority
+       #tagname                                              -> tags array
+   - tkSetGroupMode / tkSetHideDone: persist UI prefs + re-render.
+   - tkDateGroup: returns one of overdue|today|tomorrow|week|later|nodate|done.
+   - tkOpenQuickAddHelp: tiny toast explaining the smart parsing. */
+function tkParseQuickAdd(raw){
+  var text = String(raw||'').trim();
+  if(!text) return null;
+  var task = {
+    id: String(Date.now()),
+    title: '',
+    notes: '',
+    priority: 'none',
+    tags: [],
+    dueDate: null,
+    workspace: (workspaces[0] && workspaces[0].id) || tkWorkspace || 'personal',
+    listId: null,
+    subtasks: [],
+    done: false,
+    starred: false,
+    color: COLORS[0],
+    createdAt: Date.now()
+  };
+  // !priority
+  text = text.replace(/(^|\s)!(urgent|high|medium|med|low)(?=\s|$)/gi, function(m, lead, p){
+    task.priority = (p.toLowerCase()==='med') ? 'medium' : p.toLowerCase();
+    return lead;
+  });
+  // #tags
+  text = text.replace(/(^|\s)#([a-z0-9\-_]+)(?=\s|$)/gi, function(m, lead, tag){
+    var t = tag.toLowerCase();
+    if(task.tags.indexOf(t)<0) task.tags.push(t);
+    return lead;
+  });
+  function _setOffset(n){
+    var dt = new Date();
+    dt.setDate(dt.getDate() + n);
+    task.dueDate = dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+  }
+  function _setWeekday(target){
+    var dt = new Date();
+    var diff = (target - dt.getDay() + 7) % 7;
+    if(diff===0) diff = 7;
+    _setOffset(diff);
+  }
+  // date keywords (longest matches first)
+  text = text.replace(/(^|\s)tomorrow(?=\s|$)/i,    function(m,lead){_setOffset(1); return lead;});
+  text = text.replace(/(^|\s)tom(?=\s|$)/i,         function(m,lead){_setOffset(1); return lead;});
+  text = text.replace(/(^|\s)today(?=\s|$)/i,       function(m,lead){_setOffset(0); return lead;});
+  text = text.replace(/(^|\s)(monday|mon)(?=\s|$)/i, function(m,lead){_setWeekday(1); return lead;});
+  text = text.replace(/(^|\s)(tuesday|tue|tues)(?=\s|$)/i, function(m,lead){_setWeekday(2); return lead;});
+  text = text.replace(/(^|\s)(wednesday|wed)(?=\s|$)/i, function(m,lead){_setWeekday(3); return lead;});
+  text = text.replace(/(^|\s)(thursday|thu|thurs)(?=\s|$)/i, function(m,lead){_setWeekday(4); return lead;});
+  text = text.replace(/(^|\s)(friday|fri)(?=\s|$)/i, function(m,lead){_setWeekday(5); return lead;});
+  text = text.replace(/(^|\s)(saturday|sat)(?=\s|$)/i, function(m,lead){_setWeekday(6); return lead;});
+  text = text.replace(/(^|\s)(sunday|sun)(?=\s|$)/i, function(m,lead){_setWeekday(0); return lead;});
+  task.title = text.replace(/\s+/g,' ').trim();
+  if(!task.title) return null;
+  return task;
+}
+function tkQuickAdd(){
+  var inp = document.getElementById('tk-quickadd-input');
+  if(!inp) return;
+  var task = tkParseQuickAdd(inp.value);
+  if(!task){ inp.focus(); return; }
+  tasks.unshift(task);
+  saveTasks();
+  inp.value = '';
+  inp.focus();
+  renderTasks();
+  toast('Added: '+task.title);
+}
+function tkOpenQuickAddHelp(){
+  toast('Try: "Email John tom !urgent #work" · dates: today/tom/fri · priority: !urgent !high !medium !low · tags: #anything');
+}
+function tkSetGroupMode(mode){
+  if(['by-date','by-workspace','flat'].indexOf(mode)<0) mode='by-date';
+  tkGroupMode = mode;
+  try{ lsSet('lifeos_tk_group', mode); }catch(_){}
+  renderTasks();
+}
+function tkSetHideDone(checked){
+  tkHideDone = !!checked;
+  try{ if(checked) lsSet('lifeos_tk_hidedone','1'); else localStorage.removeItem('lifeos_tk_hidedone'); }catch(_){}
+  renderTasks();
+}
+function tkDateGroup(t){
+  if(t.done) return 'done';
+  if(!t.dueDate) return 'nodate';
+  var today = new Date(); today.setHours(0,0,0,0);
+  var dt = new Date(t.dueDate); dt.setHours(0,0,0,0);
+  var diff = Math.round((dt - today) / 86400000);
+  if(diff < 0)  return 'overdue';
+  if(diff === 0) return 'today';
+  if(diff === 1) return 'tomorrow';
+  if(diff <= 7)  return 'week';
+  return 'later';
+}
+var _TK_DATE_GROUPS = ['overdue','today','tomorrow','week','later','nodate','done'];
+var _TK_DATE_LABELS = {overdue:'Overdue', today:'Today', tomorrow:'Tomorrow', week:'This week', later:'Later', nodate:'No date', done:'Done'};
+var _TK_DATE_COLORS = {overdue:'#E05252', today:'#4A8ECC', tomorrow:'#C98A1A', week:'#7A74D4', later:'#888880', nodate:'#666666', done:'#1D9E75'};
 
 function tkAddWithTag(tagName){
   openTaskModal();
@@ -2665,9 +2774,14 @@ function renderTasks(){
   // Filter and sort
   const q=(document.getElementById('tk-search').value||'').toLowerCase();
   const priOrder={urgent:4,high:3,medium:2,low:1,none:0};
+  // v5.21.0: sync group + hide-done controls.
+  var _grpSel = document.getElementById('tk-group'); if(_grpSel && _grpSel.value !== tkGroupMode) _grpSel.value = tkGroupMode;
+  var _hdInp  = document.getElementById('tk-hide-done'); if(_hdInp) _hdInp.checked = !!tkHideDone;
+
   let vis=wsTasks.filter(t=>{
     if(tkFilterStatus==='active'&&t.done)return false;
     if(tkFilterStatus==='done'&&!t.done)return false;
+    if(tkHideDone && t.done && tkFilterStatus!=='done') return false;  // v5.21.0
     if(tkFilterPriority!=='all'&&t.priority!==tkFilterPriority)return false;
     if(tkFilterList==='none'&&t.listId)return false;
     if(tkFilterList!=='all'&&tkFilterList!=='none'&&t.listId!==tkFilterList)return false;
@@ -2705,46 +2819,86 @@ function renderTasks(){
 
   const container=document.getElementById('tk-list');
   if(!vis.length){
-    container.innerHTML='<div class="empty">'+(wsTasks.length?'No tasks match your filter':'Add your first task<br><span class="kbd-hint">Press <kbd>T</kbd> anywhere to add a task</span>')+'</div>';
+    // v5.21.0: warmer empty states
+    var emptyHtml;
+    if(!wsTasks.length){
+      emptyHtml = '<div class="empty tk-empty-warm"><div class="tk-empty-emoji">&#10024;</div>'
+        +'<div>Nothing yet. Type above to add your first task.</div>'
+        +'<div class="kbd-hint">or press <kbd>T</kbd> anywhere</div></div>';
+    } else if(q || tkFilterPriority!=='all' || tkFilterList!=='all' || tkFilterStatus!=='all'){
+      emptyHtml = '<div class="empty tk-empty-warm"><div class="tk-empty-emoji">&#128269;</div>'
+        +'<div>Nothing here. Try a different filter?</div></div>';
+    } else {
+      emptyHtml = '<div class="empty tk-empty-warm"><div class="tk-empty-emoji">&#10024;</div>'
+        +'<div>All clear today. Nice work.</div></div>';
+    }
+    container.innerHTML = emptyHtml;
     return;
   }
 
-  var _firstWsId=(workspaces[0]&&workspaces[0].id)||'personal';
-  var _buckets={};
-  workspaces.forEach(function(w){_buckets[w.id]=[];});
-  vis.forEach(function(t){var wid=(t.workspace&&getWorkspace(t.workspace))?t.workspace:_firstWsId;if(!_buckets[wid])_buckets[wid]=[];_buckets[wid].push(t);});
-
-  function buildSection(sectionTasks,w){
-    if(!sectionTasks.length)return '';
-    var active=sectionTasks.filter(function(t){return !t.done;});
-    var done=sectionTasks.filter(function(t){return t.done;});
-    var dotColor=w.color;
-    var label=(w.emoji?w.emoji+' ':'')+w.name;
-    var headStyle='background:'+w.color+'2b;color:'+w.color+';border:0.5px solid '+w.color+'4d;border-bottom:none';
-    var countLabel=active.length+' active'+(done.length?' &middot; '+done.length+' done':'');
-    var priW2={urgent:1000,high:100,medium:10,low:1,none:0};
-    active.sort(function(a,b){
-      var sa=(priW2[a.priority||'none']||0),sb=(priW2[b.priority||'none']||0);
-      if(a.dueDate){var d=Math.ceil((new Date(a.dueDate)-new Date())/(1000*60*60*24));if(d<0)sa+=5000;else if(d===0)sa+=2000;else if(d<=3)sa+=500;else if(d<=7)sa+=100;}
-      if(b.dueDate){var d=Math.ceil((new Date(b.dueDate)-new Date())/(1000*60*60*24));if(d<0)sb+=5000;else if(d===0)sb+=2000;else if(d<=3)sb+=500;else if(d<=7)sb+=100;}
-      return sb-sa;
-    });
-    var cards=[...active,...done].map(renderTaskCard).join('');
-    return '<div class="tk-section">'+
-      '<div class="tk-section-head" style="'+headStyle+'">'+
-        '<div class="tk-section-head-left">'+
-          '<span class="tk-section-dot" style="background:'+dotColor+'"></span>'+
-          esc(label)+
+  // v5.21.0: three grouping modes -- by-date (default), by-workspace, flat.
+  if(tkGroupMode === 'by-workspace'){
+    var _firstWsId=(workspaces[0]&&workspaces[0].id)||'personal';
+    var _buckets={};
+    workspaces.forEach(function(w){_buckets[w.id]=[];});
+    vis.forEach(function(t){var wid=(t.workspace&&getWorkspace(t.workspace))?t.workspace:_firstWsId;if(!_buckets[wid])_buckets[wid]=[];_buckets[wid].push(t);});
+    function buildSection(sectionTasks,w){
+      if(!sectionTasks.length)return '';
+      var active=sectionTasks.filter(function(t){return !t.done;});
+      var done=sectionTasks.filter(function(t){return t.done;});
+      var dotColor=w.color;
+      var label=(w.emoji?w.emoji+' ':'')+w.name;
+      var headStyle='background:'+w.color+'2b;color:'+w.color+';border:0.5px solid '+w.color+'4d;border-bottom:none';
+      var countLabel=active.length+' active'+(done.length?' &middot; '+done.length+' done':'');
+      var priW2={urgent:1000,high:100,medium:10,low:1,none:0};
+      active.sort(function(a,b){
+        var sa=(priW2[a.priority||'none']||0),sb=(priW2[b.priority||'none']||0);
+        if(a.dueDate){var d=Math.ceil((new Date(a.dueDate)-new Date())/(1000*60*60*24));if(d<0)sa+=5000;else if(d===0)sa+=2000;else if(d<=3)sa+=500;else if(d<=7)sa+=100;}
+        if(b.dueDate){var d=Math.ceil((new Date(b.dueDate)-new Date())/(1000*60*60*24));if(d<0)sb+=5000;else if(d===0)sb+=2000;else if(d<=3)sb+=500;else if(d<=7)sb+=100;}
+        return sb-sa;
+      });
+      // In workspace mode, the workspace IS the section header -> don't repeat it on each card.
+      var cards=[...active,...done].map(function(t){return renderTaskCard(t,{showWorkspace:false});}).join('');
+      return '<div class="tk-section">'+
+        '<div class="tk-section-head" style="'+headStyle+'">'+
+          '<div class="tk-section-head-left">'+
+            '<span class="tk-section-dot" style="background:'+dotColor+'"></span>'+esc(label)+
+          '</div>'+
+          '<span style="opacity:.6;font-size:11px;font-weight:400">'+countLabel+'</span>'+
         '</div>'+
-        '<span style="opacity:.6;font-size:11px;font-weight:400">'+countLabel+'</span>'+
-      '</div>'+
-      '<div class="tk-section-body">'+cards+'</div>'+
-    '</div>';
+        '<div class="tk-section-body">'+cards+'</div>'+
+      '</div>';
+    }
+    container.innerHTML=workspaces.map(function(w){return buildSection(_buckets[w.id]||[],w);}).join('');
   }
-
-  container.innerHTML=workspaces.map(function(w){return buildSection(_buckets[w.id]||[],w);}).join('');
-
-
+  else if(tkGroupMode === 'flat'){
+    container.innerHTML = vis.map(function(t){return renderTaskCard(t,{showWorkspace:true});}).join('');
+  }
+  else {
+    // by-date (default)
+    var buckets = {};
+    _TK_DATE_GROUPS.forEach(function(g){ buckets[g] = []; });
+    vis.forEach(function(t){ buckets[tkDateGroup(t)].push(t); });
+    var html = _TK_DATE_GROUPS.map(function(g){
+      var arr = buckets[g];
+      if(!arr.length) return '';
+      var label = _TK_DATE_LABELS[g];
+      var col   = _TK_DATE_COLORS[g];
+      var headStyle = 'background:'+col+'22;color:'+col+';border:0.5px solid '+col+'4d;border-bottom:none';
+      var countLabel = arr.length+' task'+(arr.length!==1?'s':'');
+      var cards = arr.map(function(t){return renderTaskCard(t,{showWorkspace:true});}).join('');
+      return '<div class="tk-section">'+
+        '<div class="tk-section-head" style="'+headStyle+'">'+
+          '<div class="tk-section-head-left">'+
+            '<span class="tk-section-dot" style="background:'+col+'"></span>'+esc(label)+
+          '</div>'+
+          '<span style="opacity:.6;font-size:11px;font-weight:400">'+countLabel+'</span>'+
+        '</div>'+
+        '<div class="tk-section-body">'+cards+'</div>'+
+      '</div>';
+    }).join('');
+    container.innerHTML = html;
+  }
 }
 function toggleBasement(id){
   const isOpen = localStorage.getItem(id)==='1';
@@ -2787,7 +2941,8 @@ function renderTaskItem(t){
   </div>`;
 }
 
-function renderTaskCard(t){
+function renderTaskCard(t, opts){
+  opts = opts || {};
   var dl=taskDueLabel(t.dueDate);
   var dueHtml=dl?'<span class="item-due'+(dl.cls?' '+dl.cls:'')+'">'+(dl.label)+'</span>':'';
   var doneSubs=(t.subtasks||[]).filter(function(s){return s.done;}).length;
@@ -2797,6 +2952,14 @@ function renderTaskCard(t){
   var titleCls = 'tk-card-title tk-card-title-'+pri;
   var wsCol=workspaceColor(t.workspace||'personal');
   var barColor=wsCol;
+  // v5.21.0: workspace chip in meta row when grouping by date or flat list.
+  var wsChip = '';
+  if(opts.showWorkspace){
+    var _w = getWorkspace(t.workspace);
+    if(_w){
+      wsChip = '<span class="tk-tag tk-tag-ws" style="background:'+_w.color+'22;color:'+_w.color+';border-color:'+_w.color+'40">'+(_w.emoji?_w.emoji+' ':'')+esc(_w.name)+'</span>';
+    }
+  }
   var svgDone='<svg viewBox="0 0 12 12" width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1.5 6l3 3 6-5"/></svg>';
   var svgEdit='<svg viewBox="0 0 12 12" width="9" height="9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 1.5l2 2-6 6H2.5v-2l6-6z"/><path d="M7 3l2 2"/></svg>';
   var svgDup='<svg viewBox="0 0 12 12" width="9" height="9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="1" width="7" height="7" rx="1"/><rect x="1" y="4" width="7" height="7" rx="1"/></svg>';
@@ -2848,7 +3011,7 @@ function renderTaskCard(t){
         '<div class="'+titleCls+'">'+esc(t.title)+'</div>'+
       '</div>'+
     '</div>'+
-    '<div class="tk-card-meta">'+dueHtml+tagsHtml+'</div>'+
+    '<div class="tk-card-meta">'+dueHtml+wsChip+tagsHtml+'</div>'+
     subtaskBar+
     notesHtml+
     actionsHtml+

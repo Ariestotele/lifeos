@@ -825,7 +825,32 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:v
 .tk-section-head-left{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500}
 .tk-section-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
 .tk-section-body{border:0.5px solid var(--border2);border-radius:0 0 8px 8px;padding:8px;display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.tk-card{background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-md);padding:13px 10px 9px;position:relative;overflow:hidden}
+.tk-card{background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-md);padding:13px 10px 9px;position:relative;overflow:hidden;transition:border-color .15s,transform .12s,box-shadow .15s}
+/* v5.21.0: subtle lift on hover/press so the page feels responsive. */
+.tk-card:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.tk-card:active{transform:translateY(0);box-shadow:0 2px 6px rgba(0,0,0,.18)}
+/* Workspace chip variant in the meta row (shown only when grouping by date/flat). */
+.tk-tag-ws{border:0.5px solid var(--border);font-weight:500}
+/* Quick-add bar */
+.tk-quickadd{display:flex;align-items:center;gap:8px;background:var(--surface2);border:0.5px solid var(--border2);border-radius:var(--radius-md);padding:6px 10px;margin-bottom:12px;transition:border-color .15s,box-shadow .15s}
+.tk-quickadd:focus-within{border-color:var(--accent-border);box-shadow:0 0 0 3px var(--accent-glow)}
+.tk-quickadd-plus{color:var(--text3);font-size:18px;line-height:1;flex-shrink:0}
+.tk-quickadd input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:14px;font-family:var(--font);padding:6px 0;min-width:0}
+.tk-quickadd-hint{flex-shrink:0;width:24px;height:24px;border-radius:50%;border:0.5px solid var(--border2);background:transparent;color:var(--text3);font-size:11px;cursor:pointer;font-family:var(--mono);transition:all .15s}
+.tk-quickadd-hint:hover{background:var(--surface3);color:var(--text)}
+/* Hide-done toggle in the toolbar */
+.tk-toggle{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text3);cursor:pointer;user-select:none;-webkit-user-select:none;padding:0 8px;height:32px;border-radius:var(--radius-sm);transition:color .15s,background .15s}
+.tk-toggle:hover{color:var(--text);background:var(--surface3)}
+.tk-toggle input{accent-color:var(--accent);width:14px;height:14px;cursor:pointer;margin:0}
+/* Warm empty state */
+.tk-empty-warm{text-align:center;padding:32px 16px;color:var(--text2);font-size:13px;line-height:1.6}
+.tk-empty-warm .tk-empty-emoji{font-size:28px;margin-bottom:8px;opacity:.85}
+.tk-empty-warm .kbd-hint{margin-top:8px}
+@media (max-width:640px), (pointer:coarse){
+  .tk-card:hover{transform:none;box-shadow:none}
+  .tk-card:active{transform:scale(.99);background:var(--surface3)}
+  .tk-quickadd input{font-size:16px}
+}
 
 .tk-card-done{opacity:.45}
 /* v5.20.10: dropped .tk-card-stripe (top color bar). Priority now lives on the title. */

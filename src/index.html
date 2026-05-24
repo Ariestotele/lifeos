@@ -280,11 +280,23 @@
         <!-- List column -->
         <div class="tk-main-col" id="tk-main-col">
           <div class="metrics" id="tasks-metrics"></div>
+          <!-- v5.21.0: inline quick-add bar with smart parsing -->
+          <div class="tk-quickadd">
+            <span class="tk-quickadd-plus">&#65291;</span>
+            <input id="tk-quickadd-input" type="text" placeholder="Add a task&#8230; (try &quot;Email John tom !urgent #work&quot;)" autocomplete="off"
+              onkeydown="if(event.key==='Enter'){event.preventDefault();tkQuickAdd();}">
+            <button class="tk-quickadd-hint" type="button" onclick="tkOpenQuickAddHelp()" title="What can I type?">?</button>
+          </div>
           <div class="toolbar">
             <div class="search-wrap">
               <span class="search-icon">&#8981;</span>
               <input id="tk-search" type="text" placeholder="Search tasks&#8230; (press T to add)" oninput="renderTasks()">
             </div>
+            <select class="sort-select" id="tk-group" onchange="tkSetGroupMode(this.value)" title="Group tasks by">
+              <option value="by-date">Group: By date</option>
+              <option value="by-workspace">Group: Workspace</option>
+              <option value="flat">Group: None</option>
+            </select>
             <select class="sort-select" id="tk-sort" onchange="renderTasks()">
               <option value="urgency">Sort: Urgency</option>
               <option value="created">Sort: Recent</option>
@@ -293,6 +305,10 @@
               <option value="name">Sort: Name</option>
               <option value="starred">Sort: Starred</option>
             </select>
+            <label class="tk-toggle" title="Hide completed tasks">
+              <input id="tk-hide-done" type="checkbox" onchange="tkSetHideDone(this.checked)">
+              <span>Hide done</span>
+            </label>
           </div>
           <div id="tk-metrics" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:1rem"></div>
           <div class="filter-row" id="tk-filters" style="flex-wrap:wrap;gap:6px;align-items:center"></div>

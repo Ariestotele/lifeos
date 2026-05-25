@@ -917,9 +917,13 @@
     <!-- Cloud sync (v5.22.0) -->
     <div class="settings-section">
       <div class="settings-section-title">Cloud sync</div>
-      <div style="font-size:11px;color:var(--text3);margin-bottom:10px;line-height:1.5">Push your data to a JSON file in the GitHub repo you've configured for deploy, pull on another device. Uses the same token. Best for "use it one device at a time".</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:10px;line-height:1.5">Push your data to a JSON file in a GitHub repo, pull on another device. Uses the deploy token. Leave the repo blank to use the deploy repo; set it to a separate <b>private</b> repo to keep your data out of a public one.</div>
+      <div class="settings-row" style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+        <span style="font-size:11px;color:var(--text3);flex-shrink:0;width:36px">Repo:</span>
+        <input id="cloud-repo-input" type="text" placeholder="(deploy repo)" class="settings-input" style="flex:1" oninput="_cloudOnRepoInput(this)">
+      </div>
       <div class="settings-row" style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
-        <span style="font-size:11px;color:var(--text3);flex-shrink:0">File:</span>
+        <span style="font-size:11px;color:var(--text3);flex-shrink:0;width:36px">File:</span>
         <input id="cloud-path-input" type="text" placeholder="lifeos-data.json" class="settings-input" style="flex:1" oninput="_cloudOnPathInput(this)">
       </div>
       <div style="display:flex;flex-direction:column;gap:6px">

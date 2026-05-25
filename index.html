@@ -2591,7 +2591,7 @@ body.touch-device #version-stamp{bottom:auto;top:4px;left:auto;right:4px}
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.22.0';
+const APP_VERSION = '5.22.1';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -3047,7 +3047,8 @@ function ghCancelDeploy(){
    refuse pushes when the SHA changed under us, and use last-write-wins with
    user opt-in to overwrite. */
 const CLOUD_PATH_KEY = 'lifeos_cloud_path';      // path inside the repo
-const CLOUD_LAST_SYNC_KEY = 'lifeos_cloud_last_sync';
+const CLOUD_LAST_PULL_KEY = 'lifeos_cloud_last_pull'; // v5.22.1
+const CLOUD_LAST_PUSH_KEY = 'lifeos_cloud_last_push'; // v5.22.1
 const CLOUD_FILE_SHA_KEY  = 'lifeos_cloud_sha';  // SHA of the file as we last saw it
 
 function cloudGetPath(){ return localStorage.getItem(CLOUD_PATH_KEY) || 'lifeos-data.json'; }
@@ -3096,7 +3097,7 @@ async function cloudPull(){
     // Reuse the existing 'replace' restore path.
     _pendingRestore = data;
     applyRestore('replace');
-    lsSet(CLOUD_LAST_SYNC_KEY, String(Date.now()));
+    lsSet(CLOUD_LAST_PULL_KEY, String(Date.now()));
     lsSet(CLOUD_FILE_SHA_KEY,  meta.sha);
     _cloudSetBusy(false);
     toast('↓ Pulled from cloud');
@@ -3137,7 +3138,7 @@ async function cloudPush(){
     }
     if(!r.ok) throw new Error('HTTP '+r.status);
     var resp = await r.json();
-    lsSet(CLOUD_LAST_SYNC_KEY, String(Date.now()));
+    lsSet(CLOUD_LAST_PUSH_KEY, String(Date.now()));
     lsSet(CLOUD_FILE_SHA_KEY,  resp.content ? resp.content.sha : sha);
     _cloudSetBusy(false);
     toast('↑ Pushed to cloud');
@@ -3155,18 +3156,24 @@ function _cloudSetBusy(b){
   var bs = document.getElementById('cloud-push-btn');
   [bp,bs].forEach(function(el){ if(el){ el.style.opacity = b?'0.6':'1'; el.disabled = !!b; } });
 }
+function _cloudFormatAgo(ts){
+  if(!ts) return 'never';
+  var mins = Math.round((Date.now()-ts)/60000);
+  if(mins < 1) return 'just now';
+  if(mins < 60) return mins+' min ago';
+  if(mins < 1440) return Math.round(mins/60)+'h ago';
+  return Math.round(mins/1440)+'d ago';
+}
 function _cloudRefreshStatus(){
   var el = document.getElementById('cloud-status');
   if(!el) return;
-  var ts = parseInt(localStorage.getItem(CLOUD_LAST_SYNC_KEY)||'0',10);
-  if(!ts){ el.textContent = 'Never synced.'; return; }
-  var mins = Math.round((Date.now()-ts)/60000);
-  var when;
-  if(mins < 1) when = 'just now';
-  else if(mins < 60) when = mins+' min ago';
-  else if(mins < 1440) when = Math.round(mins/60)+'h ago';
-  else when = Math.round(mins/1440)+'d ago';
-  el.textContent = 'Last synced ' + when + '.';
+  var pullTs = parseInt(localStorage.getItem(CLOUD_LAST_PULL_KEY)||'0',10);
+  var pushTs = parseInt(localStorage.getItem(CLOUD_LAST_PUSH_KEY)||'0',10);
+  if(!pullTs && !pushTs){ el.textContent = 'Never synced.'; return; }
+  el.innerHTML =
+    '<span style="color:var(--accent)">↓ Last pulled</span> '+_cloudFormatAgo(pullTs)+
+    ' <span style="opacity:.4;margin:0 6px">|</span> '+
+    '<span style="color:var(--positive)">↑ Last pushed</span> '+_cloudFormatAgo(pushTs);
 }
 function _cloudOnPathInput(input){ cloudSetPath(input.value); _cloudRefreshStatus(); }
 

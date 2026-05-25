@@ -2,7 +2,7 @@
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.22.1';
+const APP_VERSION = '5.22.2';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -458,6 +458,7 @@ function ghCancelDeploy(){
    refuse pushes when the SHA changed under us, and use last-write-wins with
    user opt-in to overwrite. */
 const CLOUD_PATH_KEY = 'lifeos_cloud_path';      // path inside the repo
+const CLOUD_REPO_KEY = 'lifeos_cloud_repo';      // v5.22.2: optional override
 const CLOUD_LAST_PULL_KEY = 'lifeos_cloud_last_pull'; // v5.22.1
 const CLOUD_LAST_PUSH_KEY = 'lifeos_cloud_last_push'; // v5.22.1
 const CLOUD_FILE_SHA_KEY  = 'lifeos_cloud_sha';  // SHA of the file as we last saw it
@@ -469,6 +470,22 @@ function cloudSetPath(p){
   if(!/\.json$/i.test(clean)) clean += '.json';
   lsSet(CLOUD_PATH_KEY, clean);
   return clean;
+}
+/* v5.22.2: optional override -- when set, cloud sync uses this repo instead of
+   the deploy repo. Lets users keep the code repo public for GitHub Pages and
+   put their personal data in a separate private repo. */
+function cloudGetRepo(){
+  var override = (localStorage.getItem(CLOUD_REPO_KEY)||'').trim();
+  if(override) return override;
+  return localStorage.getItem(GH_REPO_KEY) || '';
+}
+function cloudSetRepo(r){
+  var clean = (r||'').trim();
+  if(!clean) localStorage.removeItem(CLOUD_REPO_KEY);
+  else lsSet(CLOUD_REPO_KEY, clean);
+  // Clear the cached SHA -- it belonged to the previous repo's file and would
+  // immediately cause a 409 on the new one.
+  localStorage.removeItem(CLOUD_FILE_SHA_KEY);
 }
 
 /* GitHub REST helper. Mirrors ghDeploy's pattern of routing through the
@@ -489,7 +506,7 @@ async function _cloudGhFetch(url, opts){
 
 async function cloudPull(){
   var token = localStorage.getItem(GH_TOKEN_KEY);
-  var repo  = localStorage.getItem(GH_REPO_KEY);
+  var repo  = cloudGetRepo();
   if(!token || !repo){ toast('Set GitHub token + repo first (Settings -> Auto-save / GitHub)'); return false; }
   var path = cloudGetPath();
   var url  = 'https://api.github.com/repos/'+repo+'/contents/'+encodeURIComponent(path);
@@ -523,7 +540,7 @@ async function cloudPull(){
 
 async function cloudPush(){
   var token = localStorage.getItem(GH_TOKEN_KEY);
-  var repo  = localStorage.getItem(GH_REPO_KEY);
+  var repo  = cloudGetRepo();
   if(!token || !repo){ toast('Set GitHub token + repo first'); return false; }
   var path = cloudGetPath();
   var url  = 'https://api.github.com/repos/'+repo+'/contents/'+encodeURIComponent(path);
@@ -587,6 +604,7 @@ function _cloudRefreshStatus(){
     '<span style="color:var(--positive)">↑ Last pushed</span> '+_cloudFormatAgo(pushTs);
 }
 function _cloudOnPathInput(input){ cloudSetPath(input.value); _cloudRefreshStatus(); }
+function _cloudOnRepoInput(input){ cloudSetRepo(input.value); _cloudRefreshStatus(); }
 
 async function ghDeploy(){
   var token=localStorage.getItem(GH_TOKEN_KEY);
@@ -6940,6 +6958,8 @@ function openSettingsModal(){
   // v5.22.0: cloud sync row state
   var cpath = document.getElementById('cloud-path-input');
   if(cpath) cpath.value = cloudGetPath();
+  var crepo = document.getElementById('cloud-repo-input');
+  if(crepo) crepo.value = (localStorage.getItem(CLOUD_REPO_KEY)||'').trim();
   _cloudRefreshStatus();
 }
 function closeSettingsModal(){

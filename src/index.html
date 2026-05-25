@@ -914,6 +914,27 @@
       </button>
     </div>
 
+    <!-- Cloud sync (v5.22.0) -->
+    <div class="settings-section">
+      <div class="settings-section-title">Cloud sync</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:10px;line-height:1.5">Push your data to a JSON file in the GitHub repo you've configured for deploy, pull on another device. Uses the same token. Best for "use it one device at a time".</div>
+      <div class="settings-row" style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+        <span style="font-size:11px;color:var(--text3);flex-shrink:0">File:</span>
+        <input id="cloud-path-input" type="text" placeholder="lifeos-data.json" class="settings-input" style="flex:1" oninput="_cloudOnPathInput(this)">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <button id="cloud-pull-btn" class="settings-action-btn" onclick="cloudPull()">
+          <div class="settings-action-icon" style="background:rgba(74,142,204,.15);color:var(--accent)">&#8595;</div>
+          <div><div>Pull from cloud</div><div style="font-size:10px;color:var(--text3);margin-top:1px">Replace local data with the remote file</div></div>
+        </button>
+        <button id="cloud-push-btn" class="settings-action-btn" onclick="cloudPush()">
+          <div class="settings-action-icon" style="background:rgba(31,170,126,.15);color:var(--positive)">&#8593;</div>
+          <div><div>Push to cloud</div><div style="font-size:10px;color:var(--text3);margin-top:1px">Upload current data to the remote file</div></div>
+        </button>
+      </div>
+      <div id="cloud-status" style="font-size:11px;color:var(--text3);margin-top:8px;text-align:center"></div>
+    </div>
+
     <!-- Backup -->
     <div class="settings-section">
       <div class="settings-section-title">Backup</div>

@@ -2,7 +2,7 @@
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.21.2';
+const APP_VERSION = '5.22.0';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -450,6 +450,136 @@ function ghCancelDeploy(){
   var btn=document.getElementById('gh-deploy-btn');
   if(btn) btn.style.display='';
 }
+
+/* v5.22.0 cloud sync.
+   Stores a JSON blob of every entity (same payload as exportJSON) as a file in
+   the user's existing GitHub repo (the one already configured for deploy). Single-
+   device-at-a-time usage so we don't need CRDT merging -- track the file's SHA,
+   refuse pushes when the SHA changed under us, and use last-write-wins with
+   user opt-in to overwrite. */
+const CLOUD_PATH_KEY = 'lifeos_cloud_path';      // path inside the repo
+const CLOUD_LAST_SYNC_KEY = 'lifeos_cloud_last_sync';
+const CLOUD_FILE_SHA_KEY  = 'lifeos_cloud_sha';  // SHA of the file as we last saw it
+
+function cloudGetPath(){ return localStorage.getItem(CLOUD_PATH_KEY) || 'lifeos-data.json'; }
+function cloudSetPath(p){
+  var clean = (p||'').replace(/^\/+|\/+$/g,'').trim();
+  if(!clean) clean = 'lifeos-data.json';
+  if(!/\.json$/i.test(clean)) clean += '.json';
+  lsSet(CLOUD_PATH_KEY, clean);
+  return clean;
+}
+
+/* GitHub REST helper. Mirrors ghDeploy's pattern of routing through the
+   Cloudflare proxy when one is set (needed in some network configs). */
+async function _cloudGhFetch(url, opts){
+  var proxyBase = (aiGetProxy()||'').replace(/\/+$/,'');
+  if(proxyBase){
+    return fetch(proxyBase+'/github', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        url:url, method:opts.method||'GET', headers:opts.headers||{}, body:opts.body||null
+      })
+    });
+  }
+  return fetch(url, opts);
+}
+
+async function cloudPull(){
+  var token = localStorage.getItem(GH_TOKEN_KEY);
+  var repo  = localStorage.getItem(GH_REPO_KEY);
+  if(!token || !repo){ toast('Set GitHub token + repo first (Settings -> Auto-save / GitHub)'); return false; }
+  var path = cloudGetPath();
+  var url  = 'https://api.github.com/repos/'+repo+'/contents/'+encodeURIComponent(path);
+  var headers = {Authorization:'token '+token, Accept:'application/vnd.github.v3+json'};
+  _cloudSetBusy(true);
+  try{
+    var r = await _cloudGhFetch(url, {headers:headers});
+    if(r.status === 404){ _cloudSetBusy(false); toast('Nothing in the cloud yet — push first'); return false; }
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    var meta = await r.json();
+    // base64 decode (GitHub wraps base64 in newlines)
+    var jsonStr = atob((meta.content||'').replace(/\n/g,''));
+    // GitHub returns base64 of UTF-8 bytes; decode to a proper unicode string
+    try{ jsonStr = decodeURIComponent(escape(jsonStr)); }catch(_){}
+    var data = JSON.parse(jsonStr);
+    // Reuse the existing 'replace' restore path.
+    _pendingRestore = data;
+    applyRestore('replace');
+    lsSet(CLOUD_LAST_SYNC_KEY, String(Date.now()));
+    lsSet(CLOUD_FILE_SHA_KEY,  meta.sha);
+    _cloudSetBusy(false);
+    toast('↓ Pulled from cloud');
+    _cloudRefreshStatus();
+    return true;
+  }catch(e){
+    _cloudSetBusy(false);
+    toast('Pull failed: '+(e.message||'unknown'));
+    return false;
+  }
+}
+
+async function cloudPush(){
+  var token = localStorage.getItem(GH_TOKEN_KEY);
+  var repo  = localStorage.getItem(GH_REPO_KEY);
+  if(!token || !repo){ toast('Set GitHub token + repo first'); return false; }
+  var path = cloudGetPath();
+  var url  = 'https://api.github.com/repos/'+repo+'/contents/'+encodeURIComponent(path);
+  var headers = {Authorization:'token '+token, Accept:'application/vnd.github.v3+json', 'Content-Type':'application/json'};
+  _cloudSetBusy(true);
+  try{
+    var payload = _buildBackupPayload();
+    var jsonStr = JSON.stringify(payload, null, 2);
+    // Encode as UTF-8 -> base64 (handles non-ASCII like emojis in workspace names)
+    var content = btoa(unescape(encodeURIComponent(jsonStr)));
+    var sha = localStorage.getItem(CLOUD_FILE_SHA_KEY);
+    var body = {
+      message: 'LifeOS data sync ' + new Date().toISOString(),
+      content: content,
+      branch: 'main'
+    };
+    if(sha) body.sha = sha;
+    var r = await _cloudGhFetch(url, {method:'PUT', headers:headers, body:JSON.stringify(body)});
+    if(r.status === 409 || r.status === 422){
+      _cloudSetBusy(false);
+      toast('Cloud has newer data -- pull first, then push');
+      return false;
+    }
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    var resp = await r.json();
+    lsSet(CLOUD_LAST_SYNC_KEY, String(Date.now()));
+    lsSet(CLOUD_FILE_SHA_KEY,  resp.content ? resp.content.sha : sha);
+    _cloudSetBusy(false);
+    toast('↑ Pushed to cloud');
+    _cloudRefreshStatus();
+    return true;
+  }catch(e){
+    _cloudSetBusy(false);
+    toast('Push failed: '+(e.message||'unknown'));
+    return false;
+  }
+}
+
+function _cloudSetBusy(b){
+  var bp = document.getElementById('cloud-pull-btn');
+  var bs = document.getElementById('cloud-push-btn');
+  [bp,bs].forEach(function(el){ if(el){ el.style.opacity = b?'0.6':'1'; el.disabled = !!b; } });
+}
+function _cloudRefreshStatus(){
+  var el = document.getElementById('cloud-status');
+  if(!el) return;
+  var ts = parseInt(localStorage.getItem(CLOUD_LAST_SYNC_KEY)||'0',10);
+  if(!ts){ el.textContent = 'Never synced.'; return; }
+  var mins = Math.round((Date.now()-ts)/60000);
+  var when;
+  if(mins < 1) when = 'just now';
+  else if(mins < 60) when = mins+' min ago';
+  else if(mins < 1440) when = Math.round(mins/60)+'h ago';
+  else when = Math.round(mins/1440)+'d ago';
+  el.textContent = 'Last synced ' + when + '.';
+}
+function _cloudOnPathInput(input){ cloudSetPath(input.value); _cloudRefreshStatus(); }
 
 async function ghDeploy(){
   var token=localStorage.getItem(GH_TOKEN_KEY);
@@ -2082,12 +2212,28 @@ document.getElementById('tabby-modal').addEventListener('click',e=>{if(e.target=
 
 function exportJSON(){
   if(!items.length&&!payments.length&&!tabbyItems.length&&!tasks.length){toast('Nothing to back up yet');return;}
-  const data=JSON.stringify({items,payments,tabbyItems,tasks,taskHistory,shopping,shCollections,links,linkGroups,lists,workspaces,goals,notes,loans,receivables,accounts,nwHistory,budgets,dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),dbCollapsed:JSON.parse(localStorage.getItem('lifeos_db_collapsed')||'{}'),navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),proxyUrl:localStorage.getItem(AI_PROXY_STORE)||'',exportedAt:new Date().toISOString()},null,2);
+  const data=JSON.stringify(_buildBackupPayload(),null,2);
   const d=new Date();
   const filename='bills-backup-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'.json';
   verSnapshot(true);
   triggerDownload(new Blob([data],{type:'application/json'}),filename);
   toast('&#8595; Backup downloaded');
+}
+
+/* v5.22.0: shared backup payload builder.
+   Same shape as exportJSON, reused by cloud push. */
+function _buildBackupPayload(){
+  return {
+    items, payments, tabbyItems, tasks, taskHistory,
+    shopping, shCollections, links, linkGroups,
+    lists, workspaces, goals, notes, loans, receivables, accounts, nwHistory, budgets,
+    dbLayout:JSON.parse(localStorage.getItem(DB_LAYOUT_KEY)||'[]'),
+    dbCollapsed:JSON.parse(localStorage.getItem('lifeos_db_collapsed')||'{}'),
+    navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),
+    cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),
+    proxyUrl:localStorage.getItem(AI_PROXY_STORE)||'',
+    exportedAt:new Date().toISOString()
+  };
 }
 
 /* Holds parsed backup while user decides replace vs merge */
@@ -6784,6 +6930,10 @@ function openSettingsModal(){
   if(txt&&srcTxt) txt.textContent = srcTxt.textContent;
   updateSettingsInstallState();
   renderBudgetsSettings();
+  // v5.22.0: cloud sync row state
+  var cpath = document.getElementById('cloud-path-input');
+  if(cpath) cpath.value = cloudGetPath();
+  _cloudRefreshStatus();
 }
 function closeSettingsModal(){
   document.getElementById('settings-modal').style.display='none';

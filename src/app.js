@@ -2,7 +2,7 @@
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.23.1';
+const APP_VERSION = '5.23.2';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -1470,7 +1470,7 @@ function renderHistory(){
               +'<div class="item-dot" style="background:'+color+'"></div>'
               +'<div><div class="history-name">'+esc(p.name)+'</div><div class="history-meta">'+(p.cat||'')+(p.note?' \u00B7 '+esc(p.note):'')+'</div></div>'
               +'<div><div class="history-amount">AED '+fmt(p.amount)+'</div><div class="history-date">'+d.getDate()+' '+MONTHS[d.getMonth()]+'</div></div>'
-              +'<button class="icon-btn del" onclick="deletePayment(\''+ p.id +'\')" title="Delete payment">&#10005;</button>'
+              +'<button class="icon-btn del" data-pid="'+p.id+'" onclick="deletePayment(this.dataset.pid)" title="Delete payment">&#10005;</button>'
               +'</div>';
           }).join('')
           +'</div>';
@@ -2334,10 +2334,10 @@ function applyRestore(mode){
     nwHistory=data.nwHistory||[];
     receivables=data.receivables||[];
     saveData();saveTasks();saveTaskHistory();saveShopping();saveShCollections();saveLinks();saveLinkGroups();saveLists();saveWorkspaces();saveBudgets();saveGoals();saveNotes();saveLoans();saveReceivables();saveAccounts();saveNetWorth();
-    if(data.dbLayout)  localStorage.setItem(DB_LAYOUT_KEY,  JSON.stringify(data.dbLayout));
-    if(data.dbCollapsed) localStorage.setItem('lifeos_db_collapsed', JSON.stringify(data.dbCollapsed));
-    if(data.navLayout) localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(data.navLayout));
-    if(data.cycleStart) localStorage.setItem(CYCLE_KEY, data.cycleStart);
+    if(data.dbLayout)  lsSet(DB_LAYOUT_KEY,  JSON.stringify(data.dbLayout));
+    if(data.dbCollapsed) lsSet('lifeos_db_collapsed', JSON.stringify(data.dbCollapsed));
+    if(data.navLayout) lsSet(NAV_LAYOUT_KEY, JSON.stringify(data.navLayout));
+    if(data.cycleStart) lsSet(CYCLE_KEY, data.cycleStart);
     if(data.proxyUrl){ aiSetProxy(data.proxyUrl); loadProxyUrl(); }
     renderNav();
     updateCyclePreview();
@@ -2397,10 +2397,10 @@ loadProxyUrl();
     taskHistory=[...(data.taskHistory||[]),...taskHistory.filter(t=>!thIds.has(t.id))];
     saveData();saveTasks();saveTaskHistory();saveShopping();saveShCollections();saveLinks();saveLinkGroups();saveLists();saveWorkspaces();saveBudgets();saveGoals();saveNotes();saveLoans();saveReceivables();saveAccounts();saveNetWorth();
     // Merge layouts: only apply from backup if local layout is empty
-    if(data.dbLayout  && !localStorage.getItem(DB_LAYOUT_KEY))  localStorage.setItem(DB_LAYOUT_KEY,  JSON.stringify(data.dbLayout));
-    if(data.dbCollapsed && !localStorage.getItem('lifeos_db_collapsed')) localStorage.setItem('lifeos_db_collapsed', JSON.stringify(data.dbCollapsed));
-    if(data.navLayout && !localStorage.getItem(NAV_LAYOUT_KEY)) localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(data.navLayout));
-    if(data.cycleStart) localStorage.setItem(CYCLE_KEY, data.cycleStart);
+    if(data.dbLayout  && !localStorage.getItem(DB_LAYOUT_KEY))  lsSet(DB_LAYOUT_KEY,  JSON.stringify(data.dbLayout));
+    if(data.dbCollapsed && !localStorage.getItem('lifeos_db_collapsed')) lsSet('lifeos_db_collapsed', JSON.stringify(data.dbCollapsed));
+    if(data.navLayout && !localStorage.getItem(NAV_LAYOUT_KEY)) lsSet(NAV_LAYOUT_KEY, JSON.stringify(data.navLayout));
+    if(data.cycleStart) lsSet(CYCLE_KEY, data.cycleStart);
     if(data.proxyUrl){ aiSetProxy(data.proxyUrl); loadProxyUrl(); }
     renderNav();
     updateCyclePreview();
@@ -4177,7 +4177,7 @@ function dbToggleCollapse(widgetId){
   const isNowCollapsed = el.classList.toggle('collapsed');
   const state = JSON.parse(localStorage.getItem('lifeos_db_collapsed')||'{}');
   state[widgetId] = isNowCollapsed ? 1 : 0;
-  localStorage.setItem('lifeos_db_collapsed', JSON.stringify(state));
+  lsSet('lifeos_db_collapsed', JSON.stringify(state));
 }
 
 /* \u2500\u2500 Widget: Financial snapshot \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
@@ -5672,7 +5672,7 @@ function verSnapshot(force, autoLabel){
 
     versions.unshift(snap);
     if(versions.length > VER_MAX) versions = versions.slice(0, VER_MAX);
-    localStorage.setItem(KEY_VER, JSON.stringify(versions));
+    lsSet(KEY_VER, JSON.stringify(versions));
     if(_verPanelOpen) renderVerPanel();
   } catch(e){
     console.warn('Version snapshot failed:', e);
@@ -5688,7 +5688,7 @@ function verManualCheckpoint(){
   const versions = getVersions();
   if(versions.length && !versions[0].name){
     versions[0].name = name || 'Manual checkpoint';
-    localStorage.setItem(KEY_VER, JSON.stringify(versions));
+    lsSet(KEY_VER, JSON.stringify(versions));
   }
   toast('\u2713 Checkpoint saved'+(name?' \u201C'+name+'\u201D':''));
   // Re-render panel if open
@@ -5767,7 +5767,7 @@ function verSaveName(idx, name){
   let versions = getVersions();
   if(!versions[idx]) return;
   versions[idx].name = name.trim();
-  localStorage.setItem(KEY_VER, JSON.stringify(versions));
+  lsSet(KEY_VER, JSON.stringify(versions));
   // Don't re-render the whole panel (would lose focus mid-type)
 }
 
@@ -6209,7 +6209,7 @@ ${context}`;
   const raw=(data.content||[]).map(b=>b.text||'').join('').trim();
   const clean=raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim();
   const insights=JSON.parse(clean);
-  localStorage.setItem(AI_INS_STORE,JSON.stringify({date:today,insights,savedAt:new Date().toISOString()}));
+  lsSet(AI_INS_STORE,JSON.stringify({date:today,insights,savedAt:new Date().toISOString()}));
   return insights;
 }
 
@@ -6360,7 +6360,7 @@ function dbLoadLayout(){
 }
 
 function dbSaveLayout(layout){
-  localStorage.setItem(DB_LAYOUT_KEY, JSON.stringify(layout));
+  lsSet(DB_LAYOUT_KEY, JSON.stringify(layout));
 }
 
 /* \u2500\u2500 Get ordered list of widgets with visibility \u2500\u2500 */
@@ -6565,7 +6565,7 @@ function navLoadLayout(){
 
 function navSaveLayout(){
   const items = navLoadLayout().map(n=>({id:n.id,visible:n.visible}));
-  localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(items));
+  lsSet(NAV_LAYOUT_KEY, JSON.stringify(items));
 }
 
 /* \u2500\u2500 Render the nav (called on load + after any change) \u2500\u2500 */
@@ -6671,7 +6671,7 @@ function navSaveOrder(){
       id: el.dataset.navId,
       visible: !el.classList.contains('nav-hidden')
     }));
-    if(order.length) localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(order));
+    if(order.length) lsSet(NAV_LAYOUT_KEY, JSON.stringify(order));
   }
   renderNav();
   toast('&#10003; Sidebar order saved');
@@ -6680,7 +6680,7 @@ function navSaveOrder(){
 /* \u2500\u2500 Toggle item visibility \u2500\u2500 */
 function navToggleVisible(id){
   const layout = navLoadLayout().map(n=>({id:n.id, visible:n.id===id?!n.visible:n.visible}));
-  localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(layout.map(n=>({id:n.id,visible:n.visible}))));
+  lsSet(NAV_LAYOUT_KEY, JSON.stringify(layout.map(n=>({id:n.id,visible:n.visible}))));
   renderNav();
 }
 
@@ -6710,7 +6710,7 @@ function navDrop(e){
   if(si<0||di<0) return;
   const [moved] = layout.splice(si,1);
   layout.splice(di,0,moved);
-  localStorage.setItem(NAV_LAYOUT_KEY, JSON.stringify(layout));
+  lsSet(NAV_LAYOUT_KEY, JSON.stringify(layout));
   // Defer DOM rebuild until after dragend fires -- destroying elements mid-drag
   // prevents subsequent drags from working in Chrome/Firefox
   setTimeout(renderNav, 0);
@@ -6964,7 +6964,7 @@ function verSaveNameByTs(ts, name){
   const v = versions.find(x=>String(x.ts)===String(ts));
   if(!v) return;
   v.name = name.trim();
-  localStorage.setItem(KEY_VER, JSON.stringify(versions));
+  lsSet(KEY_VER, JSON.stringify(versions));
 }
 
 
@@ -7715,7 +7715,7 @@ function renderShCollSidebar(){
     const count=shopping.filter(function(s){return s.collId===c.id&&!s.bought;}).length;
     const isActive=shCollView===c.id;
     return '<div style="margin-bottom:4px">'
-      +'<button class="sh-coll-btn'+(isActive?' active':'')+'" onclick="shCollView=&quot;'+c.id+'&quot;;renderShopping()">'
+      +'<button class="sh-coll-btn'+(isActive?' active':'')+'" data-cid="'+c.id+'">'
         +'<span class="sh-coll-dot" style="background:'+c.color+'"></span>'
         +'<span class="sh-coll-name">'+esc(c.name)+'</span>'
         +(count>0?'<span class="sh-coll-count">'+count+'</span>':'')

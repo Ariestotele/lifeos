@@ -2147,6 +2147,24 @@ body.touch-device #version-stamp{bottom:auto;top:4px;left:auto;right:4px}
                 <select id="tk-list-sel"></select>
               </div>
             </div>
+            <div class="fields-row">
+              <div class="field"><label>Repeats</label>
+                <select id="tk-recur-freq" onchange="document.getElementById('tk-recur-interval-row').style.display=this.value?'flex':'none'">
+                  <option value="">&#8212; Doesn't repeat</option>
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                </select>
+              </div>
+              <div class="field" id="tk-recur-interval-row" style="display:none">
+                <label>Every</label>
+                <input id="tk-recur-interval" type="number" min="1" max="365" step="1" value="1">
+              </div>
+            </div>
+            <div class="field" style="display:flex;align-items:center;gap:8px">
+              <input id="tk-paused" type="checkbox" style="accent-color:var(--accent);width:16px;height:16px;cursor:pointer">
+              <label for="tk-paused" style="margin:0;cursor:pointer;font-size:13px">Pause this task (hide from date buckets)</label>
+            </div>
             <div class="field"><label>Tags (comma separated)</label><input id="tk-tags" type="text" placeholder="e.g. review, urgent"></div>
             <!-- Subtasks -->
             <div class="field">
@@ -2595,7 +2613,7 @@ body.touch-device #version-stamp{bottom:auto;top:4px;left:auto;right:4px}
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.23.4';
+const APP_VERSION = '5.24.0';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -2787,6 +2805,55 @@ function tkToggleSubtask(taskId, subId){
    - tkSetGroupMode / tkSetHideDone: persist UI prefs + re-render.
    - tkDateGroup: returns one of overdue|today|tomorrow|week|later|nodate|done.
    - tkOpenQuickAddHelp: tiny toast explaining the smart parsing. */
+
+// v5.24.0: recurring helpers. Schema: task.recur = {freq:'daily'|'weekly'|'monthly', interval:1} or null.
+// On completion of an active recurring task, advance dueDate to the next future occurrence and log
+// to taskHistory instead of marking done -- single row, no list clutter.
+function tkAdvanceDueDate(dateStr, recur){
+  if(!recur || !recur.freq || !dateStr) return dateStr;
+  var d = new Date(dateStr+'T00:00:00');
+  var n = Math.max(1, recur.interval||1);
+  var today = new Date(); today.setHours(0,0,0,0);
+  var hops = 0;
+  do {
+    if(recur.freq==='daily')        d.setDate(d.getDate()+n);
+    else if(recur.freq==='weekly')  d.setDate(d.getDate()+7*n);
+    else if(recur.freq==='monthly') d.setMonth(d.getMonth()+n);
+    else break;
+    hops++;
+  } while(d <= today && hops < 365);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function tkRecurLabel(recur){
+  if(!recur || !recur.freq) return '';
+  var n = Math.max(1, recur.interval||1);
+  if(n===1) return recur.freq==='daily'?'Daily':recur.freq==='weekly'?'Weekly':'Monthly';
+  return 'Every '+n+' '+(recur.freq==='daily'?'days':recur.freq==='weekly'?'weeks':'months');
+}
+// Yields the dates within [startIso, endIso] (inclusive) on which task t should appear.
+// Non-recurring: just [t.dueDate] if it falls in the window. Paused/done: nothing.
+function tkOccurrencesInRange(t, startIso, endIso){
+  if(!t.dueDate || t.paused || t.done) return [];
+  if(!t.recur || !t.recur.freq){
+    return (t.dueDate>=startIso && t.dueDate<=endIso) ? [t.dueDate] : [];
+  }
+  var n = Math.max(1, t.recur.interval||1);
+  var d = new Date(t.dueDate+'T00:00:00');
+  var end = new Date(endIso+'T00:00:00');
+  var dates = [];
+  var hops = 0;
+  while(d <= end && hops < 366){
+    var iso = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    if(iso >= startIso) dates.push(iso);
+    if(t.recur.freq==='daily')        d.setDate(d.getDate()+n);
+    else if(t.recur.freq==='weekly')  d.setDate(d.getDate()+7*n);
+    else if(t.recur.freq==='monthly') d.setMonth(d.getMonth()+n);
+    else break;
+    hops++;
+  }
+  return dates;
+}
+
 function tkParseQuickAdd(raw){
   var text = String(raw||'').trim();
   if(!text) return null;
@@ -2875,6 +2942,7 @@ function tkSetDateBucket(g){
   renderTasks();
 }
 function tkDateGroup(t){
+  if(t.paused) return 'paused';
   if(t.done) return 'done';
   if(!t.dueDate) return 'nodate';
   var today = new Date(); today.setHours(0,0,0,0);
@@ -2886,9 +2954,9 @@ function tkDateGroup(t){
   if(diff <= 7)  return 'week';
   return 'later';
 }
-var _TK_DATE_GROUPS = ['overdue','today','tomorrow','week','later','nodate','done'];
-var _TK_DATE_LABELS = {overdue:'Overdue', today:'Today', tomorrow:'Tomorrow', week:'This week', later:'Later', nodate:'No date', done:'Done'};
-var _TK_DATE_COLORS = {overdue:'#E05252', today:'#4A8ECC', tomorrow:'#C98A1A', week:'#7A74D4', later:'#888880', nodate:'#666666', done:'#1D9E75'};
+var _TK_DATE_GROUPS = ['overdue','today','tomorrow','week','later','nodate','paused','done'];
+var _TK_DATE_LABELS = {overdue:'Overdue', today:'Today', tomorrow:'Tomorrow', week:'This week', later:'Later', nodate:'No date', paused:'Paused', done:'Done'};
+var _TK_DATE_COLORS = {overdue:'#E05252', today:'#4A8ECC', tomorrow:'#C98A1A', week:'#7A74D4', later:'#888880', nodate:'#666666', paused:'#888880', done:'#1D9E75'};
 
 function tkAddWithTag(tagName){
   openTaskModal();
@@ -5837,17 +5905,28 @@ function renderTaskCard(t, opts){
     }
   }
   var notesHtml=t.notes?'<div class="tk-card-notes">'+esc(t.notes)+'</div>':'';
+  // v5.24.0: recur + paused chips in the meta row, and a pause toggle in the action row.
+  var recurChip = (t.recur&&t.recur.freq)
+    ? '<span class="tk-tag" style="background:#7A74D422;color:#7A74D4;border-color:#7A74D440" title="'+esc(tkRecurLabel(t.recur))+'">&#8634; '+esc(tkRecurLabel(t.recur))+'</span>'
+    : '';
+  var pausedChip = t.paused
+    ? '<span class="tk-tag" style="background:#88888022;color:#888;border-color:#88888055">&#10074;&#10074; Paused</span>'
+    : '';
+  var pauseBtnTitle = t.paused?'Resume':'Pause';
+  var pauseBtnGlyph = t.paused?'&#9654;':'&#10074;&#10074;';
+  var pauseBtn = '<button class="tk-ibtn" data-id="'+t.id+'" onclick="toggleTaskPaused(this.dataset.id)" title="'+pauseBtnTitle+'" style="font-size:9px">'+pauseBtnGlyph+'</button>';
   var actionsHtml=t.done?'':
     '<div class="tk-card-actions">'+
     '<button class="tk-ibtn tk-ibtn-done" data-id="'+t.id+'" onclick="toggleTaskDone(this.dataset.id)" title="Mark done">'+svgDone+'</button>'+
     '<button class="tk-ibtn" data-id="'+t.id+'" onclick="openTaskModal(this.dataset.id)" title="Edit">'+svgEdit+'</button>'+
     '<button class="tk-ibtn" data-id="'+t.id+'" onclick="duplicateTask(this.dataset.id)" title="Duplicate">'+svgDup+'</button>'+
+    pauseBtn+
     '<button class="tk-ibtn tk-ibtn-del" data-id="'+t.id+'" onclick="deleteTask(this.dataset.id)" title="Delete">'+svgDel+'</button>'+
     '</div>';
-  var cardCls='tk-card'+(t.done?' tk-card-done':'');
+  var cardCls='tk-card'+(t.done?' tk-card-done':'')+(t.paused?' tk-card-paused':'');
   // v5.21.2: subtle workspace tint on the card background + border so you can
   // tell Personal from Work at a glance without parsing the meta row.
-  var cardStyle='background:'+wsCol+'14;border-color:'+wsCol+'40;';
+  var cardStyle='background:'+wsCol+'14;border-color:'+wsCol+'40;'+(t.paused?'opacity:.6;':'');
   var checkHtml=t.done?
     '<div class="tk-card-check tk-card-check-done" data-id="'+t.id+'" onclick="toggleTaskDone(this.dataset.id)">&#10003;</div>':
     '<div class="tk-card-check" data-id="'+t.id+'" onclick="toggleTaskDone(this.dataset.id)"></div>';
@@ -5858,7 +5937,7 @@ function renderTaskCard(t, opts){
         '<div class="'+titleCls+'">'+esc(t.title)+'</div>'+
       '</div>'+
     '</div>'+
-    '<div class="tk-card-meta">'+dueHtml+wsChip+tagsHtml+'</div>'+
+    '<div class="tk-card-meta">'+dueHtml+wsChip+recurChip+pausedChip+tagsHtml+'</div>'+
     subtaskBar+
     notesHtml+
     actionsHtml+
@@ -5874,11 +5953,37 @@ function setTkFilter(type,val){
 
 function toggleTaskDone(id){
   const t=tasks.find(t=>t.id===id);if(!t)return;
+  // v5.24.0: recurring & active & not paused -> advance dueDate, log to history, stay active.
+  if(!t.done && !t.paused && t.recur && t.recur.freq && t.dueDate){
+    var oldDue = t.dueDate;
+    taskHistory.unshift({
+      id: String(Date.now())+'-r',
+      taskId: t.id,
+      title: t.title,
+      priority: t.priority,
+      workspace: t.workspace,
+      listId: t.listId,
+      dueDate: oldDue,
+      doneAt: new Date().toISOString(),
+      recurring: true,
+    });
+    if(taskHistory.length > 500) taskHistory.length = 500;
+    t.dueDate = tkAdvanceDueDate(oldDue, t.recur);
+    saveTasks(); saveTaskHistory(); renderTasks();
+    toast('&#10003; '+esc(t.title)+' &#8594; next '+t.dueDate);
+    return;
+  }
   t.done=!t.done;
   if(t.done) t.doneAt=new Date().toISOString();
   else delete t.doneAt;
   saveTasks();renderTasks();
   toast(t.done?`&#10003; Done: ${t.title}`:`&#8617; Reopened: ${t.title}`);
+}
+function toggleTaskPaused(id){
+  const t=tasks.find(t=>t.id===id);if(!t)return;
+  t.paused=!t.paused;
+  saveTasks();renderTasks();
+  toast(t.paused?'&#10074;&#10074; Paused: '+t.title:'&#9654; Resumed: '+t.title);
 }
 
 function toggleTaskStar(id){
@@ -5959,6 +6064,17 @@ function openTaskModal(id){
   tkSelectedColor=t?.color||COLORS[0];
   renderTkColorPicker();
   renderModalSubtasks(t?.subtasks||[]);
+  // v5.24.0: recur + paused fields
+  var recurFreq=(t&&t.recur&&t.recur.freq)||'';
+  var recurInterval=(t&&t.recur&&t.recur.interval)||1;
+  var rfSel=document.getElementById('tk-recur-freq');
+  var rfInt=document.getElementById('tk-recur-interval');
+  var rfRow=document.getElementById('tk-recur-interval-row');
+  var pauseCb=document.getElementById('tk-paused');
+  if(rfSel) rfSel.value=recurFreq;
+  if(rfInt) rfInt.value=recurInterval;
+  if(rfRow) rfRow.style.display=recurFreq?'flex':'none';
+  if(pauseCb) pauseCb.checked=!!(t&&t.paused);
   document.getElementById('tk-panel').classList.add('open');
   document.getElementById('tk-panel-tint').classList.add('show');
   setTimeout(()=>document.getElementById('tk-title').focus(),80);
@@ -6016,12 +6132,22 @@ function saveTask(){
   const tags=tagsRaw?tagsRaw.split(',').map(t=>t.trim()).filter(Boolean):[];
   const subtasks=modalSubtasks.filter(s=>(s.title||'').trim()).map(s=>({...s,title:s.title.trim()}));
   const existing=tkEditId?tasks.find(t=>t.id===tkEditId):null;
+  // v5.24.0: recur + paused
+  var rfSel=document.getElementById('tk-recur-freq');
+  var rfInt=document.getElementById('tk-recur-interval');
+  var pauseCb=document.getElementById('tk-paused');
+  var recurFreq=rfSel?rfSel.value:'';
+  var recurInterval=rfInt?Math.max(1,parseInt(rfInt.value,10)||1):1;
+  var recur=recurFreq?{freq:recurFreq, interval:recurInterval}:null;
+  var dueIso=document.getElementById('tk-due').value||null;
+  // Recurring tasks need a dueDate -- default to today.
+  if(recur && !dueIso) dueIso = todayStr();
   const obj={
     id:tkEditId||String(Date.now()),
     title,
     notes:document.getElementById('tk-notes').value.trim(),
     priority:document.getElementById('tk-priority').value,
-    dueDate:document.getElementById('tk-due').value||null,
+    dueDate:dueIso,
     listId:((document.getElementById('tk-list-sel')||{}).value)||null,
     workspace:(document.getElementById('tk-workspace-sel')||{}).value||(existing?existing.workspace||'personal':'personal'),
     tags,subtasks,
@@ -6029,6 +6155,8 @@ function saveTask(){
     starred:existing?.starred||false,
     color:tkSelectedColor,
     createdAt:existing?.createdAt||Date.now(),
+    recur:recur,
+    paused:pauseCb?pauseCb.checked:false,
   };
   if(tkEditId){const idx=tasks.findIndex(t=>t.id===tkEditId);if(idx>-1)tasks[idx]=obj;}
   else tasks.unshift(obj);
@@ -6487,12 +6615,20 @@ function calGetEvents(){
     addEv(dateStr,{type:'bill',name:i.name,meta:`AED ${fmt(i.amount)} / ${cycleShort(i.cycle)}`,color:i.color||CATCOLORS[i.cat]||'#C98A1A',overdue,paid:paidThisMonth});
   });
 
-  // Tasks with dueDate
-  tasks.filter(t=>!t.done&&t.dueDate).forEach(t=>{
-    const d=new Date(t.dueDate); d.setHours(0,0,0,0);
-    const overdue=d<now;
-    // Only show in current month view
-    addEv(t.dueDate,{type:'task',name:t.title,meta:t.priority&&t.priority!=='none'?`${t.priority} priority`:'',color:'#9B7FE8',overdue,taskId:t.id});
+  // Tasks with dueDate. v5.24.0: recurring tasks expand to all occurrences in the visible month.
+  const monthStartIso = `${calYear}-${String(calMonth+1).padStart(2,'0')}-01`;
+  const monthEndDay = new Date(calYear, calMonth+1, 0).getDate();
+  const monthEndIso = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(monthEndDay).padStart(2,'0')}`;
+  tasks.filter(t=>!t.done&&!t.paused&&t.dueDate).forEach(t=>{
+    const dates = (t.recur&&t.recur.freq)
+      ? tkOccurrencesInRange(t, monthStartIso, monthEndIso)
+      : [t.dueDate];
+    dates.forEach(function(dStr){
+      const d=new Date(dStr+'T00:00:00'); d.setHours(0,0,0,0);
+      const overdue=d<now;
+      const recurLabel = (t.recur&&t.recur.freq) ? ' · '+tkRecurLabel(t.recur) : '';
+      addEv(dStr,{type:'task',name:t.title,meta:(t.priority&&t.priority!=='none'?`${t.priority} priority`:'')+recurLabel,color:'#9B7FE8',overdue,taskId:t.id});
+    });
   });
 
   // Goals with deadline

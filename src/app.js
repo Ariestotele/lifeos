@@ -2,7 +2,7 @@
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.22.3';
+const APP_VERSION = '5.23.0';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -1307,7 +1307,7 @@ function renderItemCard(item,ym){
 
   var cls='bill-card'+(paidNow?' bill-card-paid':'')+(isOD?' bill-card-overdue':'')+(isP?' bill-card-paused':'');
 
-  var h='<div class="'+cls+'" id="bill-'+item.id+'" style="border-left-color:'+color+'">';
+  var h='<div class="'+cls+'" id="bill-'+item.id+'" style="border-left-color:'+color+';background:'+color+'14">';
   h+='<div class="bill-card-top">';
   h+='<div class="bill-card-name">'+esc(item.name)+(badges?' '+badges:'')+'</div>';
   h+='<div class="bill-card-amt-wrap"><div class="bill-card-amt">AED '+fmt(item.amount);
@@ -1343,7 +1343,7 @@ function renderTabbyActiveItem(item){
   var svgView='<svg viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6s2-4 5-4 5 4 5 4-2 4-5 4-5-4-5-4z"/><circle cx="6" cy="6" r="1.5"/></svg>';
   var svgX='<svg viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h8M5 3V2h2v1M4 3l.5 6.5h3L8 3"/></svg>';
   var cls='bill-card'+(complete?' bill-card-paid':'');
-  var h='<div class="'+cls+'" style="border-left-color:'+color+'">';
+  var h='<div class="'+cls+'" style="border-left-color:'+color+';background:'+color+'14">';
   h+='<div class="bill-card-top">';
   h+='<div class="bill-card-name">'+esc(t.name)+' <span class="badge-tabby">'+paidCount+'/4</span>'+(complete?' <span class="badge badge-paid">complete</span>':'')+'</div>';
   h+='<div class="bill-card-amt-wrap"><div class="bill-card-amt">AED '+fmt(t.total/4)+'<span class="bill-card-cycle"> / inst</span></div>';

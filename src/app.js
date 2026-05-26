@@ -2,7 +2,7 @@
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.23.2';
+const APP_VERSION = '5.23.3';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';

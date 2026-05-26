@@ -89,7 +89,7 @@
       <div class="toolbar">
         <div class="search-wrap">
           <span class="search-icon">&#8981;</span>
-          <input id="search" type="text" placeholder="Search&#8230; (press N to add)" oninput="render()">
+          <input id="search" type="text" placeholder="Search&#8230; (press N to add)" oninput="dbSearch(render)">
         </div>
         <select class="sort-select" id="sort" onchange="render()">
           <option value="due">Sort: Due date</option>
@@ -290,7 +290,7 @@
           <div class="toolbar">
             <div class="search-wrap">
               <span class="search-icon">&#8981;</span>
-              <input id="tk-search" type="text" placeholder="Search tasks&#8230; (press T to add)" oninput="renderTasks()">
+              <input id="tk-search" type="text" placeholder="Search tasks&#8230; (press T to add)" oninput="dbSearch(renderTasks)">
             </div>
             <select class="sort-select" id="tk-group" onchange="tkSetGroupMode(this.value)" title="Group tasks by">
               <option value="by-date">Group: By date</option>
@@ -446,7 +446,7 @@
       <div class="qn-toolbar">
         <div class="qn-search-wrap">
           <span class="qn-search-icon">&#8981;</span>
-          <input id="qn-search" type="text" placeholder="Search notes&#8230;" oninput="renderNotes()">
+          <input id="qn-search" type="text" placeholder="Search notes&#8230;" oninput="dbSearch(renderNotes)">
         </div>
         <select class="sort-select" id="qn-sort" onchange="renderNotes()">
           <option value="updated">Sort: Recent</option>
@@ -537,7 +537,7 @@
       <div class="ac-filter-row">
         <div class="ac-search-wrap">
           <span class="ac-search-icon">&#8981;</span>
-          <input id="ac-search" type="text" placeholder="Search accounts&#8230;" oninput="renderAccounts()">
+          <input id="ac-search" type="text" placeholder="Search accounts&#8230;" oninput="dbSearch(renderAccounts)">
         </div>
         <select class="sort-select" id="ac-sort" onchange="renderAccounts()">
           <option value="balance">Sort: Balance</option>
@@ -577,7 +577,7 @@
         </div>
       </div>
       <div id="links-search-row" style="margin-bottom:1rem">
-        <input id="links-search" type="text" placeholder="Search links..." class="modal-input" style="width:100%;max-width:360px" oninput="renderLinks()">
+        <input id="links-search" type="text" placeholder="Search links..." class="modal-input" style="width:100%;max-width:360px" oninput="dbSearch(renderLinks)">
       </div>
       <div id="links-grid"></div>
     </div>

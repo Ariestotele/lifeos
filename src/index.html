@@ -351,6 +351,24 @@
                 <select id="tk-list-sel"></select>
               </div>
             </div>
+            <div class="fields-row">
+              <div class="field"><label>Repeats</label>
+                <select id="tk-recur-freq" onchange="document.getElementById('tk-recur-interval-row').style.display=this.value?'flex':'none'">
+                  <option value="">&#8212; Doesn't repeat</option>
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                </select>
+              </div>
+              <div class="field" id="tk-recur-interval-row" style="display:none">
+                <label>Every</label>
+                <input id="tk-recur-interval" type="number" min="1" max="365" step="1" value="1">
+              </div>
+            </div>
+            <div class="field" style="display:flex;align-items:center;gap:8px">
+              <input id="tk-paused" type="checkbox" style="accent-color:var(--accent);width:16px;height:16px;cursor:pointer">
+              <label for="tk-paused" style="margin:0;cursor:pointer;font-size:13px">Pause this task (hide from date buckets)</label>
+            </div>
             <div class="field"><label>Tags (comma separated)</label><input id="tk-tags" type="text" placeholder="e.g. review, urgent"></div>
             <!-- Subtasks -->
             <div class="field">

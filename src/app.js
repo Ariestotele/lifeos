@@ -2,7 +2,7 @@
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.24.3';
+const APP_VERSION = '5.24.4';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -607,6 +607,24 @@ async function cloudPush(){
     // Encode as UTF-8 -> base64 (handles non-ASCII like emojis in workspace names)
     var content = btoa(unescape(encodeURIComponent(jsonStr)));
     var sha = localStorage.getItem(CLOUD_FILE_SHA_KEY);
+    // v5.24.4: pre-check -- if the remote SHA differs from our cached one, another
+    // device has pushed since we last synced. GitHub will reject the PUT with 409
+    // anyway, but we get a friendlier prompt by checking first.
+    if(sha){
+      try{
+        var checkR = await _cloudGhFetch(url, {headers:headers});
+        if(checkR.ok){
+          var meta = await checkR.json();
+          if(meta.sha && meta.sha !== sha){
+            if(!confirm('Cloud has newer data than your last sync (likely pushed from another device).\n\nOverwrite the cloud with your local data?\n\nCancel to pull first instead.')){
+              _cloudSetBusy(false);
+              return false;
+            }
+            sha = meta.sha; // user confirmed overwrite -- use the current SHA so PUT goes through
+          }
+        }
+      }catch(_){ /* fall through -- the PUT below still enforces SHA via 409 */ }
+    }
     var body = {
       message: 'LifeOS data sync ' + new Date().toISOString(),
       content: content,
@@ -3179,6 +3197,16 @@ function renderTasks(){
 
     // The selected bucket's cards (or a warm empty state).
     var arr = buckets[selectedBucket] || [];
+    // v5.24.4: explicit header above the body so the active bucket is unmistakable
+    // (paused tasks keep their 'Today' due-date chip, which was making it look like
+    // the paused tab was rendering today's tasks).
+    var selectedColor = _TK_DATE_COLORS[selectedBucket] || '#888';
+    var selectedLabel = _TK_DATE_LABELS[selectedBucket] || selectedBucket;
+    var bucketHeader = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:11px;font-weight:600;color:'+selectedColor+';text-transform:uppercase;letter-spacing:.08em">'
+      + '<span style="width:8px;height:8px;border-radius:50%;background:'+selectedColor+';flex-shrink:0"></span>'
+      + esc(selectedLabel)
+      + '<span style="color:var(--text3);font-weight:400;letter-spacing:0;text-transform:none">· '+arr.length+(arr.length===1?' task':' tasks')+'</span>'
+      + '</div>';
     var bodyHtml;
     if(!arr.length){
       var msgMap = {
@@ -3194,7 +3222,7 @@ function renderTasks(){
       bodyHtml = '<div class="tk-empty-warm"><div class="tk-empty-emoji">✨</div><div>'
         + esc(msgMap[selectedBucket] || 'Nothing here.') + '</div></div>';
     } else {
-      bodyHtml = arr.map(function(t){return renderTaskCard(t,{showWorkspace:true});}).join('');
+      bodyHtml = bucketHeader + arr.map(function(t){return renderTaskCard(t,{showWorkspace:true});}).join('');
     }
 
     container.innerHTML =

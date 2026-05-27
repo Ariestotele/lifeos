@@ -2615,7 +2615,7 @@ body.touch-device .reminder-banner{position:static!important;top:auto!important;
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.24.2';
+const APP_VERSION = '5.24.3';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -5768,7 +5768,7 @@ function renderTasks(){
 
     // Decide which bucket to display. Persisted preference, but skip done if hide-done is on.
     var selectedBucket = tkDateBucket;
-    if(!buckets[selectedBucket]) selectedBucket = 'today';
+    if(_TK_DATE_GROUPS.indexOf(selectedBucket) === -1) selectedBucket = 'today';
     if(selectedBucket === 'done' && tkHideDone) selectedBucket = 'today';
 
     // Pill nav: hide a pill entirely if its bucket is empty AND it's not the currently-selected one,
@@ -5800,6 +5800,7 @@ function renderTasks(){
         week:     'Nothing scheduled this week.',
         later:    'Nothing scheduled for later.',
         nodate:   'No undated tasks. Tidy.',
+        paused:   '⏸︎ No tasks paused right now.',
         done:     'Nothing completed yet today.',
         overdue:  '✨ No overdue tasks. Solid.'
       };
@@ -6838,6 +6839,7 @@ const DB_WIDGETS = [
   { id:'networth',  cols:1, render: dbWidgetNetWorth    },
   { id:'aiinsight', cols:3, render: dbWidgetAIInsight   },
   { id:'budget',    cols:1, render: dbWidgetBudget      },
+  { id:'cloud',     cols:1, render: dbWidgetCloud       },
   /* \u2500\u2500 Future widgets plug in here \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
      { id:'habits',   cols:1, render: dbWidgetHabits      },
      \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
@@ -7207,6 +7209,44 @@ function dbWidgetBudget(el){
       '<div class="db-budget-bar"><div class="db-budget-fill '+statusCls+'" style="width:'+barWidth+'%;background:'+color+'"></div></div>'+
     '</div>';
   }).join('');
+}
+
+/* Widget: Cloud sync (v5.24.3) -- one-tap push/pull from the dashboard */
+function dbWidgetCloud(el){
+  dbCard(el,{icon:'&#9729;',title:'Cloud sync',headColor:'rgba(74,142,204,.08)'});
+  var body=document.getElementById('dbwb-cloud');
+  if(!body) return;
+  var token = localStorage.getItem(GH_TOKEN_KEY);
+  var repo  = cloudGetRepo();
+  if(!token || !repo){
+    body.innerHTML='<div class="db-empty" style="text-align:center;padding:14px 0">'+
+      '<div style="margin-bottom:6px">Cloud sync not configured</div>'+
+      '<button class="db-link" onclick="openSettingsModal()">Set GitHub token + repo in Settings &rarr;</button>'+
+      '</div>';
+    return;
+  }
+  var pullTs = parseInt(localStorage.getItem(CLOUD_LAST_PULL_KEY)||'0',10);
+  var pushTs = parseInt(localStorage.getItem(CLOUD_LAST_PUSH_KEY)||'0',10);
+  var pullLbl = pullTs ? _cloudFormatAgo(pullTs) : 'never';
+  var pushLbl = pushTs ? _cloudFormatAgo(pushTs) : 'never';
+  body.innerHTML =
+    '<div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--text3);padding:4px 2px 10px">'+
+      '<span><span style="color:var(--accent)">&#8595; pulled</span> '+pullLbl+'</span>'+
+      '<span><span style="color:var(--positive)">&#8593; pushed</span> '+pushLbl+'</span>'+
+    '</div>'+
+    '<div style="display:flex;gap:6px">'+
+      '<button class="btn" style="flex:1;justify-content:center;font-size:12px" onclick="dbCloudPull()">&#8595; Pull</button>'+
+      '<button class="btn primary" style="flex:1;justify-content:center;font-size:12px" onclick="dbCloudPush()">&#8593; Push</button>'+
+    '</div>';
+}
+async function dbCloudPull(){
+  if(!confirm('Pull from cloud will replace your local data with the cloud version. Continue?')) return;
+  await cloudPull();
+  var w=document.getElementById('dbw-cloud'); if(w) dbWidgetCloud(w);
+}
+async function dbCloudPush(){
+  await cloudPush();
+  var w=document.getElementById('dbw-cloud'); if(w) dbWidgetCloud(w);
 }
 
 /* \u2500\u2500 Widget: 14-day strip \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */

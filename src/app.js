@@ -2,7 +2,7 @@
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.24.1';
+const APP_VERSION = '5.24.2';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -4080,7 +4080,7 @@ function renderCalendar(){
       const isOverdue=ev.overdue;
       const cls=isOverdue?'cal-dot cal-dot-overdue':`cal-dot cal-dot-${ev.type}`;
       const dot=`<span style="width:5px;height:5px;border-radius:50%;background:${isOverdue?'#E05252':ev.color};flex-shrink:0;display:inline-block"></span>`;
-      return `<div class="${cls}">${dot}<span style="overflow:hidden;text-overflow:ellipsis">${esc(ev.name)}</span></div>`;
+      return `<div class="${cls}">${dot}<span style="overflow:hidden;text-overflow:ellipsis;min-width:0">${esc(ev.name)}</span></div>`;
     }).join('');
 
     cells+=`<div class="cal-cell${isToday?' cal-today':''}${isSelected?' cal-selected':''}${otherMonth?' cal-other-month':''}" onclick="calSelectDay('${dateStr}')">

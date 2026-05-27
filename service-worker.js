@@ -2,7 +2,7 @@
 // HTML navigations: network-first (always fresh when online, cache fallback offline).
 // Other assets: cache-first with background refresh.
 // IMPORTANT: still bump CACHE on every release -- it's the invalidation key.
-const CACHE = 'lifeos-ea956fb4';
+const CACHE = 'lifeos-f230cfb2';
 const CORE = [
   './',
   './index.html',

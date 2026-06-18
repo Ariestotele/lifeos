@@ -331,6 +331,12 @@
             <div class="tk-form-grid">
               <div class="tk-form-col tk-form-col-main">
                 <div class="field"><label>Title</label><input id="tk-title" type="text" placeholder="What needs to be done?" autocomplete="off" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();saveTask();}"></div>
+                <!-- Subtasks (right under title for quick breakdown of work) -->
+                <div class="field">
+                  <label>Subtasks</label>
+                  <div id="tk-sub-list" style="margin-bottom:6px"></div>
+                  <button type="button" class="btn" style="font-size:12px;height:30px;width:100%;justify-content:center" onclick="addSubtaskRow()">&#65291; Add subtask</button>
+                </div>
                 <div class="field"><label>Notes</label><textarea id="tk-notes" placeholder="Details, links, context&#8230;" style="height:120px"></textarea></div>
                 <div class="fields-row">
                   <div class="field"><label>Workspace</label>
@@ -339,12 +345,6 @@
                   <div class="field"><label>List</label>
                     <select id="tk-list-sel"></select>
                   </div>
-                </div>
-                <!-- Subtasks -->
-                <div class="field">
-                  <label>Subtasks</label>
-                  <div id="tk-sub-list" style="margin-bottom:6px"></div>
-                  <button type="button" class="btn" style="font-size:12px;height:30px;width:100%;justify-content:center" onclick="addSubtaskRow()">&#65291; Add subtask</button>
                 </div>
               </div>
               <div class="tk-form-col tk-form-col-params">

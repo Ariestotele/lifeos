@@ -325,6 +325,14 @@
               <div class="tk-form-col tk-form-col-main">
                 <div class="field"><label>Title</label><input id="tk-title" type="text" placeholder="What needs to be done?" autocomplete="off" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();saveTask();}"></div>
                 <div class="field"><label>Notes</label><textarea id="tk-notes" placeholder="Details, links, context&#8230;" style="height:120px"></textarea></div>
+                <div class="fields-row">
+                  <div class="field"><label>Workspace</label>
+                    <select id="tk-workspace-sel"></select>
+                  </div>
+                  <div class="field"><label>List</label>
+                    <select id="tk-list-sel"></select>
+                  </div>
+                </div>
                 <!-- Subtasks -->
                 <div class="field">
                   <label>Subtasks</label>
@@ -351,14 +359,6 @@
                       <button type="button" class="pill" onclick="tkSetDueOffset(null)" title="Clear date">&#10005;</button>
                     </div>
                     <input id="tk-due" type="date">
-                  </div>
-                </div>
-                <div class="fields-row">
-                  <div class="field"><label>Workspace</label>
-                    <select id="tk-workspace-sel"></select>
-                  </div>
-                  <div class="field"><label>List</label>
-                    <select id="tk-list-sel"></select>
                   </div>
                 </div>
                 <div class="fields-row">
@@ -946,9 +946,13 @@
         <span style="font-size:11px;color:var(--text3);flex-shrink:0;width:36px">Repo:</span>
         <input id="cloud-repo-input" type="text" placeholder="(deploy repo)" class="settings-input" style="flex:1" oninput="_cloudOnRepoInput(this)">
       </div>
-      <div class="settings-row" style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+      <div class="settings-row" style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
         <span style="font-size:11px;color:var(--text3);flex-shrink:0;width:36px">File:</span>
         <input id="cloud-path-input" type="text" placeholder="lifeos-data.json" class="settings-input" style="flex:1" oninput="_cloudOnPathInput(this)">
+      </div>
+      <div class="settings-row" style="display:flex;align-items:center;gap:6px;margin-bottom:8px" title="Identifies this device in cloud sync status">
+        <span style="font-size:11px;color:var(--text3);flex-shrink:0;width:50px">Device:</span>
+        <input id="cloud-device-input" type="text" placeholder="(auto-detected)" class="settings-input" style="flex:1" oninput="setDeviceName(this.value)">
       </div>
       <div style="display:flex;flex-direction:column;gap:6px">
         <button id="cloud-pull-btn" class="settings-action-btn" onclick="cloudPull()">

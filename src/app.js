@@ -2,7 +2,7 @@
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.24.5';
+const APP_VERSION = '5.24.6';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -514,6 +514,32 @@ const CLOUD_REPO_KEY = 'lifeos_cloud_repo';      // v5.22.2: optional override
 const CLOUD_LAST_PULL_KEY = 'lifeos_cloud_last_pull'; // v5.22.1
 const CLOUD_LAST_PUSH_KEY = 'lifeos_cloud_last_push'; // v5.22.1
 const CLOUD_FILE_SHA_KEY  = 'lifeos_cloud_sha';  // SHA of the file as we last saw it
+// v5.24.6: device identity for sync provenance
+const DEVICE_ID_KEY   = 'lifeos_device_id';
+const DEVICE_NAME_KEY = 'lifeos_device_name';
+const CLOUD_REMOTE_SENDER_KEY = 'lifeos_cloud_remote_sender'; // JSON {id,name,at} of last known cloud writer
+function _detectDeviceName(){
+  var ua = (navigator.userAgent||'').toLowerCase();
+  if(/android/.test(ua))               return 'Android phone';
+  if(/iphone/.test(ua))                return 'iPhone';
+  if(/ipad/.test(ua))                  return 'iPad';
+  if(/mac os|macintosh/.test(ua))      return 'Mac';
+  if(/windows/.test(ua))               return 'Windows PC';
+  if(/linux/.test(ua))                 return 'Linux';
+  return 'Device';
+}
+function getDeviceId(){
+  var id = localStorage.getItem(DEVICE_ID_KEY);
+  if(!id){ id = 'd'+Math.random().toString(36).slice(2,10); try{ localStorage.setItem(DEVICE_ID_KEY, id); }catch(_){} }
+  return id;
+}
+function getDeviceName(){ return localStorage.getItem(DEVICE_NAME_KEY) || _detectDeviceName(); }
+function setDeviceName(n){
+  var v=(n||'').trim();
+  try{ if(v) localStorage.setItem(DEVICE_NAME_KEY, v); else localStorage.removeItem(DEVICE_NAME_KEY); }catch(_){}
+  _cloudRefreshStatus();
+  var w=document.getElementById('dbw-cloud'); if(w&&typeof dbWidgetCloud==='function') dbWidgetCloud(w);
+}
 
 function cloudGetPath(){ return localStorage.getItem(CLOUD_PATH_KEY) || 'lifeos-data.json'; }
 function cloudSetPath(p){
@@ -577,13 +603,17 @@ async function cloudPull(){
     // GitHub returns base64 of UTF-8 bytes; decode to a proper unicode string
     try{ jsonStr = decodeURIComponent(escape(jsonStr)); }catch(_){}
     var data = JSON.parse(jsonStr);
+    // v5.24.6: capture who last wrote this -- so the recipient can see provenance.
+    var senderName = data._deviceName || 'Unknown device';
+    var senderAt   = data.exportedAt || '';
+    lsSet(CLOUD_REMOTE_SENDER_KEY, JSON.stringify({id:data._deviceId||'?', name:senderName, at:senderAt}));
     // Reuse the existing 'replace' restore path.
     _pendingRestore = data;
     applyRestore('replace');
     lsSet(CLOUD_LAST_PULL_KEY, String(Date.now()));
     lsSet(CLOUD_FILE_SHA_KEY,  meta.sha);
     _cloudSetBusy(false);
-    toast('↓ Pulled from cloud');
+    toast('↓ Pulled from cloud · '+senderName);
     _cloudRefreshStatus();
     return true;
   }catch(e){
@@ -644,6 +674,8 @@ async function cloudPush(){
     var resp = await r.json();
     lsSet(CLOUD_LAST_PUSH_KEY, String(Date.now()));
     lsSet(CLOUD_FILE_SHA_KEY,  resp.content ? resp.content.sha : sha);
+    // v5.24.6: we are now the last writer
+    lsSet(CLOUD_REMOTE_SENDER_KEY, JSON.stringify({id:getDeviceId(), name:getDeviceName(), at:new Date().toISOString()}));
     _cloudSetBusy(false);
     toast('↑ Pushed to cloud');
     _cloudRefreshStatus();
@@ -668,16 +700,35 @@ function _cloudFormatAgo(ts){
   if(mins < 1440) return Math.round(mins/60)+'h ago';
   return Math.round(mins/1440)+'d ago';
 }
+function _cloudFormatExact(ts){
+  if(!ts) return '';
+  var d = new Date(ts);
+  if(isNaN(d.getTime())) return '';
+  // e.g. '18 Jun · 14:32' -- compact for inline status; full year omitted unless not this year
+  var now = new Date();
+  var sameYear = d.getFullYear()===now.getFullYear();
+  var dateStr = d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + (sameYear?'':' '+d.getFullYear());
+  var timeStr = d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',hour12:false});
+  return dateStr+' · '+timeStr;
+}
+function _cloudGetRemoteSender(){
+  try{ return JSON.parse(localStorage.getItem(CLOUD_REMOTE_SENDER_KEY)||'null'); }catch(_){ return null; }
+}
 function _cloudRefreshStatus(){
   var el = document.getElementById('cloud-status');
   if(!el) return;
   var pullTs = parseInt(localStorage.getItem(CLOUD_LAST_PULL_KEY)||'0',10);
   var pushTs = parseInt(localStorage.getItem(CLOUD_LAST_PUSH_KEY)||'0',10);
   if(!pullTs && !pushTs){ el.textContent = 'Never synced.'; return; }
+  var sender = _cloudGetRemoteSender();
+  var senderLine = sender
+    ? '<div style="margin-top:4px;font-size:11px;color:var(--text3)">Cloud last written by <strong style="color:var(--text2)">'+esc(sender.name||'Unknown')+'</strong>'+(sender.at?' at '+esc(_cloudFormatExact(sender.at)):'')+'</div>'
+    : '';
   el.innerHTML =
-    '<span style="color:var(--accent)">↓ Last pulled</span> '+_cloudFormatAgo(pullTs)+
+    '<div><span style="color:var(--accent)">↓ Last pulled</span> '+_cloudFormatAgo(pullTs)+(pullTs?' <span style="opacity:.5">('+_cloudFormatExact(pullTs)+')</span>':'')+
     ' <span style="opacity:.4;margin:0 6px">|</span> '+
-    '<span style="color:var(--positive)">↑ Last pushed</span> '+_cloudFormatAgo(pushTs);
+    '<span style="color:var(--positive)">↑ Last pushed</span> '+_cloudFormatAgo(pushTs)+(pushTs?' <span style="opacity:.5">('+_cloudFormatExact(pushTs)+')</span>':'')+'</div>'+
+    senderLine;
 }
 function _cloudOnPathInput(input){ cloudSetPath(input.value); _cloudRefreshStatus(); }
 function _cloudOnRepoInput(input){ cloudSetRepo(input.value); _cloudRefreshStatus(); }
@@ -2333,7 +2384,10 @@ function _buildBackupPayload(){
     navLayout:JSON.parse(localStorage.getItem(NAV_LAYOUT_KEY)||'[]'),
     cycleStart:parseInt(localStorage.getItem(CYCLE_KEY)||'1'),
     proxyUrl:localStorage.getItem(AI_PROXY_STORE)||'',
-    exportedAt:new Date().toISOString()
+    exportedAt:new Date().toISOString(),
+    // v5.24.6: device provenance so the recipient knows who pushed.
+    _deviceId: getDeviceId(),
+    _deviceName: getDeviceName()
   };
 }
 
@@ -4644,11 +4698,26 @@ function dbWidgetCloud(el){
   var pushTs = parseInt(localStorage.getItem(CLOUD_LAST_PUSH_KEY)||'0',10);
   var pullLbl = pullTs ? _cloudFormatAgo(pullTs) : 'never';
   var pushLbl = pushTs ? _cloudFormatAgo(pushTs) : 'never';
+  var pullExact = pullTs ? _cloudFormatExact(pullTs) : '';
+  var pushExact = pushTs ? _cloudFormatExact(pushTs) : '';
+  var thisDev = getDeviceName();
+  var sender = _cloudGetRemoteSender();
+  // Provenance line: who last wrote the cloud version, and when.
+  var senderHtml = '';
+  if(sender){
+    var senderIsUs = sender.id === getDeviceId();
+    senderHtml = '<div style="font-size:11px;color:var(--text3);padding:0 2px 8px;line-height:1.4">'+
+      'Cloud last written by '+(senderIsUs?'<strong style="color:var(--accent)">this device</strong>':'<strong style="color:var(--text2)">'+esc(sender.name||'Unknown')+'</strong>')+
+      (sender.at?'<br><span style="opacity:.7">at '+esc(_cloudFormatExact(sender.at))+'</span>':'')+
+    '</div>';
+  }
   body.innerHTML =
-    '<div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--text3);padding:4px 2px 10px">'+
-      '<span><span style="color:var(--accent)">&#8595; pulled</span> '+pullLbl+'</span>'+
-      '<span><span style="color:var(--positive)">&#8593; pushed</span> '+pushLbl+'</span>'+
+    senderHtml +
+    '<div style="font-size:11px;color:var(--text3);padding:0 2px 4px;line-height:1.5">'+
+      '<div><span style="color:var(--accent)">&#8595; pulled</span> '+pullLbl+(pullExact?' <span style="opacity:.7">· '+pullExact+'</span>':'')+'</div>'+
+      '<div><span style="color:var(--positive)">&#8593; pushed</span> '+pushLbl+(pushExact?' <span style="opacity:.7">· '+pushExact+'</span>':'')+'</div>'+
     '</div>'+
+    '<div style="font-size:10px;color:var(--text3);padding:0 2px 10px;opacity:.7">This device: '+esc(thisDev)+'</div>'+
     '<div style="display:flex;gap:6px">'+
       '<button class="btn" style="flex:1;justify-content:center;font-size:12px" onclick="dbCloudPull()">&#8595; Pull</button>'+
       '<button class="btn primary" style="flex:1;justify-content:center;font-size:12px" onclick="dbCloudPush()">&#8593; Push</button>'+
@@ -7189,6 +7258,9 @@ function openSettingsModal(){
   if(cpath) cpath.value = cloudGetPath();
   var crepo = document.getElementById('cloud-repo-input');
   if(crepo) crepo.value = (localStorage.getItem(CLOUD_REPO_KEY)||'').trim();
+  var cdev = document.getElementById('cloud-device-input');
+  if(cdev) cdev.value = (localStorage.getItem(DEVICE_NAME_KEY)||'').trim();
+  if(cdev && !cdev.placeholder.includes(_detectDeviceName())) cdev.placeholder = '(auto: '+_detectDeviceName()+')';
   _cloudRefreshStatus();
 }
 function closeSettingsModal(){

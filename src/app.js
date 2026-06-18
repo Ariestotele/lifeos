@@ -2,7 +2,7 @@
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.24.6';
+const APP_VERSION = '5.24.7';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -615,6 +615,7 @@ async function cloudPull(){
     _cloudSetBusy(false);
     toast('↓ Pulled from cloud · '+senderName);
     _cloudRefreshStatus();
+    cloudChipRefresh();
     return true;
   }catch(e){
     _cloudSetBusy(false);
@@ -679,6 +680,7 @@ async function cloudPush(){
     _cloudSetBusy(false);
     toast('↑ Pushed to cloud');
     _cloudRefreshStatus();
+    cloudChipRefresh();
     return true;
   }catch(e){
     _cloudSetBusy(false);
@@ -730,8 +732,109 @@ function _cloudRefreshStatus(){
     '<span style="color:var(--positive)">↑ Last pushed</span> '+_cloudFormatAgo(pushTs)+(pushTs?' <span style="opacity:.5">('+_cloudFormatExact(pushTs)+')</span>':'')+'</div>'+
     senderLine;
 }
-function _cloudOnPathInput(input){ cloudSetPath(input.value); _cloudRefreshStatus(); }
-function _cloudOnRepoInput(input){ cloudSetRepo(input.value); _cloudRefreshStatus(); }
+function _cloudOnPathInput(input){ cloudSetPath(input.value); _cloudRefreshStatus(); cloudChipRefresh(); }
+function _cloudOnRepoInput(input){ cloudSetRepo(input.value); _cloudRefreshStatus(); cloudChipRefresh(); }
+
+/* v5.24.7: persistent cloud chip + popover ────────── */
+var _cloudChipTimer = null;
+function cloudChipRefresh(){
+  var chip = document.getElementById('cloud-chip');
+  if(!chip) return;
+  var hasCreds = !!(localStorage.getItem(GH_TOKEN_KEY) && cloudGetRepo());
+  if(!hasCreds){ chip.style.display='none'; return; }
+  chip.style.display='inline-flex';
+  var pushTs = parseInt(localStorage.getItem(CLOUD_LAST_PUSH_KEY)||'0',10);
+  var pullTs = parseInt(localStorage.getItem(CLOUD_LAST_PULL_KEY)||'0',10);
+  var lastTs = Math.max(pushTs, pullTs);
+  var label;
+  if(!lastTs) label = 'sync';
+  else {
+    var mins = Math.round((Date.now()-lastTs)/60000);
+    if(mins<1) label = 'just now';
+    else if(mins<60) label = mins+'m';
+    else if(mins<1440) label = Math.round(mins/60)+'h';
+    else label = Math.round(mins/1440)+'d';
+  }
+  document.getElementById('cloud-chip-label').textContent = label;
+  // Status colour: green if last sync (either dir) within 2h, amber within 24h, gray older or never.
+  chip.classList.remove('synced','dirty','stale');
+  if(!lastTs) chip.classList.add('stale');
+  else if(Date.now()-lastTs < 2*3600*1000) chip.classList.add('synced');
+  else if(Date.now()-lastTs < 24*3600*1000) chip.classList.add('dirty');
+  else chip.classList.add('stale');
+  // If popover is open, re-render it too so the times stay live.
+  var pop = document.getElementById('cloud-popover');
+  if(pop && pop.style.display === 'block') cloudChipRenderPopover();
+}
+function cloudChipToggle(ev){
+  if(ev) ev.stopPropagation();
+  var pop = document.getElementById('cloud-popover');
+  if(!pop) return;
+  if(pop.style.display === 'block'){ cloudChipHidePopover(); return; }
+  cloudChipRenderPopover();
+  pop.style.display='block';
+  // Outside-click closes
+  setTimeout(function(){
+    document.addEventListener('click', _cloudChipOutside, {capture:true});
+    document.addEventListener('keydown', _cloudChipEsc);
+  }, 0);
+}
+function cloudChipHidePopover(){
+  var pop = document.getElementById('cloud-popover');
+  if(pop) pop.style.display='none';
+  document.removeEventListener('click', _cloudChipOutside, {capture:true});
+  document.removeEventListener('keydown', _cloudChipEsc);
+}
+function _cloudChipOutside(e){
+  var pop = document.getElementById('cloud-popover');
+  var chip = document.getElementById('cloud-chip');
+  if(pop && (pop.contains(e.target) || (chip && chip.contains(e.target)))) return;
+  cloudChipHidePopover();
+}
+function _cloudChipEsc(e){ if(e.key === 'Escape') cloudChipHidePopover(); }
+function cloudChipRenderPopover(){
+  var pop = document.getElementById('cloud-popover');
+  if(!pop) return;
+  var pullTs = parseInt(localStorage.getItem(CLOUD_LAST_PULL_KEY)||'0',10);
+  var pushTs = parseInt(localStorage.getItem(CLOUD_LAST_PUSH_KEY)||'0',10);
+  var sender = _cloudGetRemoteSender();
+  var thisDev = getDeviceName();
+  var senderIsUs = sender && sender.id === getDeviceId();
+  var senderHtml = sender
+    ? '<div class="cloud-popover-row">Cloud last written by '+(senderIsUs?'<strong style="color:var(--accent)">this device</strong>':'<strong>'+esc(sender.name||'Unknown')+'</strong>')+(sender.at?'<br><span style="opacity:.7">at '+esc(_cloudFormatExact(sender.at))+'</span>':'')+'</div>'
+    : '<div class="cloud-popover-row" style="opacity:.7">No cloud history yet</div>';
+  pop.innerHTML =
+    '<div class="cloud-popover-title">Cloud sync<button class="cloud-popover-close" onclick="cloudChipHidePopover()" type="button">&#10005;</button></div>'+
+    senderHtml +
+    '<div class="cloud-popover-sep"></div>'+
+    '<div class="cloud-popover-row"><span style="color:var(--accent)">&#8595; pulled</span> '+(pullTs?_cloudFormatAgo(pullTs)+' <span style="opacity:.7">· '+_cloudFormatExact(pullTs)+'</span>':'never')+'</div>'+
+    '<div class="cloud-popover-row"><span style="color:var(--positive)">&#8593; pushed</span> '+(pushTs?_cloudFormatAgo(pushTs)+' <span style="opacity:.7">· '+_cloudFormatExact(pushTs)+'</span>':'never')+'</div>'+
+    '<div class="cloud-popover-row" style="opacity:.7;margin-top:6px">This device: '+esc(thisDev)+'</div>'+
+    '<div class="cloud-popover-actions">'+
+      '<button class="btn" onclick="cloudChipPull()" type="button">&#8595; Pull</button>'+
+      '<button class="btn primary" onclick="cloudChipPush()" type="button">&#8593; Push</button>'+
+    '</div>';
+}
+async function cloudChipPull(){
+  var chip = document.getElementById('cloud-chip');
+  if(chip) chip.classList.add('busy');
+  if(confirm('Pull will replace your local data with the cloud version. Continue?')){
+    await cloudPull();
+  }
+  if(chip) chip.classList.remove('busy');
+  cloudChipRefresh();
+}
+async function cloudChipPush(){
+  var chip = document.getElementById('cloud-chip');
+  if(chip) chip.classList.add('busy');
+  await cloudPush();
+  if(chip) chip.classList.remove('busy');
+  cloudChipRefresh();
+}
+function cloudChipStartTimer(){
+  if(_cloudChipTimer) return;
+  _cloudChipTimer = setInterval(cloudChipRefresh, 60*1000);
+}
 
 async function ghDeploy(){
   var token=localStorage.getItem(GH_TOKEN_KEY);
@@ -858,6 +961,9 @@ function loadData(){
   render();
   switchPage('dashboard');
   setTimeout(verSnapshot, 500); // snapshot initial state on load
+  // v5.24.7: persistent cloud sync chip
+  cloudChipRefresh();
+  cloudChipStartTimer();
 }
 
 /* &#9472;&#9472; Helpers &#9472;&#9472; */

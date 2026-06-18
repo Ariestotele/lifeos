@@ -829,6 +829,19 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:v
 .cloud-chip.stale  .cloud-chip-dot{background:var(--text3)}
 .cloud-chip.synced .cloud-chip-icon{color:var(--positive)}
 .cloud-chip.busy .cloud-chip-icon{animation:cloudSpin 1s linear infinite;color:var(--accent)}
+/* v5.24.10: cloud was written by another device since our last sync — pulse to draw the eye */
+.cloud-chip.remote-new{
+  border-color:rgba(74,142,204,.55);
+  background:linear-gradient(180deg, rgba(74,142,204,.18), rgba(74,142,204,.08));
+  color:var(--accent);
+}
+.cloud-chip.remote-new .cloud-chip-icon{color:var(--accent)}
+.cloud-chip.remote-new .cloud-chip-dot{
+  background:var(--accent);
+  box-shadow:0 0 0 1.5px var(--surface2),0 0 10px rgba(74,142,204,.6);
+  animation:cloudPulse 2s ease-out infinite;
+}
+@keyframes cloudPulse{0%,100%{opacity:1}50%{opacity:.5}}
 @keyframes cloudSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 .cloud-popover{
   position:fixed;

@@ -848,6 +848,19 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:v
 .cloud-chip.stale  .cloud-chip-dot{background:var(--text3)}
 .cloud-chip.synced .cloud-chip-icon{color:var(--positive)}
 .cloud-chip.busy .cloud-chip-icon{animation:cloudSpin 1s linear infinite;color:var(--accent)}
+/* v5.24.10: cloud was written by another device since our last sync — pulse to draw the eye */
+.cloud-chip.remote-new{
+  border-color:rgba(74,142,204,.55);
+  background:linear-gradient(180deg, rgba(74,142,204,.18), rgba(74,142,204,.08));
+  color:var(--accent);
+}
+.cloud-chip.remote-new .cloud-chip-icon{color:var(--accent)}
+.cloud-chip.remote-new .cloud-chip-dot{
+  background:var(--accent);
+  box-shadow:0 0 0 1.5px var(--surface2),0 0 10px rgba(74,142,204,.6);
+  animation:cloudPulse 2s ease-out infinite;
+}
+@keyframes cloudPulse{0%,100%{opacity:1}50%{opacity:.5}}
 @keyframes cloudSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 .cloud-popover{
   position:fixed;
@@ -2704,7 +2717,7 @@ body.touch-device .reminder-banner{position:static!important;top:auto!important;
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.24.9';
+const APP_VERSION = '5.24.10';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -3220,6 +3233,9 @@ const CLOUD_FILE_SHA_KEY  = 'lifeos_cloud_sha';  // SHA of the file as we last s
 const DEVICE_ID_KEY   = 'lifeos_device_id';
 const DEVICE_NAME_KEY = 'lifeos_device_name';
 const CLOUD_REMOTE_SENDER_KEY = 'lifeos_cloud_remote_sender'; // JSON {id,name,at} of last known cloud writer
+// v5.24.10: passive cloud peek -- watches the cloud file for changes without pulling
+const CLOUD_PEEK_LAST_KEY    = 'lifeos_cloud_peek_last';     // last peek timestamp
+const CLOUD_PEEK_COMMIT_KEY  = 'lifeos_cloud_peek_commit';   // last commit SHA we processed
 function _detectDeviceName(){
   var ua = (navigator.userAgent||'').toLowerCase();
   if(/android/.test(ua))               return 'Android phone';
@@ -3458,6 +3474,83 @@ function _cloudRefreshStatus(){
 function _cloudOnPathInput(input){ cloudSetPath(input.value); _cloudRefreshStatus(); cloudChipRefresh(); }
 function _cloudOnRepoInput(input){ cloudSetRepo(input.value); _cloudRefreshStatus(); cloudChipRefresh(); }
 
+/* v5.24.10: passive cloud peek -- read the file's latest commit cheaply via
+   the Commits API; if the SHA changed since we last looked, fetch the file
+   once to extract the device that wrote it. This lets the status indicator
+   refresh "who last wrote the cloud and when" without anyone tapping Pull. */
+var _cloudPeekTimer = null;
+var _cloudPeekInProgress = false;
+async function cloudPeekStatus(opts){
+  opts = opts || {};
+  if(_cloudPeekInProgress) return false;
+  var token = localStorage.getItem(GH_TOKEN_KEY);
+  var repo  = cloudGetRepo();
+  if(!token || !repo) return false;
+  // Throttle: don't peek more than once per 30s unless forced.
+  var lastPeek = parseInt(localStorage.getItem(CLOUD_PEEK_LAST_KEY)||'0',10);
+  if(!opts.force && Date.now()-lastPeek < 30*1000) return false;
+  _cloudPeekInProgress = true;
+  try{
+    var path = cloudGetPath();
+    var headers = {Authorization:'token '+token, Accept:'application/vnd.github.v3+json'};
+    // Step 1: tiny commits-API call to detect change.
+    var commitsUrl = 'https://api.github.com/repos/'+repo+'/commits?path='+encodeURIComponent(path)+'&per_page=1';
+    var r = await _cloudGhFetch(commitsUrl, {headers:headers});
+    if(!r.ok){ return false; }
+    var commits = await r.json();
+    if(!Array.isArray(commits) || !commits.length){ return false; }
+    var c = commits[0];
+    var commitSha = c.sha;
+    var commitDate = c.commit && c.commit.author && c.commit.author.date;
+    lsSet(CLOUD_PEEK_LAST_KEY, String(Date.now()));
+    // If we've already processed this commit, just bump the peek timestamp.
+    var lastSeen = localStorage.getItem(CLOUD_PEEK_COMMIT_KEY);
+    if(lastSeen === commitSha && !opts.force){
+      cloudChipRefresh();
+      return true;
+    }
+    // Step 2: commit changed -- fetch the file to read _deviceName/_deviceId/exportedAt.
+    var fileUrl = 'https://api.github.com/repos/'+repo+'/contents/'+encodeURIComponent(path);
+    var r2 = await _cloudGhFetch(fileUrl, {headers:headers});
+    if(!r2.ok){ return false; }
+    var meta = await r2.json();
+    var jsonStr = '';
+    try{
+      jsonStr = atob((meta.content||'').replace(/\n/g,''));
+      try{ jsonStr = decodeURIComponent(escape(jsonStr)); }catch(_){}
+    }catch(_){ return false; }
+    var data;
+    try{ data = JSON.parse(jsonStr); }catch(_){ return false; }
+    var senderName = data._deviceName || 'Unknown device';
+    var senderId   = data._deviceId || '?';
+    var senderAt   = data.exportedAt || commitDate || '';
+    lsSet(CLOUD_REMOTE_SENDER_KEY, JSON.stringify({id:senderId, name:senderName, at:senderAt}));
+    lsSet(CLOUD_PEEK_COMMIT_KEY, commitSha);
+    // IMPORTANT: do NOT update CLOUD_FILE_SHA_KEY here -- that would defeat the
+    // push-conflict check. The cached file SHA stays as it was at our last
+    // actual pull/push.
+    _cloudRefreshStatus();
+    cloudChipRefresh();
+    var w=document.getElementById('dbw-cloud'); if(w&&typeof dbWidgetCloud==='function') dbWidgetCloud(w);
+    return true;
+  }catch(e){
+    return false;
+  }finally{
+    _cloudPeekInProgress = false;
+  }
+}
+function cloudPeekStartTimer(){
+  if(_cloudPeekTimer) return;
+  // Every 5 min while the tab is visible.
+  _cloudPeekTimer = setInterval(function(){
+    if(document.visibilityState === 'visible') cloudPeekStatus();
+  }, 5*60*1000);
+  // Also peek when returning to the tab (good for phone PWA after the screen wakes).
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'visible') cloudPeekStatus();
+  });
+}
+
 /* v5.24.7: persistent cloud chip + popover ────────── */
 var _cloudChipTimer = null;
 function cloudChipRefresh(){
@@ -3469,23 +3562,38 @@ function cloudChipRefresh(){
   var pushTs = parseInt(localStorage.getItem(CLOUD_LAST_PUSH_KEY)||'0',10);
   var pullTs = parseInt(localStorage.getItem(CLOUD_LAST_PULL_KEY)||'0',10);
   var lastTs = Math.max(pushTs, pullTs);
+  // v5.24.10: detect if the cloud has been written by another device AFTER our last sync action.
+  var sender = _cloudGetRemoteSender();
+  var remoteNewer = false;
+  if(sender && sender.id !== getDeviceId() && sender.at){
+    var cloudAt = new Date(sender.at).getTime();
+    if(!isNaN(cloudAt) && cloudAt > lastTs) remoteNewer = true;
+  }
+  chip.classList.remove('synced','dirty','stale','remote-new');
   var label;
-  if(!lastTs) label = 'sync';
-  else {
-    var mins = Math.round((Date.now()-lastTs)/60000);
-    if(mins<1) label = 'just now';
-    else if(mins<60) label = mins+'m';
-    else if(mins<1440) label = Math.round(mins/60)+'h';
-    else label = Math.round(mins/1440)+'d';
+  if(remoteNewer){
+    // Show how long ago the OTHER device pushed, not our own ago.
+    var rmins = Math.round((Date.now()-new Date(sender.at).getTime())/60000);
+    var rLbl = rmins<1?'just now' : rmins<60?rmins+'m' : rmins<1440?Math.round(rmins/60)+'h' : Math.round(rmins/1440)+'d';
+    label = '• '+rLbl;
+    chip.classList.add('remote-new');
+    chip.title = 'Cloud was just written by '+(sender.name||'another device')+' — tap to pull';
+  } else {
+    if(!lastTs) label = 'sync';
+    else {
+      var mins = Math.round((Date.now()-lastTs)/60000);
+      if(mins<1) label = 'just now';
+      else if(mins<60) label = mins+'m';
+      else if(mins<1440) label = Math.round(mins/60)+'h';
+      else label = Math.round(mins/1440)+'d';
+    }
+    if(!lastTs) chip.classList.add('stale');
+    else if(Date.now()-lastTs < 2*3600*1000) chip.classList.add('synced');
+    else if(Date.now()-lastTs < 24*3600*1000) chip.classList.add('dirty');
+    else chip.classList.add('stale');
+    chip.title = 'Cloud sync';
   }
   document.getElementById('cloud-chip-label').textContent = label;
-  // Status colour: green if last sync (either dir) within 2h, amber within 24h, gray older or never.
-  chip.classList.remove('synced','dirty','stale');
-  if(!lastTs) chip.classList.add('stale');
-  else if(Date.now()-lastTs < 2*3600*1000) chip.classList.add('synced');
-  else if(Date.now()-lastTs < 24*3600*1000) chip.classList.add('dirty');
-  else chip.classList.add('stale');
-  // If popover is open, re-render it too so the times stay live.
   var pop = document.getElementById('cloud-popover');
   if(pop && pop.style.display === 'block') cloudChipRenderPopover();
 }
@@ -3496,6 +3604,8 @@ function cloudChipToggle(ev){
   if(pop.style.display === 'block'){ cloudChipHidePopover(); return; }
   cloudChipRenderPopover();
   pop.style.display='block';
+  // v5.24.10: opportunistic peek when popover opens (throttled internally).
+  cloudPeekStatus();
   // Outside-click closes
   setTimeout(function(){
     document.addEventListener('click', _cloudChipOutside, {capture:true});
@@ -3520,14 +3630,37 @@ function cloudChipRenderPopover(){
   if(!pop) return;
   var pullTs = parseInt(localStorage.getItem(CLOUD_LAST_PULL_KEY)||'0',10);
   var pushTs = parseInt(localStorage.getItem(CLOUD_LAST_PUSH_KEY)||'0',10);
+  var lastTs = Math.max(pullTs, pushTs);
   var sender = _cloudGetRemoteSender();
   var thisDev = getDeviceName();
   var senderIsUs = sender && sender.id === getDeviceId();
+  // v5.24.10: highlight if cloud has data from another device newer than our last sync.
+  var remoteNewer = false;
+  if(sender && !senderIsUs && sender.at){
+    var cloudAt = new Date(sender.at).getTime();
+    if(!isNaN(cloudAt) && cloudAt > lastTs) remoteNewer = true;
+  }
+  var alertHtml = '';
+  if(remoteNewer){
+    alertHtml =
+      '<div style="background:rgba(74,142,204,.15);border:0.5px solid rgba(74,142,204,.4);border-radius:8px;padding:8px 10px;margin-bottom:10px;display:flex;gap:8px;align-items:flex-start">'+
+        '<div style="width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(74,142,204,.7);margin-top:5px;flex-shrink:0"></div>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">New from another device</div>'+
+          '<div style="font-size:12px;color:var(--text2);line-height:1.4"><strong>'+esc(sender.name||'Another device')+'</strong> pushed at '+esc(_cloudFormatExact(sender.at))+'</div>'+
+        '</div>'+
+      '</div>';
+  }
   var senderHtml = sender
     ? '<div class="cloud-popover-row">Cloud last written by '+(senderIsUs?'<strong style="color:var(--accent)">this device</strong>':'<strong>'+esc(sender.name||'Unknown')+'</strong>')+(sender.at?'<br><span style="opacity:.7">at '+esc(_cloudFormatExact(sender.at))+'</span>':'')+'</div>'
     : '<div class="cloud-popover-row" style="opacity:.7">No cloud history yet</div>';
+  var peekTs = parseInt(localStorage.getItem(CLOUD_PEEK_LAST_KEY)||'0',10);
+  var peekHtml = peekTs
+    ? '<div style="font-size:10px;color:var(--text3);opacity:.7;text-align:center;margin-top:8px">Checked cloud '+esc(_cloudFormatAgo(peekTs))+' · <button type="button" onclick="cloudPeekNow()" style="background:transparent;border:none;color:var(--accent);font-size:10px;font-family:var(--font);cursor:pointer;text-decoration:underline;padding:0">refresh now</button></div>'
+    : '<div style="font-size:10px;color:var(--text3);opacity:.7;text-align:center;margin-top:8px"><button type="button" onclick="cloudPeekNow()" style="background:transparent;border:none;color:var(--accent);font-size:10px;font-family:var(--font);cursor:pointer;text-decoration:underline;padding:0">check cloud now</button></div>';
   pop.innerHTML =
     '<div class="cloud-popover-title">Cloud sync<button class="cloud-popover-close" onclick="cloudChipHidePopover()" type="button">&#10005;</button></div>'+
+    alertHtml +
     senderHtml +
     '<div class="cloud-popover-sep"></div>'+
     '<div style="display:flex;flex-direction:column;gap:8px">'+
@@ -3536,9 +3669,16 @@ function cloudChipRenderPopover(){
     '</div>'+
     '<div class="cloud-popover-row" style="opacity:.7;margin-top:10px">This device: '+esc(thisDev)+'</div>'+
     '<div class="cloud-popover-actions">'+
-      '<button class="btn" onclick="cloudChipPull()" type="button">&#8595; Pull</button>'+
-      '<button class="btn primary" onclick="cloudChipPush()" type="button">&#8593; Push</button>'+
-    '</div>';
+      '<button class="btn'+(remoteNewer?' primary':'')+'" onclick="cloudChipPull()" type="button">&#8595; Pull</button>'+
+      '<button class="btn'+(remoteNewer?'':' primary')+'" onclick="cloudChipPush()" type="button">&#8593; Push</button>'+
+    '</div>'+
+    peekHtml;
+}
+async function cloudPeekNow(){
+  var chip = document.getElementById('cloud-chip');
+  if(chip) chip.classList.add('busy');
+  await cloudPeekStatus({force:true});
+  if(chip) chip.classList.remove('busy');
 }
 async function cloudChipPull(){
   var chip = document.getElementById('cloud-chip');
@@ -3689,6 +3829,9 @@ function loadData(){
   // v5.24.7: persistent cloud sync chip
   cloudChipRefresh();
   cloudChipStartTimer();
+  // v5.24.10: passive cloud peek so the chip stays fresh without manual pulls
+  cloudPeekStartTimer();
+  setTimeout(function(){ cloudPeekStatus(); }, 2000); // initial peek shortly after load
 }
 
 /* &#9472;&#9472; Helpers &#9472;&#9472; */

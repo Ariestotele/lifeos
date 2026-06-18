@@ -797,6 +797,67 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:v
   border-bottom:0.5px solid var(--border);
 }
 .tk-panel-title{font-size:15px;font-weight:600;letter-spacing:-.01em}
+/* v5.24.7: persistent cloud-sync chip + popover. Top-right of viewport, theme-matched pill. */
+.cloud-chip{
+  position:fixed;
+  top:calc(env(safe-area-inset-top, 0px) + 10px);
+  right:14px;
+  z-index:155;
+  display:inline-flex;align-items:center;gap:6px;
+  height:30px;padding:0 10px 0 9px;
+  border-radius:99px;
+  background:linear-gradient(180deg, var(--surface3), var(--surface2));
+  border:0.5px solid var(--border2);
+  color:var(--text2);
+  font-family:var(--font);font-size:11px;font-weight:500;letter-spacing:.01em;
+  cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,.25);
+  transition:border-color .15s,transform .15s,background .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.cloud-chip:hover{border-color:var(--accent-border);background:var(--surface3)}
+.cloud-chip:active{transform:scale(.97)}
+.cloud-chip-icon{flex-shrink:0;color:var(--text3)}
+.cloud-chip-label{white-space:nowrap;line-height:1}
+.cloud-chip-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--text3);
+  box-shadow:0 0 0 1.5px var(--surface2);
+  flex-shrink:0;
+}
+.cloud-chip.synced .cloud-chip-dot{background:var(--positive)}
+.cloud-chip.dirty  .cloud-chip-dot{background:var(--amber)}
+.cloud-chip.stale  .cloud-chip-dot{background:var(--text3)}
+.cloud-chip.synced .cloud-chip-icon{color:var(--positive)}
+.cloud-chip.busy .cloud-chip-icon{animation:cloudSpin 1s linear infinite;color:var(--accent)}
+@keyframes cloudSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.cloud-popover{
+  position:fixed;
+  top:calc(env(safe-area-inset-top, 0px) + 48px);
+  right:14px;
+  z-index:170;
+  width:288px;max-width:calc(100vw - 28px);
+  background:linear-gradient(160deg,var(--surface2) 0%,var(--surface) 100%);
+  border:0.5px solid var(--border2);
+  border-radius:var(--radius-lg);
+  box-shadow:0 12px 30px rgba(0,0,0,.45);
+  padding:14px;
+  animation:cloudPopIn .15s ease both;
+}
+@keyframes cloudPopIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.cloud-popover-title{font-size:12px;font-weight:600;color:var(--text);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.cloud-popover-close{width:24px;height:24px;border-radius:6px;border:0.5px solid transparent;background:transparent;color:var(--text3);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center}
+.cloud-popover-close:hover{background:var(--surface3);color:var(--text2)}
+.cloud-popover-row{font-size:11.5px;color:var(--text3);line-height:1.5;margin-bottom:6px}
+.cloud-popover-row strong{color:var(--text2);font-weight:500}
+.cloud-popover-sep{height:0.5px;background:var(--border);margin:10px 0}
+.cloud-popover-actions{display:flex;gap:6px;margin-top:10px}
+.cloud-popover-actions .btn{flex:1;justify-content:center;font-size:12px;height:32px}
+body.touch-device .cloud-chip{height:36px;font-size:12px;padding:0 12px 0 10px}
+body.touch-device .cloud-popover{top:calc(env(safe-area-inset-top, 0px) + 56px)}
+@media(max-width:520px){
+  .cloud-chip-label{display:none}
+  .cloud-chip{padding:0 9px}
+}
 /* v5.24.5: 2-column task modal on wider viewports -- left content, right parameters */
 .tk-form-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:1.5rem;align-items:start}
 .tk-form-col{display:flex;flex-direction:column;min-width:0}

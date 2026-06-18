@@ -816,6 +816,67 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:v
   border-bottom:0.5px solid var(--border);
 }
 .tk-panel-title{font-size:15px;font-weight:600;letter-spacing:-.01em}
+/* v5.24.7: persistent cloud-sync chip + popover. Top-right of viewport, theme-matched pill. */
+.cloud-chip{
+  position:fixed;
+  top:calc(env(safe-area-inset-top, 0px) + 10px);
+  right:14px;
+  z-index:155;
+  display:inline-flex;align-items:center;gap:6px;
+  height:30px;padding:0 10px 0 9px;
+  border-radius:99px;
+  background:linear-gradient(180deg, var(--surface3), var(--surface2));
+  border:0.5px solid var(--border2);
+  color:var(--text2);
+  font-family:var(--font);font-size:11px;font-weight:500;letter-spacing:.01em;
+  cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,.25);
+  transition:border-color .15s,transform .15s,background .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.cloud-chip:hover{border-color:var(--accent-border);background:var(--surface3)}
+.cloud-chip:active{transform:scale(.97)}
+.cloud-chip-icon{flex-shrink:0;color:var(--text3)}
+.cloud-chip-label{white-space:nowrap;line-height:1}
+.cloud-chip-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--text3);
+  box-shadow:0 0 0 1.5px var(--surface2);
+  flex-shrink:0;
+}
+.cloud-chip.synced .cloud-chip-dot{background:var(--positive)}
+.cloud-chip.dirty  .cloud-chip-dot{background:var(--amber)}
+.cloud-chip.stale  .cloud-chip-dot{background:var(--text3)}
+.cloud-chip.synced .cloud-chip-icon{color:var(--positive)}
+.cloud-chip.busy .cloud-chip-icon{animation:cloudSpin 1s linear infinite;color:var(--accent)}
+@keyframes cloudSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.cloud-popover{
+  position:fixed;
+  top:calc(env(safe-area-inset-top, 0px) + 48px);
+  right:14px;
+  z-index:170;
+  width:288px;max-width:calc(100vw - 28px);
+  background:linear-gradient(160deg,var(--surface2) 0%,var(--surface) 100%);
+  border:0.5px solid var(--border2);
+  border-radius:var(--radius-lg);
+  box-shadow:0 12px 30px rgba(0,0,0,.45);
+  padding:14px;
+  animation:cloudPopIn .15s ease both;
+}
+@keyframes cloudPopIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.cloud-popover-title{font-size:12px;font-weight:600;color:var(--text);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.cloud-popover-close{width:24px;height:24px;border-radius:6px;border:0.5px solid transparent;background:transparent;color:var(--text3);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center}
+.cloud-popover-close:hover{background:var(--surface3);color:var(--text2)}
+.cloud-popover-row{font-size:11.5px;color:var(--text3);line-height:1.5;margin-bottom:6px}
+.cloud-popover-row strong{color:var(--text2);font-weight:500}
+.cloud-popover-sep{height:0.5px;background:var(--border);margin:10px 0}
+.cloud-popover-actions{display:flex;gap:6px;margin-top:10px}
+.cloud-popover-actions .btn{flex:1;justify-content:center;font-size:12px;height:32px}
+body.touch-device .cloud-chip{height:36px;font-size:12px;padding:0 12px 0 10px}
+body.touch-device .cloud-popover{top:calc(env(safe-area-inset-top, 0px) + 56px)}
+@media(max-width:520px){
+  .cloud-chip-label{display:none}
+  .cloud-chip{padding:0 9px}
+}
 /* v5.24.5: 2-column task modal on wider viewports -- left content, right parameters */
 .tk-form-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:1.5rem;align-items:start}
 .tk-form-col{display:flex;flex-direction:column;min-width:0}
@@ -1867,6 +1928,13 @@ body.touch-device .reminder-banner{position:static!important;top:auto!important;
   <input type="file" id="import-input" accept=".json" style="display:none" onchange="importJSON(event)">
 
   <main class="main">
+    <!-- v5.24.7: persistent cloud sync chip (top-right) + click-out popover -->
+    <button class="cloud-chip" id="cloud-chip" type="button" onclick="cloudChipToggle(event)" style="display:none" title="Cloud sync">
+      <svg class="cloud-chip-icon" viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13a3.5 3.5 0 0 1 0-7 4 4 0 0 1 7.6-1A3.5 3.5 0 0 1 13 13z"/></svg>
+      <span class="cloud-chip-label" id="cloud-chip-label">—</span>
+      <span class="cloud-chip-dot" id="cloud-chip-dot"></span>
+    </button>
+    <div class="cloud-popover" id="cloud-popover" style="display:none"></div>
     <!-- Bill reminders banner — injected by checkReminders() on load -->
     <div id="reminder-banner-wrap"></div>
     <!-- Dashboard page -->
@@ -2633,7 +2701,7 @@ body.touch-device .reminder-banner{position:static!important;top:auto!important;
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.24.6';
+const APP_VERSION = '5.24.7';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -3246,6 +3314,7 @@ async function cloudPull(){
     _cloudSetBusy(false);
     toast('↓ Pulled from cloud · '+senderName);
     _cloudRefreshStatus();
+    cloudChipRefresh();
     return true;
   }catch(e){
     _cloudSetBusy(false);
@@ -3310,6 +3379,7 @@ async function cloudPush(){
     _cloudSetBusy(false);
     toast('↑ Pushed to cloud');
     _cloudRefreshStatus();
+    cloudChipRefresh();
     return true;
   }catch(e){
     _cloudSetBusy(false);
@@ -3361,8 +3431,109 @@ function _cloudRefreshStatus(){
     '<span style="color:var(--positive)">↑ Last pushed</span> '+_cloudFormatAgo(pushTs)+(pushTs?' <span style="opacity:.5">('+_cloudFormatExact(pushTs)+')</span>':'')+'</div>'+
     senderLine;
 }
-function _cloudOnPathInput(input){ cloudSetPath(input.value); _cloudRefreshStatus(); }
-function _cloudOnRepoInput(input){ cloudSetRepo(input.value); _cloudRefreshStatus(); }
+function _cloudOnPathInput(input){ cloudSetPath(input.value); _cloudRefreshStatus(); cloudChipRefresh(); }
+function _cloudOnRepoInput(input){ cloudSetRepo(input.value); _cloudRefreshStatus(); cloudChipRefresh(); }
+
+/* v5.24.7: persistent cloud chip + popover ────────── */
+var _cloudChipTimer = null;
+function cloudChipRefresh(){
+  var chip = document.getElementById('cloud-chip');
+  if(!chip) return;
+  var hasCreds = !!(localStorage.getItem(GH_TOKEN_KEY) && cloudGetRepo());
+  if(!hasCreds){ chip.style.display='none'; return; }
+  chip.style.display='inline-flex';
+  var pushTs = parseInt(localStorage.getItem(CLOUD_LAST_PUSH_KEY)||'0',10);
+  var pullTs = parseInt(localStorage.getItem(CLOUD_LAST_PULL_KEY)||'0',10);
+  var lastTs = Math.max(pushTs, pullTs);
+  var label;
+  if(!lastTs) label = 'sync';
+  else {
+    var mins = Math.round((Date.now()-lastTs)/60000);
+    if(mins<1) label = 'just now';
+    else if(mins<60) label = mins+'m';
+    else if(mins<1440) label = Math.round(mins/60)+'h';
+    else label = Math.round(mins/1440)+'d';
+  }
+  document.getElementById('cloud-chip-label').textContent = label;
+  // Status colour: green if last sync (either dir) within 2h, amber within 24h, gray older or never.
+  chip.classList.remove('synced','dirty','stale');
+  if(!lastTs) chip.classList.add('stale');
+  else if(Date.now()-lastTs < 2*3600*1000) chip.classList.add('synced');
+  else if(Date.now()-lastTs < 24*3600*1000) chip.classList.add('dirty');
+  else chip.classList.add('stale');
+  // If popover is open, re-render it too so the times stay live.
+  var pop = document.getElementById('cloud-popover');
+  if(pop && pop.style.display === 'block') cloudChipRenderPopover();
+}
+function cloudChipToggle(ev){
+  if(ev) ev.stopPropagation();
+  var pop = document.getElementById('cloud-popover');
+  if(!pop) return;
+  if(pop.style.display === 'block'){ cloudChipHidePopover(); return; }
+  cloudChipRenderPopover();
+  pop.style.display='block';
+  // Outside-click closes
+  setTimeout(function(){
+    document.addEventListener('click', _cloudChipOutside, {capture:true});
+    document.addEventListener('keydown', _cloudChipEsc);
+  }, 0);
+}
+function cloudChipHidePopover(){
+  var pop = document.getElementById('cloud-popover');
+  if(pop) pop.style.display='none';
+  document.removeEventListener('click', _cloudChipOutside, {capture:true});
+  document.removeEventListener('keydown', _cloudChipEsc);
+}
+function _cloudChipOutside(e){
+  var pop = document.getElementById('cloud-popover');
+  var chip = document.getElementById('cloud-chip');
+  if(pop && (pop.contains(e.target) || (chip && chip.contains(e.target)))) return;
+  cloudChipHidePopover();
+}
+function _cloudChipEsc(e){ if(e.key === 'Escape') cloudChipHidePopover(); }
+function cloudChipRenderPopover(){
+  var pop = document.getElementById('cloud-popover');
+  if(!pop) return;
+  var pullTs = parseInt(localStorage.getItem(CLOUD_LAST_PULL_KEY)||'0',10);
+  var pushTs = parseInt(localStorage.getItem(CLOUD_LAST_PUSH_KEY)||'0',10);
+  var sender = _cloudGetRemoteSender();
+  var thisDev = getDeviceName();
+  var senderIsUs = sender && sender.id === getDeviceId();
+  var senderHtml = sender
+    ? '<div class="cloud-popover-row">Cloud last written by '+(senderIsUs?'<strong style="color:var(--accent)">this device</strong>':'<strong>'+esc(sender.name||'Unknown')+'</strong>')+(sender.at?'<br><span style="opacity:.7">at '+esc(_cloudFormatExact(sender.at))+'</span>':'')+'</div>'
+    : '<div class="cloud-popover-row" style="opacity:.7">No cloud history yet</div>';
+  pop.innerHTML =
+    '<div class="cloud-popover-title">Cloud sync<button class="cloud-popover-close" onclick="cloudChipHidePopover()" type="button">&#10005;</button></div>'+
+    senderHtml +
+    '<div class="cloud-popover-sep"></div>'+
+    '<div class="cloud-popover-row"><span style="color:var(--accent)">&#8595; pulled</span> '+(pullTs?_cloudFormatAgo(pullTs)+' <span style="opacity:.7">· '+_cloudFormatExact(pullTs)+'</span>':'never')+'</div>'+
+    '<div class="cloud-popover-row"><span style="color:var(--positive)">&#8593; pushed</span> '+(pushTs?_cloudFormatAgo(pushTs)+' <span style="opacity:.7">· '+_cloudFormatExact(pushTs)+'</span>':'never')+'</div>'+
+    '<div class="cloud-popover-row" style="opacity:.7;margin-top:6px">This device: '+esc(thisDev)+'</div>'+
+    '<div class="cloud-popover-actions">'+
+      '<button class="btn" onclick="cloudChipPull()" type="button">&#8595; Pull</button>'+
+      '<button class="btn primary" onclick="cloudChipPush()" type="button">&#8593; Push</button>'+
+    '</div>';
+}
+async function cloudChipPull(){
+  var chip = document.getElementById('cloud-chip');
+  if(chip) chip.classList.add('busy');
+  if(confirm('Pull will replace your local data with the cloud version. Continue?')){
+    await cloudPull();
+  }
+  if(chip) chip.classList.remove('busy');
+  cloudChipRefresh();
+}
+async function cloudChipPush(){
+  var chip = document.getElementById('cloud-chip');
+  if(chip) chip.classList.add('busy');
+  await cloudPush();
+  if(chip) chip.classList.remove('busy');
+  cloudChipRefresh();
+}
+function cloudChipStartTimer(){
+  if(_cloudChipTimer) return;
+  _cloudChipTimer = setInterval(cloudChipRefresh, 60*1000);
+}
 
 async function ghDeploy(){
   var token=localStorage.getItem(GH_TOKEN_KEY);
@@ -3489,6 +3660,9 @@ function loadData(){
   render();
   switchPage('dashboard');
   setTimeout(verSnapshot, 500); // snapshot initial state on load
+  // v5.24.7: persistent cloud sync chip
+  cloudChipRefresh();
+  cloudChipStartTimer();
 }
 
 /* &#9472;&#9472; Helpers &#9472;&#9472; */

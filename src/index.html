@@ -57,6 +57,13 @@
   <input type="file" id="import-input" accept=".json" style="display:none" onchange="importJSON(event)">
 
   <main class="main">
+    <!-- v5.24.7: persistent cloud sync chip (top-right) + click-out popover -->
+    <button class="cloud-chip" id="cloud-chip" type="button" onclick="cloudChipToggle(event)" style="display:none" title="Cloud sync">
+      <svg class="cloud-chip-icon" viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13a3.5 3.5 0 0 1 0-7 4 4 0 0 1 7.6-1A3.5 3.5 0 0 1 13 13z"/></svg>
+      <span class="cloud-chip-label" id="cloud-chip-label">—</span>
+      <span class="cloud-chip-dot" id="cloud-chip-dot"></span>
+    </button>
+    <div class="cloud-popover" id="cloud-popover" style="display:none"></div>
     <!-- Bill reminders banner — injected by checkReminders() on load -->
     <div id="reminder-banner-wrap"></div>
     <!-- Dashboard page -->

@@ -2,7 +2,7 @@
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.24.7';
+const APP_VERSION = '5.24.8';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -716,20 +716,41 @@ function _cloudFormatExact(ts){
 function _cloudGetRemoteSender(){
   try{ return JSON.parse(localStorage.getItem(CLOUD_REMOTE_SENDER_KEY)||'null'); }catch(_){ return null; }
 }
+function _cloudSyncRowHtml(direction, ts){
+  var isPull = direction === 'pull';
+  var color  = isPull ? 'var(--accent)' : 'var(--positive)';
+  var bg     = isPull ? 'rgba(74,142,204,.08)' : 'rgba(31,170,126,.08)';
+  var border = isPull ? 'rgba(74,142,204,.25)' : 'rgba(31,170,126,.25)';
+  var arrow  = isPull ? '↓' : '↑';
+  var label  = isPull ? 'Last pulled' : 'Last pushed';
+  var hint   = isPull ? 'from cloud' : 'to cloud';
+  var valueHtml = ts
+    ? '<div style="font-size:13px;font-weight:500;color:var(--text)">'+_cloudFormatAgo(ts)+'</div>'+
+      '<div style="font-size:10px;color:var(--text3);margin-top:1px">'+_cloudFormatExact(ts)+'</div>'
+    : '<div style="font-size:12px;color:var(--text3);font-style:italic">never · '+hint+'</div>';
+  return '<div style="background:'+bg+';border:0.5px solid '+border+';border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:10px">'+
+    '<div style="font-size:14px;font-weight:600;color:'+color+';flex-shrink:0;width:18px;text-align:center">'+arrow+'</div>'+
+    '<div style="flex:1;min-width:0">'+
+      '<div style="font-size:10px;font-weight:600;color:'+color+';text-transform:uppercase;letter-spacing:.06em">'+label+'</div>'+
+      valueHtml+
+    '</div>'+
+  '</div>';
+}
 function _cloudRefreshStatus(){
   var el = document.getElementById('cloud-status');
   if(!el) return;
   var pullTs = parseInt(localStorage.getItem(CLOUD_LAST_PULL_KEY)||'0',10);
   var pushTs = parseInt(localStorage.getItem(CLOUD_LAST_PUSH_KEY)||'0',10);
-  if(!pullTs && !pushTs){ el.textContent = 'Never synced.'; return; }
+  if(!pullTs && !pushTs){ el.innerHTML = '<div style="font-size:11px;color:var(--text3);text-align:center;padding:8px 0">Never synced.</div>'; return; }
   var sender = _cloudGetRemoteSender();
   var senderLine = sender
-    ? '<div style="margin-top:4px;font-size:11px;color:var(--text3)">Cloud last written by <strong style="color:var(--text2)">'+esc(sender.name||'Unknown')+'</strong>'+(sender.at?' at '+esc(_cloudFormatExact(sender.at)):'')+'</div>'
+    ? '<div style="margin-top:8px;font-size:11px;color:var(--text3);text-align:left">Cloud last written by <strong style="color:var(--text2)">'+esc(sender.name||'Unknown')+'</strong>'+(sender.at?' at '+esc(_cloudFormatExact(sender.at)):'')+'</div>'
     : '';
   el.innerHTML =
-    '<div><span style="color:var(--accent)">↓ Last pulled</span> '+_cloudFormatAgo(pullTs)+(pullTs?' <span style="opacity:.5">('+_cloudFormatExact(pullTs)+')</span>':'')+
-    ' <span style="opacity:.4;margin:0 6px">|</span> '+
-    '<span style="color:var(--positive)">↑ Last pushed</span> '+_cloudFormatAgo(pushTs)+(pushTs?' <span style="opacity:.5">('+_cloudFormatExact(pushTs)+')</span>':'')+'</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:left">'+
+      _cloudSyncRowHtml('pull', pullTs)+
+      _cloudSyncRowHtml('push', pushTs)+
+    '</div>'+
     senderLine;
 }
 function _cloudOnPathInput(input){ cloudSetPath(input.value); _cloudRefreshStatus(); cloudChipRefresh(); }
@@ -807,9 +828,11 @@ function cloudChipRenderPopover(){
     '<div class="cloud-popover-title">Cloud sync<button class="cloud-popover-close" onclick="cloudChipHidePopover()" type="button">&#10005;</button></div>'+
     senderHtml +
     '<div class="cloud-popover-sep"></div>'+
-    '<div class="cloud-popover-row"><span style="color:var(--accent)">&#8595; pulled</span> '+(pullTs?_cloudFormatAgo(pullTs)+' <span style="opacity:.7">· '+_cloudFormatExact(pullTs)+'</span>':'never')+'</div>'+
-    '<div class="cloud-popover-row"><span style="color:var(--positive)">&#8593; pushed</span> '+(pushTs?_cloudFormatAgo(pushTs)+' <span style="opacity:.7">· '+_cloudFormatExact(pushTs)+'</span>':'never')+'</div>'+
-    '<div class="cloud-popover-row" style="opacity:.7;margin-top:6px">This device: '+esc(thisDev)+'</div>'+
+    '<div style="display:flex;flex-direction:column;gap:8px">'+
+      _cloudSyncRowHtml('pull', pullTs)+
+      _cloudSyncRowHtml('push', pushTs)+
+    '</div>'+
+    '<div class="cloud-popover-row" style="opacity:.7;margin-top:10px">This device: '+esc(thisDev)+'</div>'+
     '<div class="cloud-popover-actions">'+
       '<button class="btn" onclick="cloudChipPull()" type="button">&#8595; Pull</button>'+
       '<button class="btn primary" onclick="cloudChipPush()" type="button">&#8593; Push</button>'+
@@ -4802,26 +4825,22 @@ function dbWidgetCloud(el){
   }
   var pullTs = parseInt(localStorage.getItem(CLOUD_LAST_PULL_KEY)||'0',10);
   var pushTs = parseInt(localStorage.getItem(CLOUD_LAST_PUSH_KEY)||'0',10);
-  var pullLbl = pullTs ? _cloudFormatAgo(pullTs) : 'never';
-  var pushLbl = pushTs ? _cloudFormatAgo(pushTs) : 'never';
-  var pullExact = pullTs ? _cloudFormatExact(pullTs) : '';
-  var pushExact = pushTs ? _cloudFormatExact(pushTs) : '';
   var thisDev = getDeviceName();
   var sender = _cloudGetRemoteSender();
   // Provenance line: who last wrote the cloud version, and when.
   var senderHtml = '';
   if(sender){
     var senderIsUs = sender.id === getDeviceId();
-    senderHtml = '<div style="font-size:11px;color:var(--text3);padding:0 2px 8px;line-height:1.4">'+
+    senderHtml = '<div style="font-size:11px;color:var(--text3);padding:0 2px 10px;line-height:1.4">'+
       'Cloud last written by '+(senderIsUs?'<strong style="color:var(--accent)">this device</strong>':'<strong style="color:var(--text2)">'+esc(sender.name||'Unknown')+'</strong>')+
       (sender.at?'<br><span style="opacity:.7">at '+esc(_cloudFormatExact(sender.at))+'</span>':'')+
     '</div>';
   }
   body.innerHTML =
     senderHtml +
-    '<div style="font-size:11px;color:var(--text3);padding:0 2px 4px;line-height:1.5">'+
-      '<div><span style="color:var(--accent)">&#8595; pulled</span> '+pullLbl+(pullExact?' <span style="opacity:.7">· '+pullExact+'</span>':'')+'</div>'+
-      '<div><span style="color:var(--positive)">&#8593; pushed</span> '+pushLbl+(pushExact?' <span style="opacity:.7">· '+pushExact+'</span>':'')+'</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'+
+      _cloudSyncRowHtml('pull', pullTs)+
+      _cloudSyncRowHtml('push', pushTs)+
     '</div>'+
     '<div style="font-size:10px;color:var(--text3);padding:0 2px 10px;opacity:.7">This device: '+esc(thisDev)+'</div>'+
     '<div style="display:flex;gap:6px">'+

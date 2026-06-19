@@ -956,7 +956,19 @@ body.touch-device .cloud-popover{top:calc(env(safe-area-inset-top, 0px) + 56px)}
    have the horizontal space. */
 @media(max-width:640px){.tk-section-body{grid-template-columns:1fr}}
 @media(max-width:640px){body.touch-device .tk-section-body{grid-template-columns:1fr!important}}
-.tk-card{background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-md);padding:13px 10px 9px;position:relative;overflow:hidden;transition:border-color .15s,transform .12s,box-shadow .15s}
+.tk-card{background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-md);padding:13px 10px 9px;position:relative;overflow:hidden;transition:border-color .15s,transform .12s,box-shadow .15s,background .15s;touch-action:pan-y}
+/* v5.25.1: swipe-to-complete visual feedback. Card background turns green as
+   the user crosses the commit threshold so it's clear what will happen. */
+.tk-card.tk-card-swipe-committing{
+  background:linear-gradient(135deg, rgba(31,170,126,.35), rgba(31,170,126,.18))!important;
+  border-color:var(--positive)!important;
+}
+.tk-card.tk-card-swipe-committing::after{
+  content:'✓ Done';
+  position:absolute;left:14px;top:50%;transform:translateY(-50%);
+  font-size:14px;font-weight:600;color:var(--positive);
+  letter-spacing:.04em;pointer-events:none;
+}
 /* v5.21.0: subtle lift on hover/press so the page feels responsive. */
 .tk-card:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.25)}
 .tk-card:active{transform:translateY(0);box-shadow:0 2px 6px rgba(0,0,0,.18)}
@@ -2760,7 +2772,7 @@ body.touch-device .reminder-banner{position:static!important;top:auto!important;
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.25.0';
+const APP_VERSION = '5.25.1';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -3193,6 +3205,95 @@ function tkDragEnd(){
   });
   saveTasks();
   renderTasks();
+}
+
+/* v5.25.1: Tasks Phase 2 segment 2 -- swipe-to-complete on mobile.
+   Touch only. Swipe a card to the right past the threshold (~45% of card
+   width) and release to mark done. Card animates the rest of the way off
+   and toggleTaskDone fires on the way out.
+   Disambiguation: cards have touch-action:pan-y so the browser owns vertical
+   scrolling; horizontal motion is ours. We confirm horizontal lock only
+   after dx outruns dy by 1.5x AND |dx| > 10px. */
+var _tkSwipe = null;
+function tkSwipeStart(ev, taskId){
+  if(ev.pointerType !== 'touch') return;
+  if(!document.body.classList.contains('touch-device')) return;
+  if(_tkDrag) return; // a reorder is in progress
+  // Don't start a swipe when the pointer touched an interactive child.
+  if(ev.target.closest('button, .tk-card-check, .tk-card-drag-handle, input, a, label, .tk-card-sub-row, .tk-card-subrow-clickable, select, textarea')) return;
+  var card = document.getElementById('task-'+taskId);
+  if(!card) return;
+  // Skip done tasks -- swipe-to-undo would need a different threshold/UX.
+  var t = tasks.find(function(x){return x.id===taskId;});
+  if(!t || t.done) return;
+  _tkSwipe = {
+    card: card, taskId: taskId,
+    startX: ev.clientX, startY: ev.clientY,
+    locked: null,
+    pointerId: ev.pointerId,
+    cardWidth: card.getBoundingClientRect().width,
+  };
+  document.addEventListener('pointermove', tkSwipeMove);
+  document.addEventListener('pointerup', tkSwipeEnd);
+  document.addEventListener('pointercancel', tkSwipeEnd);
+}
+function tkSwipeMove(ev){
+  if(!_tkSwipe) return;
+  if(ev.pointerId !== _tkSwipe.pointerId) return;
+  var dx = ev.clientX - _tkSwipe.startX;
+  var dy = ev.clientY - _tkSwipe.startY;
+  if(_tkSwipe.locked === null){
+    if(Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)*1.5){
+      _tkSwipe.locked = 'horizontal';
+      _tkSwipe.card.style.transition = 'none';
+    } else if(Math.abs(dy) > 10){
+      // Vertical scroll -- abort.
+      tkSwipeCleanup(false);
+      return;
+    } else {
+      return; // still undecided
+    }
+  }
+  if(_tkSwipe.locked !== 'horizontal') return;
+  ev.preventDefault();
+  var clampedDx = Math.max(0, Math.min(dx, _tkSwipe.cardWidth));
+  _tkSwipe.card.style.transform = 'translateX(' + clampedDx + 'px)';
+  var pct = clampedDx / _tkSwipe.cardWidth;
+  if(pct > 0.45) _tkSwipe.card.classList.add('tk-card-swipe-committing');
+  else _tkSwipe.card.classList.remove('tk-card-swipe-committing');
+}
+function tkSwipeEnd(ev){
+  if(!_tkSwipe) return;
+  var s = _tkSwipe;
+  if(s.locked !== 'horizontal'){ tkSwipeCleanup(false); return; }
+  var dx = ev.clientX - s.startX;
+  var commit = dx >= s.cardWidth * 0.45;
+  s.card.style.transition = 'transform .25s cubic-bezier(.4,0,.2,1), opacity .2s';
+  s.card.classList.remove('tk-card-swipe-committing');
+  if(commit){
+    s.card.style.transform = 'translateX(' + s.cardWidth + 'px)';
+    s.card.style.opacity = '0';
+    tkSwipeCleanup(true);
+    setTimeout(function(){ toggleTaskDone(s.taskId); }, 220);
+  } else {
+    s.card.style.transform = '';
+    tkSwipeCleanup(true);
+  }
+}
+function tkSwipeCleanup(keepListeners){
+  _tkSwipe = null;
+  if(!keepListeners){
+    document.removeEventListener('pointermove', tkSwipeMove);
+    document.removeEventListener('pointerup', tkSwipeEnd);
+    document.removeEventListener('pointercancel', tkSwipeEnd);
+  } else {
+    // Remove on the next tick so the current handler finishes cleanly
+    setTimeout(function(){
+      document.removeEventListener('pointermove', tkSwipeMove);
+      document.removeEventListener('pointerup', tkSwipeEnd);
+      document.removeEventListener('pointercancel', tkSwipeEnd);
+    }, 0);
+  }
 }
 function tkDateGroup(t){
   if(t.paused) return 'paused';
@@ -6597,7 +6698,10 @@ function renderTaskCard(t, opts){
   var dragHandle = '<button type="button" class="tk-card-drag-handle" data-id="'+t.id+'" onpointerdown="tkDragHandlePointerDown(event,this.dataset.id)" title="Drag to reorder" aria-label="Drag to reorder">'
     +'<svg viewBox="0 0 10 14" width="10" height="14" fill="currentColor"><circle cx="3" cy="3" r="1.1"/><circle cx="7" cy="3" r="1.1"/><circle cx="3" cy="7" r="1.1"/><circle cx="7" cy="7" r="1.1"/><circle cx="3" cy="11" r="1.1"/><circle cx="7" cy="11" r="1.1"/></svg>'
   +'</button>';
-  return '<div class="'+cardCls+'" id="task-'+t.id+'" style="'+cardStyle+'">'+
+  // v5.25.1: swipe-to-complete -- pointerdown on the card body starts a swipe
+  // (touch only; the handler aborts on mouse pointer and on interactive children).
+  var swipeAttr = t.done ? '' : ' onpointerdown="tkSwipeStart(event,\''+t.id+'\')"';
+  return '<div class="'+cardCls+'" id="task-'+t.id+'" style="'+cardStyle+'"'+swipeAttr+'>'+
     '<div class="tk-card-top">'+
       '<div style="display:flex;gap:6px;align-items:flex-start;flex:1;min-width:0">'+
         dragHandle+

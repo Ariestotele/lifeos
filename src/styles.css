@@ -937,7 +937,19 @@ body.touch-device .cloud-popover{top:calc(env(safe-area-inset-top, 0px) + 56px)}
    have the horizontal space. */
 @media(max-width:640px){.tk-section-body{grid-template-columns:1fr}}
 @media(max-width:640px){body.touch-device .tk-section-body{grid-template-columns:1fr!important}}
-.tk-card{background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-md);padding:13px 10px 9px;position:relative;overflow:hidden;transition:border-color .15s,transform .12s,box-shadow .15s}
+.tk-card{background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-md);padding:13px 10px 9px;position:relative;overflow:hidden;transition:border-color .15s,transform .12s,box-shadow .15s,background .15s;touch-action:pan-y}
+/* v5.25.1: swipe-to-complete visual feedback. Card background turns green as
+   the user crosses the commit threshold so it's clear what will happen. */
+.tk-card.tk-card-swipe-committing{
+  background:linear-gradient(135deg, rgba(31,170,126,.35), rgba(31,170,126,.18))!important;
+  border-color:var(--positive)!important;
+}
+.tk-card.tk-card-swipe-committing::after{
+  content:'✓ Done';
+  position:absolute;left:14px;top:50%;transform:translateY(-50%);
+  font-size:14px;font-weight:600;color:var(--positive);
+  letter-spacing:.04em;pointer-events:none;
+}
 /* v5.21.0: subtle lift on hover/press so the page feels responsive. */
 .tk-card:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.25)}
 .tk-card:active{transform:translateY(0);box-shadow:0 2px 6px rgba(0,0,0,.18)}

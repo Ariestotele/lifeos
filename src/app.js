@@ -2,7 +2,7 @@
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.24.12';
+const APP_VERSION = '5.25.0';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -329,6 +329,111 @@ function tkSetDateBucket(g){
   if(['overdue','today','tomorrow','week','later','nodate','done'].indexOf(g)<0) g='today';
   tkDateBucket = g;
   try{ lsSet('lifeos_tk_bucket', g); }catch(_){}
+  renderTasks();
+}
+
+/* v5.25.0: Tasks Phase 2 segment 1 -- drag-to-reorder within a date bucket.
+   Each task can have a numeric task.sortOrder. When set, it takes precedence
+   over the urgency sort. The drag handle on each card starts a pointer-based
+   drag; siblings shift up/down to make space; on release we assign new
+   sortOrder values (0..n) to all tasks in the bucket. */
+var _tkDrag = null;
+function tkDragHandlePointerDown(ev, taskId){
+  // Only left mouse button (or any touch)
+  if(ev.pointerType==='mouse' && ev.button!==0) return;
+  ev.preventDefault();
+  ev.stopPropagation();
+  var card = document.getElementById('task-'+taskId);
+  if(!card) return;
+  var bucketBody = card.parentElement;
+  if(!bucketBody) return;
+  var siblings = Array.prototype.filter.call(bucketBody.children, function(el){return el.classList && el.classList.contains('tk-card');});
+  var startIdx = siblings.indexOf(card);
+  if(startIdx < 0) return;
+  if(siblings.length < 2) return; // nothing to reorder against
+  var rects = siblings.map(function(el){return el.getBoundingClientRect();});
+  _tkDrag = {
+    card: card, taskId: taskId, bucketBody: bucketBody,
+    siblings: siblings, rects: rects,
+    startIdx: startIdx, currentIdx: startIdx,
+    startY: ev.clientY,
+    pointerId: ev.pointerId,
+  };
+  try{ ev.target.setPointerCapture(ev.pointerId); }catch(_){}
+  card.classList.add('tk-card-dragging');
+  card.style.transition = 'none';
+  card.style.zIndex = '50';
+  document.addEventListener('pointermove', tkDragMove);
+  document.addEventListener('pointerup', tkDragEnd);
+  document.addEventListener('pointercancel', tkDragEnd);
+}
+function tkDragMove(ev){
+  if(!_tkDrag) return;
+  ev.preventDefault();
+  var deltaY = ev.clientY - _tkDrag.startY;
+  _tkDrag.card.style.transform = 'translateY(' + deltaY + 'px)';
+  // Determine which slot the card is over now
+  var startRect = _tkDrag.rects[_tkDrag.startIdx];
+  var draggedCenter = startRect.top + startRect.height/2 + deltaY;
+  var newIdx = _tkDrag.startIdx;
+  for(var i = 0; i < _tkDrag.rects.length; i++){
+    if(i === _tkDrag.startIdx) continue;
+    var midY = _tkDrag.rects[i].top + _tkDrag.rects[i].height/2;
+    if(i < _tkDrag.startIdx && draggedCenter < midY){ newIdx = i; break; }
+    if(i > _tkDrag.startIdx && draggedCenter > midY){ newIdx = i; }
+  }
+  if(newIdx !== _tkDrag.currentIdx){
+    _tkDrag.currentIdx = newIdx;
+    tkDragApplyShift();
+  }
+}
+function tkDragApplyShift(){
+  var startIdx = _tkDrag.startIdx;
+  var currentIdx = _tkDrag.currentIdx;
+  var siblings = _tkDrag.siblings;
+  var dragH = _tkDrag.rects[startIdx].height;
+  var gap = 0;
+  if(siblings.length > 1){
+    gap = Math.max(0, _tkDrag.rects[1].top - _tkDrag.rects[0].bottom);
+  }
+  var shift = dragH + gap;
+  for(var i = 0; i < siblings.length; i++){
+    if(i === startIdx) continue;
+    var sib = siblings[i];
+    sib.style.transition = 'transform .15s cubic-bezier(.4,0,.2,1)';
+    if(i < startIdx && i >= currentIdx){
+      sib.style.transform = 'translateY(' + shift + 'px)';
+    } else if(i > startIdx && i <= currentIdx){
+      sib.style.transform = 'translateY(' + (-shift) + 'px)';
+    } else {
+      sib.style.transform = '';
+    }
+  }
+}
+function tkDragEnd(){
+  if(!_tkDrag) return;
+  var d = _tkDrag;
+  _tkDrag = null;
+  document.removeEventListener('pointermove', tkDragMove);
+  document.removeEventListener('pointerup', tkDragEnd);
+  document.removeEventListener('pointercancel', tkDragEnd);
+  // Clear visual state
+  d.siblings.forEach(function(s){
+    s.style.transition = '';
+    s.style.transform = '';
+    s.style.zIndex = '';
+  });
+  d.card.classList.remove('tk-card-dragging');
+  if(d.startIdx === d.currentIdx) return; // no change
+  // Commit reorder: assign sortOrder = 0..n in the new visual order, for all tasks in this bucket.
+  var taskIds = d.siblings.map(function(el){return el.id.replace(/^task-/, '');});
+  var moved = taskIds.splice(d.startIdx, 1)[0];
+  taskIds.splice(d.currentIdx, 0, moved);
+  taskIds.forEach(function(id, idx){
+    var t = tasks.find(function(x){return x.id === id;});
+    if(t) t.sortOrder = idx;
+  });
+  saveTasks();
   renderTasks();
 }
 function tkDateGroup(t){
@@ -3470,6 +3575,14 @@ function renderTasks(){
       return score;
     };
     vis.sort((a,b)=>{
+      // v5.25.0: manual sortOrder (from drag-reorder) wins over urgency. Tasks
+      // with sortOrder cluster at the top of each bucket in their chosen order;
+      // tasks without it fall through to urgency.
+      const aHas = typeof a.sortOrder === 'number';
+      const bHas = typeof b.sortOrder === 'number';
+      if(aHas && bHas) return a.sortOrder - b.sortOrder;
+      if(aHas) return -1;
+      if(bHas) return 1;
       const diff=urgencyScore(b)-urgencyScore(a);
       if(diff!==0)return diff;
       return (b.createdAt||0)-(a.createdAt||0); // tie-break: newer first
@@ -3722,9 +3835,14 @@ function renderTaskCard(t, opts){
   var checkHtml=t.done?
     '<div class="tk-card-check tk-card-check-done" data-id="'+t.id+'" onclick="toggleTaskDone(this.dataset.id)">&#10003;</div>':
     '<div class="tk-card-check" data-id="'+t.id+'" onclick="toggleTaskDone(this.dataset.id)"></div>';
+  // v5.25.0: drag handle for reordering within a date bucket.
+  var dragHandle = '<button type="button" class="tk-card-drag-handle" data-id="'+t.id+'" onpointerdown="tkDragHandlePointerDown(event,this.dataset.id)" title="Drag to reorder" aria-label="Drag to reorder">'
+    +'<svg viewBox="0 0 10 14" width="10" height="14" fill="currentColor"><circle cx="3" cy="3" r="1.1"/><circle cx="7" cy="3" r="1.1"/><circle cx="3" cy="7" r="1.1"/><circle cx="7" cy="7" r="1.1"/><circle cx="3" cy="11" r="1.1"/><circle cx="7" cy="11" r="1.1"/></svg>'
+  +'</button>';
   return '<div class="'+cardCls+'" id="task-'+t.id+'" style="'+cardStyle+'">'+
     '<div class="tk-card-top">'+
       '<div style="display:flex;gap:6px;align-items:flex-start;flex:1;min-width:0">'+
+        dragHandle+
         checkHtml+
         '<div class="'+titleCls+'">'+esc(t.title)+'</div>'+
       '</div>'+

@@ -1012,6 +1012,27 @@ body.touch-device .cloud-popover{top:calc(env(safe-area-inset-top, 0px) + 56px)}
 .tk-ibtn-del{color:#c0392b;border-color:rgba(192,57,43,.3)}
 .tk-card-check{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--border2);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;cursor:pointer}
 .tk-card-check-done{background:#1d9e75;border-color:#1d9e75;color:#fff;font-size:9px}
+/* v5.25.0: drag handle for reordering tasks within a date bucket */
+.tk-card-drag-handle{
+  width:18px;height:22px;
+  display:inline-flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-top:0;
+  background:transparent;border:none;cursor:grab;padding:0;
+  color:var(--text3);opacity:.45;
+  transition:opacity .15s,color .15s;
+  touch-action:none; /* prevent the browser from scrolling on touch-drag */
+  -webkit-tap-highlight-color:transparent;
+}
+.tk-card-drag-handle:hover{opacity:1;color:var(--text2)}
+.tk-card-drag-handle:active{cursor:grabbing}
+.tk-card.tk-card-dragging{
+  z-index:50!important;
+  box-shadow:0 14px 30px rgba(0,0,0,.5)!important;
+  opacity:.95;
+  cursor:grabbing;
+  border-color:var(--accent-border)!important;
+}
+body.touch-device .tk-card-drag-handle{opacity:.85;width:28px;height:32px}
 .tk-pri-badge{font-size:10px;font-weight:500;padding:2px 6px;border-radius:3px;flex-shrink:0;border:0.5px solid transparent}
 
 .tk-tree-group{margin-bottom:1rem}.tk-tree-hdr{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-md);cursor:pointer;transition:all .15s;user-select:none;margin-bottom:6px}.tk-tree-hdr:hover{border-color:var(--border2)}.tk-tree-hdr.open .tk-tree-chevron{transform:rotate(90deg)}.tk-tree-chevron{font-size:10px;color:var(--text3);transition:transform .2s;flex-shrink:0}.tk-tree-hdr-name{font-size:12px;font-weight:600;color:var(--text);flex:1}.tk-tree-hdr-meta{font-size:11px;color:var(--text3)}.tk-tree-body{padding-left:16px;border-left:2px solid var(--border);margin-left:10px;margin-bottom:6px;display:flex;flex-direction:column;gap:7px}.tk-tree-body.collapsed{display:none}

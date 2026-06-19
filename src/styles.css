@@ -829,6 +829,26 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:v
 .cloud-chip.stale  .cloud-chip-dot{background:var(--text3)}
 .cloud-chip.synced .cloud-chip-icon{color:var(--positive)}
 .cloud-chip.busy .cloud-chip-icon{animation:cloudSpin 1s linear infinite;color:var(--accent)}
+/* v5.24.12: local edits pending push */
+.cloud-chip.unsaved{
+  border-color:rgba(201,138,26,.5);
+  background:linear-gradient(180deg, rgba(201,138,26,.18), rgba(201,138,26,.06));
+  color:var(--amber);
+}
+.cloud-chip.unsaved .cloud-chip-icon{color:var(--amber)}
+.cloud-chip.unsaved .cloud-chip-dot{background:var(--amber);box-shadow:0 0 0 1.5px var(--surface2),0 0 6px rgba(201,138,26,.55)}
+/* v5.24.12: both sides have changes -- conflict */
+.cloud-chip.diverged{
+  border-color:rgba(224,82,82,.6);
+  background:linear-gradient(180deg, rgba(224,82,82,.2), rgba(224,82,82,.08));
+  color:var(--red);
+}
+.cloud-chip.diverged .cloud-chip-icon{color:var(--red)}
+.cloud-chip.diverged .cloud-chip-dot{
+  background:var(--red);
+  box-shadow:0 0 0 1.5px var(--surface2),0 0 10px rgba(224,82,82,.6);
+  animation:cloudPulse 1.4s ease-out infinite;
+}
 /* v5.24.10: cloud was written by another device since our last sync — pulse to draw the eye */
 .cloud-chip.remote-new{
   border-color:rgba(74,142,204,.55);

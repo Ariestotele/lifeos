@@ -2,7 +2,7 @@
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.24.11';
+const APP_VERSION = '5.24.12';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -71,15 +71,16 @@ function saveData(){
   lsSet(KEY_PAY,JSON.stringify(payments));
   lsSet(KEY_TABBY,JSON.stringify(tabbyItems));
   asAutoSave();
+  cloudMarkDirty();
 }
-function saveGoals(){lsSet(KEY_GOALS,JSON.stringify(goals));asAutoSave();}
-function saveNotes(){lsSet(KEY_NOTES,JSON.stringify(notes));asAutoSave();}
-function saveLoans(){lsSet(KEY_LOANS,JSON.stringify(loans));asAutoSave();}
-function saveReceivables(){lsSet(KEY_RECV,JSON.stringify(receivables));asAutoSave();}
-function saveAccounts(){lsSet(KEY_ACCOUNTS,JSON.stringify(accounts));asAutoSave();}
-function saveNetWorth(){lsSet(KEY_NW,JSON.stringify(nwHistory));}
+function saveGoals(){lsSet(KEY_GOALS,JSON.stringify(goals));asAutoSave();cloudMarkDirty();}
+function saveNotes(){lsSet(KEY_NOTES,JSON.stringify(notes));asAutoSave();cloudMarkDirty();}
+function saveLoans(){lsSet(KEY_LOANS,JSON.stringify(loans));asAutoSave();cloudMarkDirty();}
+function saveReceivables(){lsSet(KEY_RECV,JSON.stringify(receivables));asAutoSave();cloudMarkDirty();}
+function saveAccounts(){lsSet(KEY_ACCOUNTS,JSON.stringify(accounts));asAutoSave();cloudMarkDirty();}
+function saveNetWorth(){lsSet(KEY_NW,JSON.stringify(nwHistory));cloudMarkDirty();}
 /* Budgets per bill category (v5.20.4). Stored as a flat map { cat: monthlyCap }. */
-function saveBudgets(){lsSet(KEY_BUDGETS,JSON.stringify(budgets));asAutoSave&&asAutoSave();}
+function saveBudgets(){lsSet(KEY_BUDGETS,JSON.stringify(budgets));asAutoSave&&asAutoSave();cloudMarkDirty();}
 function getBudget(cat){var v=budgets[cat];return (typeof v==='number'&&v>0)?v:0;}
 function setBudget(cat,n){
   if(!cat) return;
@@ -521,6 +522,22 @@ const CLOUD_REMOTE_SENDER_KEY = 'lifeos_cloud_remote_sender'; // JSON {id,name,a
 // v5.24.10: passive cloud peek -- watches the cloud file for changes without pulling
 const CLOUD_PEEK_LAST_KEY    = 'lifeos_cloud_peek_last';     // last peek timestamp
 const CLOUD_PEEK_COMMIT_KEY  = 'lifeos_cloud_peek_commit';   // last commit SHA we processed
+// v5.24.12: local dirty tracker for sync-state indicator + future auto-push
+const CLOUD_DIRTY_KEY        = 'lifeos_cloud_dirty_since';   // ts of first save since last push
+function cloudMarkDirty(){
+  // Only set if not already dirty -- preserves the first-edit timestamp.
+  if(!localStorage.getItem(CLOUD_DIRTY_KEY)){
+    try{ localStorage.setItem(CLOUD_DIRTY_KEY, String(Date.now())); }catch(_){}
+  }
+  if(typeof cloudChipRefresh === 'function') cloudChipRefresh();
+}
+function cloudClearDirty(){
+  try{ localStorage.removeItem(CLOUD_DIRTY_KEY); }catch(_){}
+}
+function cloudGetDirtyTs(){
+  var v = parseInt(localStorage.getItem(CLOUD_DIRTY_KEY)||'0', 10);
+  return v > 0 ? v : null;
+}
 function _detectDeviceName(){
   var ua = (navigator.userAgent||'').toLowerCase();
   if(/android/.test(ua))               return 'Android phone';
@@ -615,6 +632,7 @@ async function cloudPull(){
     applyRestore('replace');
     lsSet(CLOUD_LAST_PULL_KEY, String(Date.now()));
     lsSet(CLOUD_FILE_SHA_KEY,  meta.sha);
+    cloudClearDirty(); // local data now matches cloud
     _cloudSetBusy(false);
     toast('↓ Pulled from cloud · '+senderName);
     _cloudRefreshStatus();
@@ -650,7 +668,15 @@ async function cloudPush(){
         if(checkR.ok){
           var meta = await checkR.json();
           if(meta.sha && meta.sha !== sha){
-            if(!confirm('Cloud has newer data than your last sync (likely pushed from another device).\n\nOverwrite the cloud with your local data?\n\nCancel to pull first instead.')){
+            // v5.24.12: include sender name + exact timestamp in the prompt so the
+            // user sees exactly whose work they're about to overwrite.
+            var rs = _cloudGetRemoteSender();
+            var who = rs && rs.name ? rs.name : 'another device';
+            var when = rs && rs.at ? ' at ' + _cloudFormatExact(rs.at) : '';
+            var msg = 'Cloud was last written by ' + who + when + '.\n\n'
+                    + 'Overwrite the cloud with your local data?\n\n'
+                    + 'Cancel to pull first instead.';
+            if(!confirm(msg)){
               _cloudSetBusy(false);
               return false;
             }
@@ -680,6 +706,7 @@ async function cloudPush(){
     lsSet(CLOUD_FILE_SHA_KEY,  resp.content ? resp.content.sha : sha);
     // v5.24.6: we are now the last writer
     lsSet(CLOUD_REMOTE_SENDER_KEY, JSON.stringify({id:getDeviceId(), name:getDeviceName(), at:new Date().toISOString()}));
+    cloudClearDirty(); // local matches cloud again
     _cloudSetBusy(false);
     toast('↑ Pushed to cloud');
     _cloudRefreshStatus();
@@ -854,15 +881,28 @@ function cloudChipRefresh(){
     var cloudAt = new Date(sender.at).getTime();
     if(!isNaN(cloudAt) && cloudAt > lastTs) remoteNewer = true;
   }
-  chip.classList.remove('synced','dirty','stale','remote-new');
+  // v5.24.12: detect local-dirty (any save since last push)
+  var dirtyTs = cloudGetDirtyTs();
+  var localDirty = !!dirtyTs;
+  chip.classList.remove('synced','dirty','stale','remote-new','unsaved','diverged');
   var label;
-  if(remoteNewer){
-    // Show how long ago the OTHER device pushed, not our own ago.
+  if(remoteNewer && localDirty){
+    // Both sides have changes -- needs a merge / decision.
+    chip.classList.add('diverged');
+    label = '⚠ conflict';
+    chip.title = 'Both this device and the cloud have changes since the last sync. Open to resolve.';
+  } else if(remoteNewer){
     var rmins = Math.round((Date.now()-new Date(sender.at).getTime())/60000);
     var rLbl = rmins<1?'just now' : rmins<60?rmins+'m' : rmins<1440?Math.round(rmins/60)+'h' : Math.round(rmins/1440)+'d';
     label = '• '+rLbl;
     chip.classList.add('remote-new');
     chip.title = 'Cloud was just written by '+(sender.name||'another device')+' — tap to pull';
+  } else if(localDirty){
+    var dmins = Math.round((Date.now()-dirtyTs)/60000);
+    var dLbl = dmins<1?'now' : dmins<60?dmins+'m' : dmins<1440?Math.round(dmins/60)+'h' : Math.round(dmins/1440)+'d';
+    label = '↑ '+dLbl;
+    chip.classList.add('unsaved');
+    chip.title = 'Local changes since last push ('+dLbl+'). Tap to push.';
   } else {
     if(!lastTs) label = 'sync';
     else {
@@ -873,10 +913,9 @@ function cloudChipRefresh(){
       else label = Math.round(mins/1440)+'d';
     }
     if(!lastTs) chip.classList.add('stale');
-    else if(Date.now()-lastTs < 2*3600*1000) chip.classList.add('synced');
-    else if(Date.now()-lastTs < 24*3600*1000) chip.classList.add('dirty');
+    else if(Date.now()-lastTs < 24*3600*1000) chip.classList.add('synced');
     else chip.classList.add('stale');
-    chip.title = 'Cloud sync';
+    chip.title = lastTs ? 'In sync · this device matches the cloud' : 'Not yet synced';
   }
   document.getElementById('cloud-chip-label').textContent = label;
   var pop = document.getElementById('cloud-popover');
@@ -925,8 +964,18 @@ function cloudChipRenderPopover(){
     var cloudAt = new Date(sender.at).getTime();
     if(!isNaN(cloudAt) && cloudAt > lastTs) remoteNewer = true;
   }
+  // v5.24.12: detect local-dirty
+  var dirtyTs = cloudGetDirtyTs();
+  var localDirty = !!dirtyTs;
+  // State banner: in sync / unsaved / remote-new / diverged
   var alertHtml = '';
-  if(remoteNewer){
+  if(remoteNewer && localDirty){
+    alertHtml =
+      '<div style="background:rgba(224,82,82,.15);border:0.5px solid rgba(224,82,82,.4);border-radius:8px;padding:8px 10px;margin-bottom:10px;line-height:1.4">'+
+        '<div style="font-size:11px;font-weight:600;color:var(--red);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">⚠ Diverged — both sides have changes</div>'+
+        '<div style="font-size:12px;color:var(--text2)"><strong>'+esc(sender.name||'Another device')+'</strong> pushed at '+esc(_cloudFormatExact(sender.at))+'.<br>This device has local edits since '+esc(_cloudFormatExact(dirtyTs))+'.<br><span style="opacity:.85">Pulling will discard local edits. Pushing will overwrite their edits.</span></div>'+
+      '</div>';
+  } else if(remoteNewer){
     alertHtml =
       '<div style="background:rgba(74,142,204,.15);border:0.5px solid rgba(74,142,204,.4);border-radius:8px;padding:8px 10px;margin-bottom:10px;display:flex;gap:8px;align-items:flex-start">'+
         '<div style="width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(74,142,204,.7);margin-top:5px;flex-shrink:0"></div>'+
@@ -934,6 +983,18 @@ function cloudChipRenderPopover(){
           '<div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">New from another device</div>'+
           '<div style="font-size:12px;color:var(--text2);line-height:1.4"><strong>'+esc(sender.name||'Another device')+'</strong> pushed at '+esc(_cloudFormatExact(sender.at))+'</div>'+
         '</div>'+
+      '</div>';
+  } else if(localDirty){
+    alertHtml =
+      '<div style="background:rgba(201,138,26,.15);border:0.5px solid rgba(201,138,26,.4);border-radius:8px;padding:8px 10px;margin-bottom:10px;line-height:1.4">'+
+        '<div style="font-size:11px;font-weight:600;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">↑ Local changes pending</div>'+
+        '<div style="font-size:12px;color:var(--text2)">Edited since '+esc(_cloudFormatExact(dirtyTs))+' · push to back up</div>'+
+      '</div>';
+  } else if(lastTs){
+    alertHtml =
+      '<div style="background:rgba(31,170,126,.13);border:0.5px solid rgba(31,170,126,.35);border-radius:8px;padding:8px 10px;margin-bottom:10px;line-height:1.4">'+
+        '<div style="font-size:11px;font-weight:600;color:var(--positive);text-transform:uppercase;letter-spacing:.06em">✓ In sync</div>'+
+        '<div style="font-size:12px;color:var(--text2)">This device matches the cloud</div>'+
       '</div>';
   }
   var senderHtml = sender
@@ -3151,12 +3212,12 @@ document.addEventListener('keydown',e=>{
 document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal') && !_bdMdInside)closeModal();});
 
 /* \u2501\u2501 Task Manager \u2501\u2501 */
-function saveTasks(){lsSet(KEY_TASKS,JSON.stringify(tasks));asAutoSave();}
-function saveLinks(){lsSet(KEY_LINKS,JSON.stringify(links));}
-function saveLinkGroups(){lsSet(KEY_LINK_GROUPS,JSON.stringify(linkGroups));}
-function saveShopping(){lsSet(KEY_SHOPPING,JSON.stringify(shopping));asAutoSave();}
-function saveShCollections(){lsSet(KEY_SH_LISTS,JSON.stringify(shCollections));}
-function saveTaskHistory(){lsSet(KEY_TASK_HIST,JSON.stringify(taskHistory));}
+function saveTasks(){lsSet(KEY_TASKS,JSON.stringify(tasks));asAutoSave();cloudMarkDirty();}
+function saveLinks(){lsSet(KEY_LINKS,JSON.stringify(links));cloudMarkDirty();}
+function saveLinkGroups(){lsSet(KEY_LINK_GROUPS,JSON.stringify(linkGroups));cloudMarkDirty();}
+function saveShopping(){lsSet(KEY_SHOPPING,JSON.stringify(shopping));asAutoSave();cloudMarkDirty();}
+function saveShCollections(){lsSet(KEY_SH_LISTS,JSON.stringify(shCollections));cloudMarkDirty();}
+function saveTaskHistory(){lsSet(KEY_TASK_HIST,JSON.stringify(taskHistory));cloudMarkDirty();}
 
 function archiveDoneTasks(){
   // Move tasks done before start of this week to taskHistory
@@ -3171,8 +3232,8 @@ function archiveDoneTasks(){
   saveTasks();
   saveTaskHistory();
 }
-function saveLists(){lsSet(KEY_LISTS,JSON.stringify(lists));asAutoSave();}
-function saveWorkspaces(){lsSet(KEY_WORKSPACES,JSON.stringify(workspaces));asAutoSave&&asAutoSave();}
+function saveLists(){lsSet(KEY_LISTS,JSON.stringify(lists));asAutoSave();cloudMarkDirty();}
+function saveWorkspaces(){lsSet(KEY_WORKSPACES,JSON.stringify(workspaces));asAutoSave&&asAutoSave();cloudMarkDirty();}
 function getWorkspace(id){return workspaces.find(function(w){return w.id===id;});}
 function workspaceLabel(id){var w=getWorkspace(id);return w?((w.emoji||'')+' '+w.name).trim():id||'';}
 function workspaceColor(id){var w=getWorkspace(id);return w?w.color:'#888';}

@@ -1,6 +1,36 @@
 # LifeOS — Claude Project Memory
 
-Personal productivity PWA. Single-file HTML app, deployed to GitHub Pages at `ariestotele.github.io/lifeos/`.
+> **Personal productivity PWA**. Single-file HTML app, deployed to GitHub Pages at `ariestotele.github.io/lifeos/`.
+
+---
+
+## ▶︎ START HERE — fresh-session orientation
+
+Read this section first; it tells you what to do.
+
+**Who you're talking to**: Faris (Abu Dhabi, CUAS / field engineering). Uses LifeOS daily on Android as an installed PWA. Prefers short, direct updates and the auto-merge workflow — open PR, squash-merge it, reply with PR URL + merge SHA, no pause for confirmation.
+
+**Where we are**: v5.24.11. Dev branch `claude/elegant-goldberg-uHJMS`. Repo `Ariestotele/lifeos`.
+
+**Workflow expectations** (this is non-negotiable, don't ask each time):
+1. Edit `src/app.js` / `src/styles.css` / `src/index.html`. Never edit the built HTMLs at the repo root.
+2. Bump `APP_VERSION` in `src/app.js` for every visible change.
+3. `node --check src/app.js && node build.js` before committing.
+4. Commit `src/` + both HTMLs + `service-worker.js` together (build output).
+5. Push, open PR to `main`, squash-merge it automatically, reply with both links.
+6. After merge: `git fetch origin main && git reset --hard origin/main && git push --force-with-lease` — keeps the feature branch in sync (squash creates new SHAs).
+7. Restore-point HTMLs only for major (v5.X) releases. Two are already sitting in the repo waiting to be deleted once Faris confirms stable — see "Open reminders".
+
+**What's queued (pick one, or surface a triage)**:
+1. **Tasks Phase 2** — drag-to-reorder within a date bucket, swipe-to-complete on mobile. Medium.
+2. **Cloud sync auto-push on change** — debounced (30s idle) so the manual push button becomes optional. Heuristic in the "Queued features" section below.
+3. **Peek-to-toast** — when `cloudPeekStatus` first detects new data from another device, show a one-time toast in addition to the chip's pulsing state. Small/medium.
+
+**Don't surprise**: never run destructive git commands (force push, reset --hard) unless inside the standard branch-sync flow. Never skip hooks. Always run `node --check src/app.js` before building.
+
+**Tone**: terse. State results and next step in one or two sentences. No long preambles. Use `file:line` when referencing code.
+
+---
 
 ## Repo layout
 

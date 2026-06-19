@@ -38,7 +38,7 @@ Vanilla JS, HTML/CSS, `localStorage`, Chart.js CDN. No frameworks. From v5.20 on
 
 ## Current version
 
-**v5.22.3** (cloud sync error reporting — see Version history for the v5.20–v5.22 series).
+**v5.24.11** (cloud sync provenance + persistent chip + recurring tasks + universal pause + audit batch — see Version history for the v5.23–v5.24 series).
 
 ## Workflow preferences
 
@@ -84,8 +84,13 @@ Build-time guards in `build.js` reject any `src/app.js` containing `</script>` o
 - **Service worker (v5.18.1+)**: network-first for HTML navigations (deploys take effect on the very next load), cache-first for static assets (fonts, CDN, same-origin sub-resources). Still bump `CACHE` per release.
 - **Mobile layout detection (v5.18.2+)**: `pwaInit()` adds `body.touch-device` when `'ontouchstart' in window || navigator.maxTouchPoints > 0`. All mobile chrome (bottom nav, task bottom sheet, sidebar slide, larger tap targets) is gated on this class with `!important` overrides — bypasses the unreliable `@media (max-width:640px)` breakpoint that didn't fire on some phones.
 - **Version stamp (v5.18.2+)**: small `#version-stamp` div near the corner displays `v<APP_VERSION> · <viewport>px · touch:<yes|no>` for at-a-glance debugging. Update is deferred to `window.load` so the DOM element exists.
-- z-index hierarchy: mobile-nav 100, page-header (sticky) 150, modal-backdrop 200, toast 300 (lifted on touch), sidebar overlay 399, sidebar 400, task panel 410, sh-coll-fab 501, settings/pay-popup 600, link-viewer 800, PWA banners 9999, version stamp 9999.
-- **Cloud sync (v5.22.0+)**: `cloudPush` / `cloudPull` round-trip the full backup payload as a JSON file in a GitHub repo via the Contents API. Reuses `_buildBackupPayload()` and the `applyRestore('replace')` path so nothing is bespoke. SHA caching prevents 409 races; first push has no SHA (= file create). Both helpers route through the AI proxy if `aiGetProxy()` is set (same pattern as `ghDeploy`). Tokens live in `localStorage` per device — so a stale token on one device while another works is normal; re-paste the token, no code change needed. From v5.22.3 the toasts surface GitHub's real `message` (e.g. `Bad credentials`, `Resource not accessible by personal access token`) instead of bare HTTP codes.
+- z-index hierarchy: mobile-nav 100, page-header (sticky) 150, **cloud-chip 155**, **cloud-popover 170**, modal-backdrop 200, toast 300 (lifted on touch), sidebar overlay 399, sidebar 400, task panel 410, sh-coll-fab 501, settings/pay-popup 600, link-viewer 800, PWA banners 9999. (Version stamp removed on touch in v5.24.2.)
+- **Cloud sync (v5.22.0+)**: `cloudPush` / `cloudPull` round-trip the full backup payload as a JSON file in a GitHub repo via the Contents API. Reuses `_buildBackupPayload()` and `applyRestore('replace')`. SHA caching (`CLOUD_FILE_SHA_KEY`) prevents 409 races; first push has no SHA (= file create). Both helpers route through the AI proxy if `aiGetProxy()` is set (same pattern as `ghDeploy`). Tokens live in `localStorage` per device — adding a new device means re-pasting the PAT.
+- **Cloud sync provenance (v5.24.6+)**: every push stamps the payload with `_deviceId` (random `d<8 chars>` in `lifeos_device_id`) + `_deviceName` (auto-detected from UA, override in Settings → Cloud sync → Device, `lifeos_device_name`). Pull reads them and stores as `lifeos_cloud_remote_sender` JSON so the recipient sees who pushed.
+- **Cloud sync passive peek (v5.24.10+)**: `cloudPeekStatus()` polls the GitHub Commits API (~1KB) every 5 min while the tab is visible — and on visibility resume — to detect when another device pushed. If the commit SHA differs from `CLOUD_PEEK_COMMIT_KEY`, it fetches the file once to refresh `_deviceName`/`exportedAt`. **Never** writes `CLOUD_FILE_SHA_KEY` (would break push-conflict detection). Throttled to 30s min between calls. Also triggered when the chip popover opens.
+- **Cloud sync UI (v5.24.7+)**: persistent chip top-right of every page (`#cloud-chip`, fixed, z-index 155). States via class: `synced` (green dot, <2h since sync), `dirty` (amber, <24h), `stale` (gray), `remote-new` (pulsing blue accent — cloud has data from another device newer than our last sync). Click toggles `#cloud-popover` (z-index 170) with full provenance + Pull/Push buttons + manual `cloudPeekNow()` refresh link. Hides itself when token/repo aren't set.
+- **Cloud push conflict guard (v5.24.4+)**: before PUT, fetches the current remote SHA via GET. If it differs from `CLOUD_FILE_SHA_KEY`, prompts the user to confirm overwrite or cancel and pull first. The PUT still relies on GitHub's 409 as a server-side backstop.
+- **Force-update escape hatch (v5.24.1+)**: Settings → App → "Force update now" unregisters every SW + deletes every Cache Storage cache + reloads with `?v=<ts>` so the browser disk cache is bypassed. Keeps localStorage intact. Use when the PWA is stuck on an old version (Chrome can serve SW JS from HTTP cache for ≤24h).
 
 ## Branding
 
@@ -117,13 +122,25 @@ Dashboard, Bills (active/trials/history), Tabby tracker, Insights, Calculator, T
 - **Keyboard shortcuts panel** — press `?`
 - **Links UX** — per-group `+ link` shortcut, empty-group CTA, mobile-visible card actions
 - **Cloud sync (v5.22)** — pull / push the full backup payload to a GitHub repo (default same as deploy repo; v5.22.2 lets you override with a private data repo). Status line shows Last pulled / Last pushed separately.
-- **Tasks Phase 1 refresh (v5.21)** — quick-add row, date grouping (Overdue / Today / Tomorrow / This week / Later / No date), one-bucket-at-a-time mobile view, workspace-coloured card backgrounds.
+- **Cloud sync — provenance + chip + peek (v5.24.6 → v5.24.10)** — per-device id+name stamps the payload so the recipient knows who pushed. Persistent top-right chip on every page shows latest sync state with a colored dot; click opens a popover with full Pull/Push UI. Passive peek polls the file's latest commit every 5 min so the "last written by" status updates even when nobody pulls. Chip pulses blue (`remote-new`) when cloud has newer data from another device.
+- **Cloud push pre-check (v5.24.4)** — before PUT, fetches remote SHA and prompts on mismatch (friendlier than GitHub's 409).
+- **Tasks Phase 1 refresh (v5.21)** — quick-add row, date grouping (Overdue / Today / Tomorrow / This week / Later / No date / **Paused** v5.24.0), one-bucket-at-a-time mobile view, workspace-coloured card backgrounds, **explicit bucket header above body (v5.24.4)** so the active bucket is unambiguous even when card content (e.g. dueDate="Today") looks similar.
+- **Recurring tasks (v5.24.0)** — `task.recur = {freq:'daily'|'weekly'|'monthly', interval:N} | null`. On completion, `dueDate` advances to next future occurrence (loop catches up missed dates), history entry logged. **Single row** in the task list — no clutter. Calendar derives all occurrences in the visible month from `recur`. Modal: "Repeats" select + "Every N" interval input.
+- **Universal pause (v5.24.0)** — `task.paused = boolean`, applies to recurring AND normal tasks. Paused tasks live in a dedicated `Paused` bucket pill, card dims to .6 opacity + shows chip, pause button in card action row.
+- **2-column task modal on wider viewports (v5.24.5–v5.24.6, v5.24.8)** — Left column: Title → **Subtasks** → Notes → Workspace+List. Right column: Priority+Due → Repeats+Every → Pause → Tags → Color. Collapses to single column under 720px.
+- **Single-column task list on phones (v5.24.9–v5.24.11)** — `.tk-section-body` is 2-col on desktop/tablets, 1-col only on viewports ≤640px. Tablets keep 2-col (v5.24.11 fix: was forcing 1-col on any touch device regardless of width).
 - **Budget tracker per bill category (v5.20.4)** — set monthly cap per category; progress bar against current cycle spend.
 - **Inline subtask quick-toggle (v5.20.1)** — tap a subtask checkbox on the task card without opening the modal.
 - **Quick-date buttons (v5.20.3)** — Today / Tomorrow / This week shortcuts in the task modal.
 - **One-time bill handling (v5.20.6–v5.20.7)** — one-time bills no longer recur across cycles; live in a dedicated paid-section after payment with "paid &lt;date&gt;" label.
 - **Day-of-month picker (v5.20.9)** — calendar grid for bill `dueDay` instead of a 1–31 number field.
 - **Clear all data (v5.20.5)** — Settings → Backup button to wipe every LifeOS key at once.
+- **Bill card BG tinted by category (v5.23.0)** — faint 8% alpha wash on card background matching the category color.
+- **Edit workspaces from Manage Workspaces (v5.23.1)** — pencil button toggles inline edit row (name + emoji + color). ID stays stable so existing `task.workspace`/`list.workspace` refs don't break.
+- **Mobile tap-target uplift (v5.23.3)** — `modal-close-btn` 26→40px, `bill-icon-btn` 22→40px, `bill-card-btn-pay` 22→36px on touch. Notes & Accounts edit/delete actions visible on touch (were hover-only).
+- **120ms search debounce (v5.23.4)** — five page-level search inputs (Bills / Tasks / Notes / Accounts / Links) now route through `dbSearch(fn)` instead of firing `render*()` on every keystroke.
+- **Calendar grid fix (v5.24.2)** — added `min-width:0` to `.cal-cell` so the 7-column grid actually distributes equally. Wide event chips (e.g. "Plex Remote Access") were blowing out the layout into 3 squashed columns on phones.
+- **Reminder banner mobile fix (v5.24.2)** — was `position:sticky;top:-2rem` (desktop trick) which jammed against the status bar on phones. Now `position:static` on touch.
 
 ## Keyboard shortcuts
 
@@ -144,7 +161,7 @@ Shortcuts are disabled while typing in inputs.
 | Entity | Array | localStorage key | Fields |
 |---|---|---|---|
 | Bills / subs | `items` | `subtracker_items` | name, cat, notes, amount, cycle, dueDay, status, isTrial |
-| Tasks | `tasks` | `subtracker_tasks` | title, notes, tags, priority, dueDate, workspace, listId, subtasks, done, starred |
+| Tasks | `tasks` | `subtracker_tasks` | title, notes, tags, priority, dueDate, workspace, listId, subtasks, done, starred, **recur** `{freq,interval}\|null` (v5.24.0), **paused** `bool` (v5.24.0) |
 | Lists | `lists` | `subtracker_lists` | id, name, color, **workspace** (nullable = global) |
 | Workspaces | `workspaces` | `lifeos_workspaces` | id, name, emoji, color |
 | Notes | `notes` | `subtracker_notes` | title, body, tags, color |
@@ -159,6 +176,30 @@ Shortcuts are disabled while typing in inputs.
 Workspace values: any `workspaces[].id` (defaults `'personal'` / `'work'` always present unless user deleted them), or `null` (global, lists only).
 
 `workspaces` is included in every export bundle (3 sites in JS) and restored by both restore-import and merge-import paths, with default-seeding fallback for older backups that omit the field.
+
+### Backup payload metadata (v5.24.6+)
+
+Every backup / cloud-sync payload carries these provenance fields alongside the data:
+- `exportedAt` (ISO timestamp)
+- `_deviceId` (random per-device id from `lifeos_device_id`)
+- `_deviceName` (auto-detected from UA, override in Settings → Cloud sync → Device)
+
+`cloudPull` and `cloudPeekStatus` read these to populate `lifeos_cloud_remote_sender` for the "Cloud last written by" UI. Old backups without `_device*` fields still restore cleanly — provenance just falls back to "Unknown device".
+
+### Cloud sync localStorage keys (v5.22+)
+
+| Key | Purpose | Set by |
+|---|---|---|
+| `lifeos_cloud_path` | path inside repo | Settings input |
+| `lifeos_cloud_repo` | optional override repo | Settings input |
+| `lifeos_cloud_last_pull` | ts of last successful pull | `cloudPull` |
+| `lifeos_cloud_last_push` | ts of last successful push | `cloudPush` |
+| `lifeos_cloud_sha` | cached file SHA for conflict guard | pull / push (never peek) |
+| `lifeos_cloud_remote_sender` | JSON `{id,name,at}` | pull + peek + push |
+| `lifeos_cloud_peek_last` | ts of last peek call | `cloudPeekStatus` |
+| `lifeos_cloud_peek_commit` | commit SHA we last processed | `cloudPeekStatus` |
+| `lifeos_device_id` | random per-device id (`d` + 8 chars) | `getDeviceId()` first call |
+| `lifeos_device_name` | user override (else UA auto-detect) | Settings input |
 
 ## Version history
 
@@ -201,22 +242,43 @@ Workspace values: any `workspaces[].id` (defaults `'personal'` / `'work'` always
 - **v5.22.1** — Cloud sync status split into separate "Last pulled" and "Last pushed" timestamps (was a single ambiguous "Last synced").
 - **v5.22.2** — Cloud sync data-repo override (`CLOUD_REPO_KEY` / `lifeos_cloud_repo` in localStorage). Lets the code repo stay public for GitHub Pages while data round-trips through a separate private repo (e.g. `Ariestotele/lifeos-data`). Clears cached SHA on override change to avoid cross-repo 409s.
 - **v5.22.3** — Cloud push/pull surface GitHub's real error message (`r.json().message`) instead of bare `HTTP 401`. Mirrors `ghDeploy`'s pattern; turned a mystery "401" into "Bad credentials" which immediately identified a stale token on one device.
+- **v5.23.0** — Bill cards tinted by category colour. Mirrors v5.21.2 task-card workspace tint; faint 8% alpha wash on the card background.
+- **v5.23.1** — Edit workspaces from the Manage Workspaces modal. Pencil button toggles inline edit row for name + emoji + color; id stays stable.
+- **v5.23.2** — Correctness sweep. Two inline-onclick string-interpolated IDs → `data-id` pattern (`deletePayment`, shopping coll switcher). 11 `localStorage.setItem` sites writing JSON now route through `lsSet()` so quota errors surface via toast.
+- **v5.23.3** — Mobile tap-target uplift on touch: `modal-close-btn` 26→40px, `bill-icon-btn` 22→40px, `bill-card-btn-pay` 22→36px. Notes & Accounts edit/delete actions visible on touch (matching the Links v5.17.3 fix).
+- **v5.23.4** — 120ms debounce on the 5 page-level search inputs (Bills / Tasks / Notes / Accounts / Links). Each was firing the page's `render*()` on every keystroke. Audit also flagged several false alarms (sidebar-overlay blur, subtask re-render storm, Chart.js leak, listener accumulation) — all already handled by earlier releases.
+- **v5.24.0** — **Recurring tasks + universal pause**. Schema additions (backwards-compatible): `task.recur = {freq,interval}|null`, `task.paused = bool`. Recurring tasks stay as a single row in the list; on completion `dueDate` advances to next future occurrence (loop catches up missed dates) and a history entry is logged to `taskHistory`. Calendar derives occurrences in the visible month from `recur`. Universal pause: any task can be paused, lives in a new `Paused` bucket pill, dims to .6 opacity, has a pause button in the card action row.
+- **v5.24.1** — **Force update button** in Settings → App. Unregisters every SW, deletes every Cache Storage cache, reloads with `?v=<ts>` cache-bust. Keeps localStorage intact. Escape hatch for the "stuck on old version" PWA scenario (Chrome can serve SW JS from HTTP cache for ≤24h, blocking auto-update detection).
+- **v5.24.2** — Calendar grid + reminder banner fixes. `.cal-cell` was missing `min-width:0`, so wide event chips (e.g. "Plex Remote Access") blew out the 7-column layout into 3 squashed columns. Reminder banner was `position:sticky;top:-2rem` (desktop trick) which jammed against the status bar on phones — now `position:static` on touch. Version stamp `#version-stamp` hidden on touch (was overlapping the banner).
+- **v5.24.3** — Paused-tab fallback hardened. The render fell back to `today` via `if(!buckets[selectedBucket])` when the truthiness check was unreliable; tightened to `_TK_DATE_GROUPS.indexOf(...) === -1`. Added `msgMap['paused']` so empty paused bucket has a friendly message. New **Cloud sync widget on the dashboard** (one-tap Pull / Push, in-place timestamp refresh, hides if creds not set).
+- **v5.24.4** — Cloud push pre-check: before PUT, GET the current remote SHA and prompt the user if it differs from our cached one (friendlier than GitHub's 409). Tasks bucket **header** above body (e.g. `● PAUSED · 1 task`) so the active bucket is unmistakable — paused tasks kept their original due-date chip ("Today" if dueDate was today), making the body look identical to today's bucket.
+- **v5.24.5** — **2-column task modal** on viewports >720px. Left: Title → Notes → Subtasks. Right: Priority+Due → Workspace+List → Repeats+Every → Pause → Tags → Color. Collapses to single column at ≤720px.
+- **v5.24.6** — Workspace+List moved to the left column (joins identity/content fields). **Cloud sync device provenance**: per-device random `_deviceId` + auto-detected `_deviceName` (editable in Settings → Cloud sync → Device) stamped on every push payload. Pull reads + stores as `lifeos_cloud_remote_sender`. Settings + dashboard widget both show exact timestamps and "Cloud last written by `<Device>`".
+- **v5.24.7** — **Persistent cloud-sync chip + popover**. Pill top-right of every page (`#cloud-chip`, fixed, z-index 155), theme-matched. States via class: `synced` (green dot, <2h), `dirty` (amber, <24h), `stale` (gray). Spinning icon while sync in flight. Auto-refreshes every 60s. Click → popover (z-index 170) with provenance + Pull/Push. Hides itself when creds aren't set.
+- **v5.24.8** — Pulled / Pushed status now renders as two distinct cards (coloured border + uppercase header + relative time large, exact time small) via the `_cloudSyncRowHtml(direction, ts)` helper. Used in Settings status, dashboard widget, and chip popover. Task modal: Subtasks moved up to sit directly under Title (was under Notes) — quicker breakdown of work without scrolling past the Notes textarea.
+- **v5.24.9** — Single-column task cards on mobile. `.tk-section-body` (by-workspace mode) was 2-col on every viewport. Added `@media(max-width:640px)` + `body.touch-device !important` overrides so it collapses on phones. (Over-corrected — see v5.24.11.)
+- **v5.24.10** — **Passive cloud peek**. `cloudPeekStatus()` hits the GitHub Commits API for the file path (~1KB) every 5 min while tab is visible — and on visibility resume — to detect when another device pushed. Only fetches the full file (and refreshes `_deviceName`/`exportedAt`) when the commit SHA changed. **Never** writes `CLOUD_FILE_SHA_KEY` so push-conflict detection stays intact. Throttled to 30s min between calls. Chip gains `remote-new` state (pulsing blue accent) when cloud has data from another device newer than our last sync; label shows the other device's push age. Popover gains "NEW FROM ANOTHER DEVICE" banner + auto-promoted Pull button + manual `cloudPeekNow()` refresh link.
+- **v5.24.11** — Tablet column fix. v5.24.9's `body.touch-device .tk-section-body{1fr}` was forcing single column on all touch devices regardless of viewport width — bad UX on tablets which have the horizontal space for 2 columns. Gated behind `@media(max-width:640px)` so phones still get 1-col and tablets get 2-col. Also updated `CLAUDE.md` for fresh-session handover.
 
 Deploy note: `index.html` was brought up to v5.17+ parity via a dedicated commit ("Deploy v5.17 to index.html (mobile nav fix)") so the installed PWA at `/lifeos/` picks up all mobile-nav + workspace-lists work.
 
 ## Queued features
 
-1. **Recurring tasks** — rrule-lite (daily/weekly/monthly + interval), generation on app load — large
-2. **Tasks Phase 2** — drag-to-reorder within a date bucket, swipe-to-complete on mobile (follow-up to v5.21) — medium
-3. **Cloud sync — auto-push on change** (debounced) so the manual push button becomes optional — small/medium
+1. **Tasks Phase 2** — drag-to-reorder within a date bucket, swipe-to-complete on mobile (follow-up to v5.21) — medium
+2. **Cloud sync — auto-push on change** (debounced) so the manual push button becomes optional — small/medium. Heuristic: any save through `saveTasks` / `saveData` / etc. sets a `dirty_since` timestamp; a 30s-idle debounce calls `cloudPush()` if dirty.
+3. **Cross-device peek-to-toast** — when `cloudPeekStatus` first detects new data from another device, show a one-time toast ("Faris phone just pushed · tap to pull") in addition to the chip's pulsing state. Could surface via the existing `_pwaUpdateBanner` pattern.
 
-Completed since the last memory catch-up (now in Version history): subtask quick-toggle (v5.20.1), quick-date buttons (v5.20.3), budget tracker per category (v5.20.4).
+Completed since the last memory catch-up (now in Version history): recurring tasks (v5.24.0), universal pause (v5.24.0), persistent cloud chip (v5.24.7), passive cloud peek (v5.24.10), device-stamped provenance (v5.24.6), the v5.23 audit batch (cards / mobile tap targets / search debounce / correctness sweep).
 
 ## Open reminders (carry forward across sessions)
 
-- Verify workspace **export → import round-trip** on the user's device after v5.18.3 (create custom workspace, export backup, restore — should preserve).
-- Once the user confirms the mobile bar + modals are fully stable, **remove the temporary `#version-stamp` element** (HTML + CSS + JS update) — it was added in v5.18.2 for debugging and isn't intended to be permanent.
-- **Cloud sync: per-device token reality** — tokens are in `localStorage`, so adding a new device always means pasting the PAT once on that device. If a future "Bad credentials" report comes in, first thing to check is whether the device's stored token matches the PC's (the password field's `ghp_…XXXX` placeholder shows the last 4 chars).
+- **Two local restore-point HTMLs are sitting in the repo root** waiting for confirm-stable + delete: `life_manager_before_audit.html` (pre-v5.23 audit batch), `life_manager_before_recurring.html` (pre-v5.24.0). Both `.gitignored`. Delete once the user confirms nothing has regressed in daily use.
+- **Verify workspace export → import round-trip** on the user's device after v5.18.3 (create custom workspace, export backup, restore — should preserve). Still unverified.
+- **Cloud sync: per-device token reality** — tokens are in `localStorage`, so adding a new device always means pasting the PAT once on that device. If a future "Bad credentials" report comes in, first thing to check is whether the device's stored token matches the other devices'. Re-paste the token, no code change needed.
+- **Cloud sync: per-device deviceName reality** — same per-device pattern. New devices auto-detect a name from UA on first use (e.g. "Android phone", "Windows PC"). User can override in Settings → Cloud sync → Device.
+- **Stuck-on-old-version PWA** — known scenario where Chrome serves SW JS from HTTP cache for up to 24h, so auto-update banner never fires. Solution: tell user to open the URL in a regular Chrome tab (not the PWA), or Android Settings → Apps → LifeOS → Storage → **Clear cache only** (NOT Clear data — wipes localStorage). Once they're on v5.24.1+ they have the in-app **Settings → App → "Force update now"** button as a permanent escape hatch.
+- **Touch-device CSS overrides** can over-fire on wide tablets (touch-enabled desktops, iPads). Pattern v5.24.11 used: gate `body.touch-device` rules behind a width media query (`@media(max-width:640px)`) for layout-flow rules — keeps the desktop-style layout on tablets that have the space. Larger tap targets, bottom sheet panels, bottom nav, etc. can stay touch-only.
+- **Paused tab perception issue** — paused tasks keep their original `dueDate` chip ("Today" if dueDate was today), making the paused bucket body look identical to today's bucket. v5.24.4 added a colored bucket header above the body (`● PAUSED · 1 task`) to disambiguate. If a user reports "Paused goes back to Today", first thing to ask: do they see the colored header?
 
 ## User context
 

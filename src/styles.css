@@ -765,6 +765,61 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:v
 .mobile-menu-btn{display:none}
 /* ── Task side panel layout ── */
 .tk-layout{position:relative;min-height:200px}
+/* v5.25.3: Focus / All view tabs */
+.tk-view-tabs{display:flex;gap:6px;margin-bottom:14px}
+.tk-view-tab{
+  padding:7px 16px;font-size:13px;font-weight:500;
+  border-radius:99px;border:0.5px solid var(--border2);
+  background:transparent;color:var(--text3);cursor:pointer;
+  font-family:var(--font);transition:all .15s;line-height:1.2;
+  -webkit-tap-highlight-color:transparent;
+}
+.tk-view-tab:hover:not(.active){color:var(--text2);border-color:var(--border3)}
+.tk-view-tab.active{
+  background:var(--accent-dim);color:var(--accent);
+  border-color:var(--accent-border);font-weight:600;
+}
+body.touch-device .tk-view-tab{padding:9px 18px;font-size:14px}
+/* Hide All-view chrome when in Focus mode */
+#page-tasks.view-focus #tasks-metrics,
+#page-tasks.view-focus .toolbar,
+#page-tasks.view-focus #tk-metrics,
+#page-tasks.view-focus #tk-filters,
+#page-tasks.view-focus #tk-list{display:none!important}
+#page-tasks.view-all #tk-focus{display:none!important}
+/* Focus sections */
+.tk-focus-section{margin-bottom:22px}
+.tk-focus-section:last-child{margin-bottom:0}
+.tk-focus-section-head{
+  display:flex;align-items:center;gap:8px;
+  font-size:10px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.09em;
+  margin-bottom:10px;padding:0 2px;
+}
+.tk-focus-section-dot{
+  width:8px;height:8px;border-radius:50%;flex-shrink:0;
+  box-shadow:0 0 8px currentColor;
+}
+.tk-focus-section-label{flex-shrink:0}
+.tk-focus-section-count{
+  font-size:10px;color:var(--text3);font-weight:400;
+  letter-spacing:0;text-transform:none;margin-left:auto;
+}
+.tk-focus-section-body{display:flex;flex-direction:column;gap:8px}
+/* Subtle size bump on focus cards so they breathe more */
+.tk-focus-section-body .tk-card{padding:15px 12px 11px}
+.tk-focus-empty{
+  text-align:center;padding:64px 20px 40px;color:var(--text3);
+}
+.tk-focus-empty-emoji{font-size:36px;margin-bottom:14px;opacity:.85}
+.tk-focus-empty-text{font-size:16px;font-weight:500;color:var(--text2);margin-bottom:6px;letter-spacing:-.01em}
+.tk-focus-empty-sub{font-size:12.5px;color:var(--text3);line-height:1.5}
+.tk-focus-empty-link{
+  background:none;border:none;padding:0;
+  color:var(--accent);font-family:var(--font);font-size:inherit;
+  cursor:pointer;text-decoration:none;
+}
+.tk-focus-empty-link:hover{text-decoration:underline}
 .tk-main-col{width:100%}
 /* dim overlay behind panel */
 .tk-panel-tint{

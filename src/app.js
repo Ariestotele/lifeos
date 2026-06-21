@@ -2,7 +2,7 @@
 const COLORS=['none','#1D9E75','#4A8ECC','#C46A8A','#C97840','#7A74D4','#C98A1A','#6A9E30','#C95050','#888880'];
 const CATCOLORS={Streaming:'#4A8ECC',Utilities:'#C97840',Software:'#7A74D4',Food:'#1D9E75',Housing:'#C98A1A',Health:'#C46A8A',Transport:'#6A9E30',Finance:'#888880',Other:'#5DCAA5'};
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const APP_VERSION = '5.25.2';
+const APP_VERSION = '5.25.3';
 const KEY_ITEMS='subtracker_items', KEY_PAY='subtracker_payments', KEY_TABBY='subtracker_tabby';
 const KEY_LINKS='lifeos_links', KEY_LINK_GROUPS='lifeos_link_groups';
 const KEY_WORKSPACES='lifeos_workspaces';
@@ -19,6 +19,14 @@ let tkGroupMode = (function(){try{return localStorage.getItem('lifeos_tk_group')
 let tkHideDone  = (function(){try{return localStorage.getItem('lifeos_tk_hidedone')==='1';}catch(_){return false;}})();
 // v5.21.1: in by-date mode we show ONE bucket at a time. This is the active one.
 let tkDateBucket = (function(){try{return localStorage.getItem('lifeos_tk_bucket')||'today';}catch(_){return 'today';}})();
+// v5.25.3: 'focus' = curated landing (Overdue / Today / Coming up urgent); 'all' = existing full page.
+let tkView = (function(){try{return localStorage.getItem('lifeos_tk_view')||'focus';}catch(_){return 'focus';}})();
+function tkSetView(v){
+  if(v!=='focus'&&v!=='all') v='focus';
+  tkView=v;
+  try{ lsSet('lifeos_tk_view', v); }catch(_){}
+  renderTasks();
+}
 const WS_DEFAULTS=[{id:'personal',name:'Personal',emoji:'\uD83D\uDC64',color:'#7F77DD'},{id:'work',name:'Work',emoji:'\uD83D\uDCBC',color:'#378ADD'}];
 let workspaces=[];
 let links=[], linkGroups=[];
@@ -3589,8 +3597,115 @@ function renderTaskMetrics(){
     <div style="font-size:22px;font-weight:600;font-family:var(--mono);color:${m.color};letter-spacing:-.02em">${m.value}</div>
   </div>`).join('');
 }
+/* v5.25.3: Tasks Focus landing -- a calmer 'what should I do next' view.
+   Top tasks grouped by urgency: Overdue / Today / Coming up. Hides search,
+   filters, group/sort controls, and metric tiles -- those live in the All
+   view. The quick-add bar stays visible in both views. */
+function renderTasksFocus(){
+  var focus = document.getElementById('tk-focus');
+  if(!focus) return;
+  focus.style.display = 'block';
+  var todayIso = todayStr();
+  var active = tasks.filter(function(t){return !t.done && !t.paused;});
+  // Summary line for the top of the focus page.
+  var sub = document.getElementById('tasks-sub');
+  if(sub){
+    var oCt = active.filter(function(t){return t.dueDate && t.dueDate < todayIso;}).length;
+    var dCt = active.filter(function(t){return t.dueDate === todayIso;}).length;
+    var wCt = active.filter(function(t){
+      if(!t.dueDate) return false;
+      var dl = Math.ceil((new Date(t.dueDate)-new Date())/86400000);
+      return dl > 0 && dl <= 7;
+    }).length;
+    sub.textContent = oCt+' overdue · '+dCt+' due today · '+wCt+' due this week';
+  }
+  // Urgency comparator that respects manual sortOrder when set.
+  var priW = {urgent:1000, high:100, medium:10, low:1, none:0};
+  function urg(t){
+    var s = priW[t.priority||'none']||0;
+    if(t.dueDate){
+      var dl = Math.ceil((new Date(t.dueDate)-new Date())/86400000);
+      if(dl < 0)        s += 5000;
+      else if(dl === 0) s += 2000;
+      else if(dl <= 3)  s += 500;
+      else if(dl <= 7)  s += 100;
+      else              s += Math.max(0, 50-dl);
+    }
+    return s;
+  }
+  function sortGroup(arr){
+    return arr.slice().sort(function(a,b){
+      var aH = typeof a.sortOrder === 'number';
+      var bH = typeof b.sortOrder === 'number';
+      if(aH && bH) return a.sortOrder - b.sortOrder;
+      if(aH) return -1;
+      if(bH) return 1;
+      return urg(b) - urg(a);
+    });
+  }
+  var MAX_PER_SECTION = 5;
+  var overdue = sortGroup(active.filter(function(t){return t.dueDate && t.dueDate < todayIso;})).slice(0, MAX_PER_SECTION);
+  var today   = sortGroup(active.filter(function(t){return t.dueDate === todayIso;})).slice(0, MAX_PER_SECTION);
+  var comingUp = sortGroup(active.filter(function(t){
+    if(!t.dueDate || t.dueDate <= todayIso) return false;
+    var dl = Math.ceil((new Date(t.dueDate)-new Date())/86400000);
+    if(dl > 7) return false;
+    return t.priority === 'urgent' || t.priority === 'high';
+  })).slice(0, MAX_PER_SECTION);
+  var total = overdue.length + today.length + comingUp.length;
+  if(total === 0){
+    if(!active.length){
+      focus.innerHTML = '<div class="tk-focus-empty">'+
+        '<div class="tk-focus-empty-emoji">&#10024;</div>'+
+        '<div class="tk-focus-empty-text">Nothing yet</div>'+
+        '<div class="tk-focus-empty-sub">Add your first task in the bar above, or press <kbd>T</kbd></div>'+
+      '</div>';
+    } else {
+      focus.innerHTML = '<div class="tk-focus-empty">'+
+        '<div class="tk-focus-empty-emoji">&#10024;</div>'+
+        '<div class="tk-focus-empty-text">All clear</div>'+
+        '<div class="tk-focus-empty-sub">No overdue, today, or upcoming urgent tasks. <button class="tk-focus-empty-link" type="button" onclick="tkSetView(\'all\')">See all tasks &rarr;</button></div>'+
+      '</div>';
+    }
+    return;
+  }
+  function section(label, color, arr){
+    if(!arr.length) return '';
+    return '<div class="tk-focus-section">'+
+      '<div class="tk-focus-section-head" style="color:'+color+'">'+
+        '<span class="tk-focus-section-dot" style="background:'+color+'"></span>'+
+        '<span class="tk-focus-section-label">'+esc(label)+'</span>'+
+        '<span class="tk-focus-section-count">'+arr.length+(arr.length===1?' task':' tasks')+'</span>'+
+      '</div>'+
+      '<div class="tk-focus-section-body">'+
+        arr.map(function(t){return renderTaskCard(t,{showWorkspace:true});}).join('')+
+      '</div>'+
+    '</div>';
+  }
+  var html = '';
+  html += section('Overdue', '#E05252', overdue);
+  html += section('Today',   '#4A8ECC', today);
+  html += section('Coming up · top priority', '#9B7FE8', comingUp);
+  // Bottom 'see all' link
+  html += '<div style="text-align:center;margin-top:6px;padding-top:14px;border-top:0.5px solid var(--border)">'+
+    '<button class="tk-focus-empty-link" type="button" onclick="tkSetView(\'all\')">See all '+active.length+' tasks &rarr;</button>'+
+  '</div>';
+  focus.innerHTML = html;
+}
 function renderTasks(){
   if(!document.getElementById('tk-search'))return;
+  // v5.25.3: dispatch to focus landing if that view is active.
+  var page = document.getElementById('page-tasks');
+  if(page){
+    page.classList.toggle('view-focus', tkView==='focus');
+    page.classList.toggle('view-all', tkView==='all');
+  }
+  // Update the toggle buttons' active state.
+  var bf = document.getElementById('tk-view-tab-focus');
+  var ba = document.getElementById('tk-view-tab-all');
+  if(bf) bf.classList.toggle('active', tkView==='focus');
+  if(ba) ba.classList.toggle('active', tkView==='all');
+  if(tkView==='focus'){ renderTasksFocus(); return; }
   const todayIso=todayStr();
   const wsTasks=tasks;
   const active=wsTasks.filter(t=>!t.done);

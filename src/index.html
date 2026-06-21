@@ -286,6 +286,11 @@
         <div class="tk-panel-tint" id="tk-panel-tint" onclick="closeTkModal()"></div>
         <!-- List column -->
         <div class="tk-main-col" id="tk-main-col">
+          <!-- v5.25.3: view tabs (Focus / All) -->
+          <div class="tk-view-tabs">
+            <button class="tk-view-tab" id="tk-view-tab-focus" type="button" onclick="tkSetView('focus')">&#9728; Focus</button>
+            <button class="tk-view-tab" id="tk-view-tab-all" type="button" onclick="tkSetView('all')">All tasks</button>
+          </div>
           <div class="metrics" id="tasks-metrics"></div>
           <!-- v5.21.0: inline quick-add bar with smart parsing -->
           <div class="tk-quickadd">
@@ -294,6 +299,8 @@
               onkeydown="if(event.key==='Enter'){event.preventDefault();tkQuickAdd();}">
             <button class="tk-quickadd-hint" type="button" onclick="tkOpenQuickAddHelp()" title="What can I type?">?</button>
           </div>
+          <!-- v5.25.3: focus landing container -->
+          <div id="tk-focus" style="display:none"></div>
           <div class="toolbar">
             <div class="search-wrap">
               <span class="search-icon">&#8981;</span>

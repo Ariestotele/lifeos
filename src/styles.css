@@ -715,28 +715,11 @@ kbd{background:var(--surface3);border:0.5px solid var(--border2);border-radius:v
     margin-bottom:env(safe-area-inset-bottom,0px);
   }
 
-  /* ── Task panel becomes bottom sheet ── */
+  /* ── Task panel: bottom sheet ONLY on touch devices (v5.25.4: don't trigger
+     on narrow desktop resize — the bottom sheet hides the backdrop and reads
+     as inline content, confusing users). Touch path moved to its own
+     @media(pointer:coarse) block below. */
   .tk-layout{min-height:0}
-  .tk-panel-tint{display:none!important}
-  .tk-panel{
-    position:fixed;bottom:0;left:0;right:0;z-index:410;
-    width:100%!important;
-    border-radius:18px 18px 0 0;
-    border:none;border-top:0.5px solid var(--border2);
-    max-height:90vh;
-    transform:translateY(100%);
-    transition:transform .28s cubic-bezier(.4,0,.2,1);
-  }
-  .tk-panel.open{
-    transform:translateY(0);
-    box-shadow:0 -8px 40px rgba(0,0,0,.6);
-  }
-  .tk-panel-inner{min-width:0;padding-bottom:max(1.25rem,env(safe-area-inset-bottom))}
-  .tk-panel::before{
-    content:'';display:block;width:36px;height:4px;
-    background:var(--border2);border-radius:99px;
-    margin:10px auto 0;
-  }
 
   /* ── Task items mobile ── */
   .tk-item{

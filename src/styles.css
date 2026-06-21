@@ -891,8 +891,11 @@ body.touch-device .cloud-popover{top:calc(env(safe-area-inset-top, 0px) + 56px)}
   .cloud-chip-label{display:none}
   .cloud-chip{padding:0 9px}
 }
-/* v5.24.5: 2-column task modal on wider viewports -- left content, right parameters */
-.tk-form-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:1.5rem;align-items:start}
+/* v5.24.5 / v5.25.2: 2-column task modal -- only on wide TOUCH viewports
+   (tablet/iPad in bottom-sheet mode). On desktop the panel is a fixed-width
+   side panel (340px) so 2 columns squashes everything. Keep 1-column for
+   desktop and narrow phones; 2-column for tablet bottom-sheet. */
+.tk-form-grid{display:grid;grid-template-columns:1fr;gap:14px;align-items:start}
 .tk-form-col{display:flex;flex-direction:column;min-width:0}
 .tk-form-col > .field,
 .tk-form-col > .fields-row{margin-bottom:0}
@@ -900,8 +903,8 @@ body.touch-device .cloud-popover{top:calc(env(safe-area-inset-top, 0px) + 56px)}
 .tk-form-col > .fields-row + .fields-row,
 .tk-form-col > .field + .fields-row,
 .tk-form-col > .fields-row + .field{margin-top:14px}
-@media(max-width:720px){
-  .tk-form-grid{grid-template-columns:1fr;gap:14px}
+@media(min-width:720px){
+  body.touch-device .tk-form-grid{grid-template-columns:1.3fr 1fr;gap:1.5rem}
 }
 /* ── Task Manager ── */
 .tk-workspace-tabs{display:flex;gap:0;margin-bottom:1.25rem;border-bottom:0.5px solid var(--border)}
